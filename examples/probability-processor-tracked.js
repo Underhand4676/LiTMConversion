@@ -317,7 +317,7 @@ const roll = await new Roll(`${diceCount}d6`).evaluate();
 // PROBABILITY TELEMETRY // RECORD THIS D6 POOL
 // ---------------------------------------------------------
 
-await game.modules.get("probability-telemetry")?.api?.recordRoll?.(roll);
+await game.modules.get("litm-conversion")?.api?.diceTelemetry?.recordRoll?.(roll);
 
 
 // ---------------------------------------------------------
