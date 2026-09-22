@@ -1,0 +1,30 @@
+{{#if (eq card.type "themebook")}}
+    {{> 'systems/mist-engine-fvtt/templates/actor/parts/themebook-partial.hbs'
+        themebook=card.themebook id=card.themebook._id
+        editMode=@root.system.editMode tidyTags=@root.tidyTags cardKey=card.key}}
+{{/if}}
+{{#if (eq card.type "quintessences")}}
+    {{> 'systems/mist-engine-fvtt/templates/actor/parts/character-quintessences-partial.hbs'
+        system=@root.system quintessences=@root.quintessences
+        editMode=@root.system.editMode cardKey=card.key}}
+{{/if}}
+{{#if (eq card.type "fellowships")}}
+    {{> 'systems/mist-engine-fvtt/templates/actor/parts/actor-fellowship-partial.hbs'
+        system=@root.system editMode=@root.system.editMode cardKey=card.key}}
+{{/if}}
+{{#if (eq card.type "backpack")}}
+    {{> 'modules/litm-conversion/templates/actor/parts/starwars-backpack-partial.hbs'
+        backpack=@root.backpack system=@root.system
+        gearSlots=@root.backpackGearSlots consumableSlots=@root.backpackConsumableSlots
+        overflowCount=@root.backpackOverflowCount
+        editMode=@root.system.editMode tidyTags=@root.tidyTags cardKey=card.key}}
+{{/if}}
+{{#if (eq card.type "rote")}}
+    {{> 'systems/mist-engine-fvtt/templates/actor/parts/rote-card-partial.hbs'
+        rote=card.rote editMode=@root.system.editMode cardKey=card.key}}
+{{/if}}
+{{#if (eq card.type "fellowship-themecard")}}
+    {{> 'systems/mist-engine-fvtt/templates/actor/parts/actor-fellowship-themebook-partial.hbs'
+        fellowshipThemecard=@root.fellowshipThemecard fellowshipThemecardName=@root.fellowshipThemecardName
+        system=@root.system editMode=@root.system.editMode tidyTags=@root.tidyTags cardKey=card.key}}
+{{/if}}

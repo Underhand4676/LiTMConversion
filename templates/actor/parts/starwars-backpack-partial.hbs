@@ -1,0 +1,77 @@
+<div class="themebook-container container-themebook-with-border litm-sw-backpack-card" data-id="{{backpack._id}}" data-card-key="{{cardKey}}">
+    <div class="themebook-style litm-backpack flexcol">
+        <h2 class="theme-name">
+            <i class="card-drag-handle fa-solid fa-grip-vertical" draggable="true" data-drag-type="card" data-card-key="{{cardKey}}" title="{{localize 'MIST_ENGINE.LABELS.DragCardHint'}}"></i>
+            BACKPACK
+            <span class="litm-sw-pack-capacity">04 // 02</span>
+            <i class="themebook-icon litm-backpack"></i>
+        </h2>
+
+        <div class="litm-sw-pack-section">
+            <div class="litm-sw-pack-section-header">
+                <span>EQUIPMENT</span>
+                <span class="litm-sw-pack-section-code">GENERAL LOADOUT // 4</span>
+            </div>
+
+            <div class="litm-sw-pack-slots litm-sw-pack-slots-gear">
+                {{#each gearSlots as |slot|}}
+                <div class="litm-sw-pack-slot {{#if slot.occupied}}occupied{{else}}empty{{/if}}" data-slot="{{slot.slotNumber}}">
+                    <span class="litm-sw-pack-slot-index">0{{slot.slotNumber}}</span>
+                    <div class="litm-sw-pack-slot-body">
+                    {{#if slot.occupied}}
+                        {{> 'systems/mist-engine-fvtt/templates/shared/litm/storytag-line.hbs' slot.storytag
+                            storytag=slot.storytag source='backpack' key='system.items'
+                            id=../backpack._id index=slot.index editMode=../editMode tidyTags=../tidyTags}}
+                    {{else}}
+                        {{#if ../editMode}}
+                        <button type="button" class="litm-sw-pack-empty-action" data-action="createLiTMBackpackSlotItem" data-category="gear" data-item-id="{{../backpack._id}}">
+                            <i class="fa-solid fa-plus"></i> LOAD ITEM
+                        </button>
+                        {{else}}
+                        <span class="litm-sw-pack-vacant">VACANT</span>
+                        {{/if}}
+                    {{/if}}
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+
+        <div class="litm-sw-pack-section consumables">
+            <div class="litm-sw-pack-section-header amber">
+                <span>CONSUMABLES</span>
+                <span class="litm-sw-pack-section-code">SINGLE-USE // 2</span>
+            </div>
+
+            <div class="litm-sw-pack-slots litm-sw-pack-slots-consumables">
+                {{#each consumableSlots as |slot|}}
+                <div class="litm-sw-pack-slot consumable {{#if slot.occupied}}occupied{{else}}empty{{/if}}" data-slot="{{slot.slotNumber}}">
+                    <span class="litm-sw-pack-slot-index">C{{slot.slotNumber}}</span>
+                    <div class="litm-sw-pack-slot-body">
+                    {{#if slot.occupied}}
+                        {{> 'systems/mist-engine-fvtt/templates/shared/litm/storytag-line.hbs' slot.storytag
+                            storytag=slot.storytag source='backpack' key='system.items'
+                            id=../backpack._id index=slot.index editMode=../editMode tidyTags=../tidyTags}}
+                    {{else}}
+                        {{#if ../editMode}}
+                        <button type="button" class="litm-sw-pack-empty-action" data-action="createLiTMBackpackSlotItem" data-category="consumable" data-item-id="{{../backpack._id}}">
+                            <i class="fa-solid fa-plus"></i> LOAD ITEM
+                        </button>
+                        {{else}}
+                        <span class="litm-sw-pack-vacant">VACANT</span>
+                        {{/if}}
+                    {{/if}}
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+
+        {{#if overflowCount}}
+        <div class="litm-sw-pack-overflow">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {{overflowCount}} LEGACY ITEM(S) OVER CAPACITY // DATA PRESERVED
+        </div>
+        {{/if}}
+    </div>
+</div>

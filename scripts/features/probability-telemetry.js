@@ -566,16 +566,17 @@ Hooks.on("getSceneControlButtons", controls => {
   };
 });
 
-Hooks.on("createChatMessage", (message) => {
+Hooks.on("createChatMessage", (message, _options, userId) => {
   if (game.settings.get(MODULE_ID, "paused")) return;
   if (!message.rolls?.length) return;
   if (!game.settings.get(MODULE_ID, "allowHiddenRolls") && messageIsHidden(message)) return;
 
-  // Only the client belonging to the message author stores the result. Using
-  // the ChatMessage author is reliable across Foundry v14 hook signatures and
-  // prevents every connected client from recording the same dice.
-  const authorId = message.author?.id ?? message.user?.id ?? message.user ?? null;
-  if (authorId !== game.user.id) return;
+  // Foundry v14 supplies the creating client as the third hook argument. Use
+  // that when available, then fall back to the ChatMessage author. This keeps
+  // only one client responsible for storing a roll while still supporting
+  // custom roll-bearing messages such as the Probability Processor macro.
+  const sourceUserId = userId ?? message.author?.id ?? message.user?.id ?? message.user ?? null;
+  if (sourceUserId !== game.user.id) return;
 
   const values = [];
   for (const roll of message.rolls) values.push(...extractD6Results(roll));
