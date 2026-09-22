@@ -1,0 +1,229 @@
+/* =========================================================
+   LiTM CONVERSION // GLOBAL SCI-FI UI
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   GAME PAUSE OVERLAY
+   --------------------------------------------------------- */
+
+#pause.litm-pause {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+#pause.litm-pause img.litm-pause-emblem {
+  width: 176px;
+  height: 176px;
+  object-fit: contain;
+  opacity: 0.96;
+  animation: none !important;
+  filter:
+    drop-shadow(0 0 5px rgba(117, 201, 210, 0.45))
+    drop-shadow(0 0 18px rgba(117, 201, 210, 0.18));
+}
+
+#pause.litm-pause figcaption {
+  min-width: 300px;
+  padding: 10px 22px 9px;
+  border-top: 1px solid rgba(117, 201, 210, 0.55);
+  border-bottom: 1px solid rgba(117, 201, 210, 0.28);
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(117, 201, 210, 0.025) 0,
+      rgba(117, 201, 210, 0.025) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    linear-gradient(90deg, transparent, rgba(6, 15, 19, 0.88) 16%, rgba(6, 15, 19, 0.88) 84%, transparent);
+  color: #8de2eb;
+  font-family: monospace;
+  font-style: normal;
+  text-align: center;
+  text-shadow: none;
+}
+
+#pause.litm-pause .litm-pause-title {
+  display: block;
+  color: #8de2eb;
+  font-family: monospace;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(117, 201, 210, 0.25);
+}
+
+#pause.litm-pause .litm-pause-subtitle {
+  display: block;
+  margin-top: 7px;
+  color: #76969c;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------
+   CHAT MESSAGE SHELL
+   --------------------------------------------------------- */
+
+.chat-message.litm-chat-message {
+  --litm-user-accent: #7fd3dc;
+
+  position: relative;
+  overflow: hidden;
+  margin: 5px 0;
+  padding: 9px 10px 10px;
+
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(90, 190, 205, 0.018) 0,
+      rgba(90, 190, 205, 0.018) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    linear-gradient(145deg, #111a1f, #0a1115 76%);
+
+  border: 1px solid #3a5960 !important;
+  border-radius: 0 !important;
+  box-shadow:
+    inset 0 0 18px rgba(0, 0, 0, 0.48),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+
+  color: #d9eef0;
+  font-family: monospace;
+}
+
+/* Small internal player-color identity mark rather than an outer border. */
+.chat-message.litm-chat-message::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12px;
+  width: 68px;
+  height: 3px;
+  background: var(--litm-user-accent);
+  box-shadow: 0 0 8px var(--litm-user-accent);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.chat-message.litm-chat-message .message-header {
+  margin: 0;
+  padding: 2px 2px 8px;
+  border: 0;
+  border-bottom: 1px solid #2b454b;
+  background: transparent;
+}
+
+.chat-message.litm-chat-message .message-sender {
+  color: var(--litm-user-accent);
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 0 7px var(--litm-user-accent);
+}
+
+.chat-message.litm-chat-message .message-metadata,
+.chat-message.litm-chat-message .message-timestamp,
+.chat-message.litm-chat-message .message-delete,
+.chat-message.litm-chat-message .message-metadata a {
+  color: #92a7ab;
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+}
+
+.chat-message.litm-chat-message .message-content {
+  position: relative;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(7, 14, 18, 0.64);
+  border: 1px solid rgba(58, 89, 96, 0.55);
+  border-left: 0;
+  box-shadow:
+    inset 3px 0 0 var(--litm-user-accent),
+    inset 0 0 12px rgba(0, 0, 0, 0.34);
+  color: #d9eef0;
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.chat-message.litm-text-message .message-content {
+  min-height: 34px;
+}
+
+.chat-message.litm-chat-message .message-content p:first-child {
+  margin-top: 0;
+}
+
+.chat-message.litm-chat-message .message-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------------------------------------------------------
+   STANDARD FOUNDRY ROLL CARDS
+   --------------------------------------------------------- */
+
+.chat-message.litm-chat-message .dice-roll {
+  color: #d9eef0;
+  font-family: monospace;
+}
+
+.chat-message.litm-chat-message .dice-formula,
+.chat-message.litm-chat-message .dice-total {
+  border: 1px solid #466f76;
+  border-radius: 0;
+  background: #10181d;
+  color: #d9eef0;
+  box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.5);
+  font-family: monospace;
+}
+
+.chat-message.litm-chat-message .dice-total {
+  color: #8de2eb;
+  font-weight: 700;
+  text-shadow: 0 0 7px rgba(117, 201, 210, 0.2);
+}
+
+.chat-message.litm-chat-message .dice-tooltip {
+  border: 1px solid #31535a;
+  border-radius: 0;
+  background: #0b1216;
+  color: #d9eef0;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.45);
+}
+
+.chat-message.litm-chat-message .dice-tooltip .part-header {
+  border-bottom: 1px solid #31535a;
+  color: #8de2eb;
+  font-family: monospace;
+}
+
+.chat-message.litm-chat-message .dice-tooltip .dice-rolls .roll {
+  background: #17272c;
+  border: 1px solid #65bac4;
+  border-radius: 0;
+  color: #e9fdff;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.55);
+}
+
+/* ---------------------------------------------------------
+   KEEP CUSTOM PROBABILITY CARDS CLEAN INSIDE CHAT
+   --------------------------------------------------------- */
+
+.chat-message.litm-roll-message .message-content > div {
+  max-width: 100%;
+}
