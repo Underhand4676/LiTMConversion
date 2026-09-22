@@ -16,7 +16,16 @@
             <div class="litm-sw-pack-slots litm-sw-pack-slots-gear">
                 {{#each gearSlots as |slot|}}
                 <div class="litm-sw-pack-slot {{#if slot.occupied}}occupied{{else}}empty{{/if}}" data-slot="{{slot.slotNumber}}">
+                    {{#if ../editMode}}
                     <span class="litm-sw-pack-slot-index">0{{slot.slotNumber}}</span>
+                    {{else}}
+                    <button type="button" class="litm-sw-pack-slot-index litm-sw-pack-slot-edit"
+                        data-action="editLiTMBackpackSlot"
+                        data-category="gear"
+                        data-item-id="{{../backpack._id}}"
+                        data-entry-index="{{slot.index}}"
+                        title="Edit backpack slot 0{{slot.slotNumber}}">0{{slot.slotNumber}}</button>
+                    {{/if}}
                     <div class="litm-sw-pack-slot-body">
                     {{#if slot.occupied}}
                         {{> 'systems/mist-engine-fvtt/templates/shared/litm/storytag-line.hbs' slot.storytag
@@ -46,7 +55,16 @@
             <div class="litm-sw-pack-slots litm-sw-pack-slots-consumables">
                 {{#each consumableSlots as |slot|}}
                 <div class="litm-sw-pack-slot consumable {{#if slot.occupied}}occupied{{else}}empty{{/if}}" data-slot="{{slot.slotNumber}}">
+                    {{#if ../editMode}}
                     <span class="litm-sw-pack-slot-index">C{{slot.slotNumber}}</span>
+                    {{else}}
+                    <button type="button" class="litm-sw-pack-slot-index litm-sw-pack-slot-edit"
+                        data-action="editLiTMBackpackSlot"
+                        data-category="consumable"
+                        data-item-id="{{../backpack._id}}"
+                        data-entry-index="{{slot.index}}"
+                        title="Edit consumable slot C{{slot.slotNumber}}">C{{slot.slotNumber}}</button>
+                    {{/if}}
                     <div class="litm-sw-pack-slot-body">
                     {{#if slot.occupied}}
                         {{> 'systems/mist-engine-fvtt/templates/shared/litm/storytag-line.hbs' slot.storytag

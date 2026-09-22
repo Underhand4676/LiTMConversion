@@ -24,7 +24,7 @@
         rote=card.rote editMode=@root.system.editMode cardKey=card.key}}
 {{/if}}
 {{#if (eq card.type "fellowship-themecard")}}
-    {{> 'systems/mist-engine-fvtt/templates/actor/parts/actor-fellowship-themebook-partial.hbs'
+    {{> 'modules/litm-conversion/templates/actor/parts/starwars-crew-themecard.hbs'
         fellowshipThemecard=@root.fellowshipThemecard fellowshipThemecardName=@root.fellowshipThemecardName
         system=@root.system editMode=@root.system.editMode tidyTags=@root.tidyTags cardKey=card.key}}
 {{/if}}
