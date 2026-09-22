@@ -313,11 +313,27 @@ if (cutCount > diceCount) {
 
 const roll = await new Roll(`${diceCount}d6`).evaluate();
 
+
 // ---------------------------------------------------------
-// PROBABILITY TELEMETRY // RECORD THIS D6 POOL
+// LiTM CONVERSION // RECORD D6 TELEMETRY
+// ---------------------------------------------------------
+//
+// The macro creates its own custom chat card, so the normal
+// chat-roll hook does not receive this Roll object. Send the
+// evaluated pool directly to the module's telemetry API.
+//
+// This records the ENTIRE rolled pool before CUT is applied.
 // ---------------------------------------------------------
 
-await game.modules.get("litm-conversion")?.api?.diceTelemetry?.recordRoll?.(roll);
+const telemetry = game.modules.get("litm-conversion")?.api?.diceTelemetry;
+
+if (telemetry?.recordRoll) {
+  await telemetry.recordRoll(roll);
+} else {
+  console.warn(
+    "Probability Processor | LiTM Conversion telemetry API unavailable; d6 results were not recorded."
+  );
+}
 
 
 // ---------------------------------------------------------
@@ -702,14 +718,14 @@ const content = `
           font-weight:bold;
           letter-spacing:2px;
         ">
-          INTERFERENCE // PURGED
+          INTERFERENCE // CUT
         </span>
 
         <span style="
           color:#756d55;
           font-size:8px;
         ">
-          CUT FROM CHECK POOL
+          Signal Disrupted
         </span>
 
       </div>

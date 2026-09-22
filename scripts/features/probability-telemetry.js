@@ -205,32 +205,9 @@ function buildBars(counts, total) {
 }
 
 function visibleUsers() {
-  const canViewGm = game.user.isGM || game.settings.get(MODULE_ID, "allowViewGmRolls");
   return game.users.contents
-    .filter(user => canViewGm || !user.isGM)
+    .slice()
     .sort((a, b) => a.name.localeCompare(b.name));
-}
-
-function leadersForFace(face, startKey, endKey) {
-  const allowGmStats = game.user.isGM || game.settings.get(MODULE_ID, "allowViewGmStats");
-  const candidates = game.users.contents.filter(user => allowGmStats || !user.isGM);
-
-  let max = 0;
-  let names = [];
-
-  for (const user of candidates) {
-    const { counts } = aggregateRange(getUserData(user), startKey, endKey);
-    const amount = counts[face - 1] ?? 0;
-
-    if (amount > max) {
-      max = amount;
-      names = [user.name];
-    } else if (amount === max && amount > 0) {
-      names.push(user.name);
-    }
-  }
-
-  return names.length ? names.join(", ") : "NO DATA";
 }
 
 function brandedConfirmContent(title, message) {
@@ -273,7 +250,7 @@ class ProbabilityTelemetryApp extends HandlebarsApplicationMixin(ApplicationV2) 
     classes: ["probability-telemetry"],
     position: {
       width: 820,
-      height: 650
+      height: 680
     },
     window: {
       title: "PROBABILITY TELEMETRY // D6 ARCHIVE",
@@ -314,11 +291,13 @@ class ProbabilityTelemetryApp extends HandlebarsApplicationMixin(ApplicationV2) 
     }
 
     const data = getUserData(selectedUser);
-    let dates = Object.keys(data).sort();
-    if (!dates.length) dates = [localDateKey()];
+    const dates = Object.keys(data).sort();
+    const today = localDateKey();
+    const firstRecordedDate = dates[0] ?? today;
+    const lastRecordedDate = dates[dates.length - 1] ?? today;
 
-    if (!this.dateFrom || !dates.includes(this.dateFrom)) this.dateFrom = dates[0];
-    if (!this.dateTo || !dates.includes(this.dateTo)) this.dateTo = dates[dates.length - 1];
+    if (!this.dateFrom) this.dateFrom = firstRecordedDate;
+    if (!this.dateTo) this.dateTo = lastRecordedDate;
     if (this.dateFrom > this.dateTo) this.dateTo = this.dateFrom;
 
     const aggregate = aggregateRange(data, this.dateFrom, this.dateTo);
@@ -337,12 +316,8 @@ class ProbabilityTelemetryApp extends HandlebarsApplicationMixin(ApplicationV2) 
         name: user.name,
         selected: user.id === selectedUser.id
       })),
-      dates: dates.map(date => ({
-        key: date,
-        label: formatDateKey(date),
-        fromSelected: date === this.dateFrom,
-        toSelected: date === this.dateTo
-      })),
+      dateFrom: this.dateFrom,
+      dateTo: this.dateTo,
       fromLabel: formatDateKey(this.dateFrom),
       toLabel: formatDateKey(this.dateTo),
       totalRolls: aggregate.total,
@@ -354,8 +329,6 @@ class ProbabilityTelemetryApp extends HandlebarsApplicationMixin(ApplicationV2) 
       deltaClass: stats.deltaClass,
       totalOnes: aggregate.counts[0],
       totalSixes: aggregate.counts[5],
-      mostOnes: leadersForFace(1, this.dateFrom, this.dateTo),
-      mostSixes: leadersForFace(6, this.dateFrom, this.dateTo),
       expectedMean: EXPECTED_MEAN.toFixed(2),
       expectedFacePercent: EXPECTED_FACE_PERCENT.toFixed(1)
     }, { inplace: false });
@@ -427,6 +400,7 @@ class ProbabilityTelemetryApp extends HandlebarsApplicationMixin(ApplicationV2) 
   }
 
   static async exportUser() {
+    if (!game.user.isGM) return;
     const user = game.users.get(this.selectedUserId);
     if (!user) return;
 
@@ -551,25 +525,7 @@ Hooks.once("init", () => {
     restricted: true
   });
 
-  game.settings.register(MODULE_ID, "allowViewGmRolls", {
-    name: "Probability Telemetry: Players can view GM telemetry",
-    hint: "Allow non-GM users to select GM accounts in the telemetry console.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: true,
-    restricted: true
-  });
 
-  game.settings.register(MODULE_ID, "allowViewGmStats", {
-    name: "Probability Telemetry: Include GM in leader readouts",
-    hint: "Allow non-GM users to see GM names in the MOST 1s and MOST 6s readouts.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: true,
-    restricted: true
-  });
 
   game.settings.register(MODULE_ID, "paused", {
     name: "Probability Telemetry: Pause data acquisition",

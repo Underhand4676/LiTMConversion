@@ -26,20 +26,12 @@
 
     <label class="pt-control-group">
       <span>SCAN FROM</span>
-      <select data-pt-field="from">
-        {{#each dates}}
-          <option value="{{key}}" {{#if fromSelected}}selected{{/if}}>{{label}}</option>
-        {{/each}}
-      </select>
+      <input type="date" value="{{dateFrom}}" data-pt-field="from">
     </label>
 
     <label class="pt-control-group">
       <span>SCAN TO</span>
-      <select data-pt-field="to">
-        {{#each dates}}
-          <option value="{{key}}" {{#if toSelected}}selected{{/if}}>{{label}}</option>
-        {{/each}}
-      </select>
+      <input type="date" value="{{dateTo}}" data-pt-field="to">
     </label>
 
     {{#if isGM}}
@@ -127,33 +119,15 @@
       </article>
     </section>
 
-    <section class="pt-leader-panel">
-      <div class="pt-leader-row high">
-        <div>
-          <div class="pt-leader-label">HIGHEST 6-SIGNAL COUNT</div>
-          <div class="pt-leader-note">MOST SIXES IN SELECTED WINDOW</div>
-        </div>
-        <div class="pt-leader-name">{{mostSixes}}</div>
-      </div>
-
-      <div class="pt-leader-row low">
-        <div>
-          <div class="pt-leader-label">HIGHEST 1-SIGNAL COUNT</div>
-          <div class="pt-leader-note">MOST ONES IN SELECTED WINDOW</div>
-        </div>
-        <div class="pt-leader-name">{{mostOnes}}</div>
-      </div>
-    </section>
 
     <footer class="pt-footer">
       <div class="pt-footer-code">◇ ARCHIVE LINK // PROBABILITY MODEL STABLE</div>
 
-      <div class="pt-footer-actions">
-        <button type="button" class="pt-button" data-action="exportUser">
-          <i class="fa-solid fa-file-export"></i> EXPORT SUBJECT
-        </button>
-
-        {{#if isGM}}
+      {{#if isGM}}
+        <div class="pt-footer-actions">
+          <button type="button" class="pt-button" data-action="exportUser">
+            <i class="fa-solid fa-file-export"></i> EXPORT SUBJECT
+          </button>
           <button type="button" class="pt-button" data-action="importUser">
             <i class="fa-solid fa-file-import"></i> IMPORT SUBJECT
           </button>
@@ -163,8 +137,8 @@
           <button type="button" class="pt-button danger" data-action="resetAll">
             <i class="fa-solid fa-trash"></i> PURGE ALL
           </button>
-        {{/if}}
-      </div>
+        </div>
+      {{/if}}
     </footer>
   </div>
 </section>
