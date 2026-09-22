@@ -638,3 +638,207 @@
   .character-name-container {
   padding: 9px 10px !important;
 }
+
+
+/* =========================================================
+   LOCKED SHEET LAYOUT REPAIR // v0.1.7
+   The base Mist Engine locked sheet reserves a 300px artwork
+   gutter and offsets decorated cards by hand. That made sense
+   for the parchment layout, but fights the datapad grid.
+   These rules affect locked mode only; edit mode is untouched.
+   ========================================================= */
+
+/* Put the locked identity block back into the header instead of
+   leaving the actor name absolutely positioned halfway down the sheet. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-header.stylized-background .header-fields {
+  align-items: stretch !important;
+  gap: 12px !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-header.stylized-background .col-character-name {
+  flex: 0 0 260px !important;
+  min-width: 260px !important;
+  max-width: 260px !important;
+  display: flex !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-header.stylized-background .character-name-container {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-header.stylized-background .col-main {
+  flex: 0 0 150px !important;
+  min-width: 150px !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-header.stylized-background .col-status {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+/* The original locked sheet intentionally offsets cards to make room for
+   raven/flowers/necklace art. Our alternate sheet has no such props, so
+   restore a real grid and let every card participate normally. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .character-sheet-divider .right-side:not(.edit-mode) {
+  margin-left: 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  flex: 1 1 100% !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .right-side:not(.edit-mode) .litm-character-themebooks-container {
+  margin: 10px 0 14px !important;
+  overflow: visible !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebooks-container.themebooks-container-stylized {
+  width: 100% !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-auto-flow: row !important;
+  justify-content: stretch !important;
+  align-items: start !important;
+  gap: 12px !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebooks-container.themebooks-container-stylized > .themebook-container {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  rotate: 0deg !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  align-self: start !important;
+}
+
+/* Keep card contents inside their own grid column without forcing siblings
+   off-screen. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebooks-container.themebooks-container-stylized .container-themebook-with-border,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebooks-container.themebooks-container-stylized .themebook-style {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Tags & Statuses header: override the base sheet's brown-on-dark fantasy
+   heading and black lock icon with readable datapad instrumentation. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-header.stylized-background .floating-status-container-character
+  .npc-subtitle-container-c {
+  color: var(--sw-cyan-bright) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-header.stylized-background .floating-status-container-character
+  .npc-subtitle-container-c::before {
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(127, 203, 211, 0.48)
+  ) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-header.stylized-background .floating-status-container-character
+  .npc-subtitle-container-c::after {
+  background: linear-gradient(
+    to left,
+    transparent,
+    rgba(127, 203, 211, 0.48)
+  ) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-header.stylized-background .floating-status-container-character
+  .npc-subtitle-text {
+  color: #cfeaec !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.10em !important;
+  text-shadow: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-header.stylized-background .floating-status-container-character
+  .lock-toggle-container {
+  color: var(--sw-amber) !important;
+  text-shadow: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-header.stylized-background .floating-status-container-character
+  .npc-subtitle-text a {
+  color: var(--sw-cyan-bright) !important;
+  opacity: 0.9 !important;
+}
+
+/* Make locked-mode tags/statuses themselves legible against the dark display. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .floating-status-container-character .fts-input-name.tag {
+  background: rgba(200, 155, 82, 0.16) !important;
+  border-color: rgba(200, 155, 82, 0.42) !important;
+  color: #ead7ae !important;
+  box-shadow: inset 2px 0 0 rgba(200, 155, 82, 0.72) !important;
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .floating-status-container-character .fts-input-name.status {
+  background: rgba(103, 154, 142, 0.16) !important;
+  border-color: rgba(112, 174, 160, 0.38) !important;
+  color: #d6e8e3 !important;
+  box-shadow: inset 2px 0 0 rgba(112, 174, 160, 0.68) !important;
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .floating-status-container-character .fts-input-name.negative,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .floating-status-container-character .fts-input-name.status.negative {
+  background: rgba(184, 100, 88, 0.17) !important;
+  border-color: rgba(184, 100, 88, 0.44) !important;
+  color: #edc0b9 !important;
+  box-shadow: inset 2px 0 0 rgba(184, 100, 88, 0.72) !important;
+}
+
+/* At narrower widths, use fewer columns instead of clipping cards. */
+@media (max-width: 950px) {
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .themebooks-container.themebooks-container-stylized {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .sheet-header.stylized-background .col-character-name {
+    flex-basis: 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
+  }
+}

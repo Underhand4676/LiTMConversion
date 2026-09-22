@@ -9,3 +9,5 @@ Manifest:
 ```text
 https://github.com/Underhand4676/LiTMConversion/releases/latest/download/module.json
 ```
+
+Current development build: v0.1.7.
