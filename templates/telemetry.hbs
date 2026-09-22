@@ -1,0 +1,170 @@
+<section class="pt-shell">
+  <header class="pt-header">
+    <div class="pt-brand">
+      <div class="pt-glyph">◈</div>
+      <div>
+        <div class="pt-title">PROBABILITY TELEMETRY</div>
+        <div class="pt-subtitle">D6 DISTRIBUTION ARCHIVE // LOCAL PROBABILITY ANALYSIS</div>
+      </div>
+    </div>
+
+    <div class="pt-status {{#if paused}}paused{{else}}online{{/if}}">
+      <span class="pt-status-dot"></span>
+      {{acquisitionLabel}}
+    </div>
+  </header>
+
+  <div class="pt-controls">
+    <label class="pt-control-group">
+      <span>SUBJECT</span>
+      <select data-pt-field="user">
+        {{#each users}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label class="pt-control-group">
+      <span>SCAN FROM</span>
+      <select data-pt-field="from">
+        {{#each dates}}
+          <option value="{{key}}" {{#if fromSelected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label class="pt-control-group">
+      <span>SCAN TO</span>
+      <select data-pt-field="to">
+        {{#each dates}}
+          <option value="{{key}}" {{#if toSelected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    {{#if isGM}}
+      <button type="button" class="pt-button pt-pause {{#if paused}}active{{/if}}" data-action="togglePause">
+        <i class="fa-solid {{#if paused}}fa-play{{else}}fa-pause{{/if}}"></i>
+        {{#if paused}}RESUME{{else}}PAUSE{{/if}}
+      </button>
+    {{/if}}
+  </div>
+
+  <div class="pt-body">
+    <section class="pt-chart-panel">
+      <div class="pt-section-heading">
+        <div>
+          <span class="pt-kicker">ROLL DISTRIBUTION</span>
+          <span class="pt-section-title">{{selectedUserName}}</span>
+        </div>
+        <div class="pt-range">{{fromLabel}} // {{toLabel}}</div>
+      </div>
+
+      <div class="pt-chart-wrap">
+        <div class="pt-y-caption">FREQUENCY</div>
+        <div class="pt-bars">
+          {{#each bars}}
+            <div class="pt-bar-column {{cssClass}}">
+              <div class="pt-bar-count">{{count}}</div>
+              <div class="pt-bar-track" title="D6 result {{face}}: {{count}} rolls // {{percentage}}%">
+                <div class="pt-baseline" style="bottom: {{baselineHeight}}%;"></div>
+                <div class="pt-bar-fill" style="height: {{height}}%;"></div>
+              </div>
+              <div class="pt-die-box">{{face}}</div>
+              <div class="pt-bar-percent">{{percentage}}%</div>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+
+      <div class="pt-baseline-key">
+        <span class="pt-baseline-swatch"></span>
+        EXPECTED FACE FREQUENCY // {{expectedFacePercent}}%
+      </div>
+    </section>
+
+    <section class="pt-readout-grid">
+      <article class="pt-readout cyan">
+        <div class="pt-readout-label">SAMPLE SIZE</div>
+        <div class="pt-readout-value">{{totalRolls}}</div>
+        <div class="pt-readout-note">TOTAL D6 RECORDED</div>
+      </article>
+
+      <article class="pt-readout cyan">
+        <div class="pt-readout-label">MEAN RETURN</div>
+        <div class="pt-readout-value">{{mean}}</div>
+        <div class="pt-readout-note">EXPECTED // {{expectedMean}}</div>
+      </article>
+
+      <article class="pt-readout {{deltaClass}}">
+        <div class="pt-readout-label">MEAN DEVIATION</div>
+        <div class="pt-readout-value">{{delta}}</div>
+        <div class="pt-readout-note">FROM EXPECTED BASELINE</div>
+      </article>
+
+      <article class="pt-readout cyan">
+        <div class="pt-readout-label">MEDIAN</div>
+        <div class="pt-readout-value">{{median}}</div>
+        <div class="pt-readout-note">CENTRAL RETURN</div>
+      </article>
+
+      <article class="pt-readout cyan">
+        <div class="pt-readout-label">MODE</div>
+        <div class="pt-readout-value pt-mode">{{mode}}</div>
+        <div class="pt-readout-note">MOST COMMON RETURN</div>
+      </article>
+
+      <article class="pt-readout amber">
+        <div class="pt-readout-label">MIN RETURN // 1s</div>
+        <div class="pt-readout-value">{{totalOnes}}</div>
+        <div class="pt-readout-note">LOW-END EVENTS</div>
+      </article>
+
+      <article class="pt-readout bright">
+        <div class="pt-readout-label">MAX RETURN // 6s</div>
+        <div class="pt-readout-value">{{totalSixes}}</div>
+        <div class="pt-readout-note">HIGH-END EVENTS</div>
+      </article>
+    </section>
+
+    <section class="pt-leader-panel">
+      <div class="pt-leader-row high">
+        <div>
+          <div class="pt-leader-label">HIGHEST 6-SIGNAL COUNT</div>
+          <div class="pt-leader-note">MOST SIXES IN SELECTED WINDOW</div>
+        </div>
+        <div class="pt-leader-name">{{mostSixes}}</div>
+      </div>
+
+      <div class="pt-leader-row low">
+        <div>
+          <div class="pt-leader-label">HIGHEST 1-SIGNAL COUNT</div>
+          <div class="pt-leader-note">MOST ONES IN SELECTED WINDOW</div>
+        </div>
+        <div class="pt-leader-name">{{mostOnes}}</div>
+      </div>
+    </section>
+
+    <footer class="pt-footer">
+      <div class="pt-footer-code">◇ ARCHIVE LINK // PROBABILITY MODEL STABLE</div>
+
+      <div class="pt-footer-actions">
+        <button type="button" class="pt-button" data-action="exportUser">
+          <i class="fa-solid fa-file-export"></i> EXPORT SUBJECT
+        </button>
+
+        {{#if isGM}}
+          <button type="button" class="pt-button" data-action="importUser">
+            <i class="fa-solid fa-file-import"></i> IMPORT SUBJECT
+          </button>
+          <button type="button" class="pt-button danger" data-action="deleteUser">
+            <i class="fa-solid fa-user-slash"></i> PURGE SUBJECT
+          </button>
+          <button type="button" class="pt-button danger" data-action="resetAll">
+            <i class="fa-solid fa-trash"></i> PURGE ALL
+          </button>
+        {{/if}}
+      </div>
+    </footer>
+  </div>
+</section>
