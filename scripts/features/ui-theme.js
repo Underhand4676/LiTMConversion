@@ -14,9 +14,14 @@ function getUserAccent(message) {
 // PAUSE OVERLAY
 // ---------------------------------------------------------------------------
 
-Hooks.on("renderGamePause", (_app, element) => {
-  const pauseEl = element ?? document.getElementById("pause");
-  if (!(pauseEl instanceof HTMLElement)) return;
+function getPauseElement(element = null) {
+  if (element instanceof HTMLElement) return element;
+  return document.getElementById("pause");
+}
+
+function stylePauseElement(element = null) {
+  const pauseEl = getPauseElement(element);
+  if (!(pauseEl instanceof HTMLElement)) return null;
 
   pauseEl.classList.add("litm-pause");
 
@@ -24,7 +29,7 @@ Hooks.on("renderGamePause", (_app, element) => {
   if (image) {
     image.src = `modules/${MODULE_ID}/artwork/republic-symbol.png`;
     image.alt = "Operations Halted";
-    image.className = "litm-pause-emblem";
+    image.classList.add("litm-pause-emblem");
   }
 
   const caption = pauseEl.querySelector("figcaption");
@@ -34,6 +39,39 @@ Hooks.on("renderGamePause", (_app, element) => {
       <span class="litm-pause-subtitle">AWAITING RESUMPTION</span>
     `;
   }
+
+  return pauseEl;
+}
+
+function syncPauseState(paused = game.paused) {
+  const pauseEl = stylePauseElement();
+  if (!pauseEl) return;
+
+  const active = Boolean(paused);
+  pauseEl.classList.toggle("litm-pause-active", active);
+  pauseEl.classList.toggle("litm-pause-inactive", !active);
+}
+
+function syncAfterCore(paused = game.paused) {
+  // Let Foundry complete its own GamePause render/update first, then apply
+  // our explicit visibility state. Two animation frames avoids racing the
+  // ApplicationV2 render transition on fast pause/unpause toggles.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => syncPauseState(paused));
+  });
+}
+
+Hooks.on("renderGamePause", (_app, element) => {
+  stylePauseElement(element);
+  syncAfterCore(game.paused);
+});
+
+Hooks.on("pauseGame", (paused) => {
+  syncAfterCore(paused);
+});
+
+Hooks.once("ready", () => {
+  syncAfterCore(game.paused);
 });
 
 // ---------------------------------------------------------------------------

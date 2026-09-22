@@ -6,13 +6,26 @@
    GAME PAUSE OVERLAY
    --------------------------------------------------------- */
 
-#pause.litm-pause {
-  display: flex;
+/*
+ * Foundry V14 keeps the GamePause application around while toggling its
+ * visible state. Do not force #pause to display:flex unconditionally: doing
+ * that prevents the banner from disappearing when the game is resumed.
+ * Visibility is driven by the classes synchronized in ui-theme.js.
+ */
+#pause.litm-pause.litm-pause-inactive {
+  display: none !important;
+}
+
+#pause.litm-pause.litm-pause-active {
+  display: flex !important;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
   pointer-events: none;
+
+  /* Replace Foundry's stronger/faster pulse with a restrained terminal glow. */
+  animation: litm-pause-breathe 8s ease-in-out infinite !important;
 }
 
 #pause.litm-pause img.litm-pause-emblem {
@@ -45,6 +58,7 @@
   font-style: normal;
   text-align: center;
   text-shadow: none;
+  animation: none !important;
 }
 
 #pause.litm-pause .litm-pause-title {
@@ -69,6 +83,23 @@
   line-height: 1.2;
   letter-spacing: 0.24em;
   text-transform: uppercase;
+}
+
+@keyframes litm-pause-breathe {
+  0%, 100% {
+    opacity: 0.96;
+  }
+
+  50% {
+    opacity: 0.86;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pause.litm-pause.litm-pause-active {
+    animation: none !important;
+    opacity: 0.96;
+  }
 }
 
 /* ---------------------------------------------------------
