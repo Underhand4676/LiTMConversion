@@ -33,7 +33,8 @@
   height: 176px;
   object-fit: contain;
   opacity: 0.96;
-  animation: none !important;
+  animation: litm-republic-spin 20s linear infinite !important;
+  transform-origin: 50% 50%;
   filter:
     drop-shadow(0 0 5px rgba(117, 201, 210, 0.45))
     drop-shadow(0 0 18px rgba(117, 201, 210, 0.18));
@@ -85,6 +86,11 @@
   text-transform: uppercase;
 }
 
+@keyframes litm-republic-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 @keyframes litm-pause-breathe {
   0%, 100% {
     opacity: 0.96;
@@ -99,6 +105,10 @@
   #pause.litm-pause.litm-pause-active {
     animation: none !important;
     opacity: 0.96;
+  }
+
+  #pause.litm-pause img.litm-pause-emblem {
+    animation: none !important;
   }
 }
 
@@ -257,4 +267,188 @@
 
 .chat-message.litm-roll-message .message-content > div {
   max-width: 100%;
+}
+
+/* =========================================================
+   LITM CHARACTER SHEET // STAR-WARS-INSPIRED RESKIN
+   ========================================================= */
+
+/* The module adds this class only to official Legend in the Mist
+ * litm-character sheets, leaving NPC, Journey and Fellowship sheets alone. */
+.litm-starwars-character-sheet {
+  --litm-sheet-bg: #10171c;
+  --litm-sheet-bg-deep: #0a1014;
+  --litm-sheet-panel: #182229;
+  --litm-sheet-panel-2: #202d34;
+  --litm-sheet-card: #d9e0de;
+  --litm-sheet-card-2: #c9d2d1;
+  --litm-sheet-ink: #142127;
+  --litm-sheet-text: #d8e8eb;
+  --litm-sheet-muted: #80969b;
+  --litm-sheet-line: #466f76;
+  --litm-sheet-cyan: #7fd3dc;
+  --litm-sheet-amber: #c8a45e;
+  --litm-sheet-red: #b96859;
+}
+
+/* Main sheet shell: darker spacecraft-console framing without forcing away
+ * the actor-art column used by the system's full layout. */
+.litm-starwars-character-sheet.window-app,
+.application.litm-starwars-character-sheet,
+.litm-starwars-character-sheet .window-content,
+.litm-starwars-character-sheet.window-content {
+  background-color: var(--litm-sheet-bg-deep) !important;
+  color: var(--litm-sheet-text);
+}
+
+.application.litm-starwars-character-sheet .window-header,
+.litm-starwars-character-sheet .window-header {
+  background: linear-gradient(90deg, #0b1216, #172229) !important;
+  border-bottom: 1px solid var(--litm-sheet-line) !important;
+  color: var(--litm-sheet-cyan) !important;
+}
+
+.application.litm-starwars-character-sheet .window-title,
+.litm-starwars-character-sheet .window-title {
+  font-family: monospace;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Primary page/body surfaces. These intentionally use background-color
+ * rather than globally deleting background-image so the official full-sheet
+ * character artwork can remain intact. */
+.litm-starwars-character-sheet .sheet-body,
+.litm-starwars-character-sheet .sheet-content,
+.litm-starwars-character-sheet .character-sheet,
+.litm-starwars-character-sheet .actor-sheet,
+.litm-starwars-character-sheet main {
+  color: var(--litm-sheet-text);
+}
+
+/* Navigation becomes a restrained databank strip. */
+.litm-starwars-character-sheet .tabs,
+.litm-starwars-character-sheet .sheet-tabs,
+.litm-starwars-character-sheet nav.tabs {
+  background: rgba(9, 16, 20, 0.94) !important;
+  border-top: 1px solid #29434a !important;
+  border-bottom: 1px solid #29434a !important;
+  box-shadow: none !important;
+}
+
+.litm-starwars-character-sheet .tabs > *,
+.litm-starwars-character-sheet .sheet-tabs > *,
+.litm-starwars-character-sheet nav.tabs > * {
+  color: #92a9ae !important;
+  font-family: monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: none !important;
+}
+
+.litm-starwars-character-sheet .tabs .active,
+.litm-starwars-character-sheet .sheet-tabs .active,
+.litm-starwars-character-sheet nav.tabs .active {
+  color: var(--litm-sheet-cyan) !important;
+  background: rgba(127, 211, 220, 0.07) !important;
+  box-shadow: inset 0 -2px 0 var(--litm-sheet-cyan) !important;
+}
+
+/* Theme cards: cleaner rectangular data modules instead of parchment props. */
+.litm-starwars-character-sheet .themebook,
+.litm-starwars-character-sheet .theme-card,
+.litm-starwars-character-sheet [class*="themebook-card"],
+.litm-starwars-character-sheet [data-item-type="themebook"] {
+  position: relative;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(17, 33, 39, 0.035) 0,
+      rgba(17, 33, 39, 0.035) 1px,
+      transparent 1px,
+      transparent 5px
+    ),
+    linear-gradient(145deg, var(--litm-sheet-card), var(--litm-sheet-card-2)) !important;
+  border: 1px solid #65787b !important;
+  border-radius: 0 !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.22),
+    0 2px 8px rgba(0,0,0,0.28) !important;
+  color: var(--litm-sheet-ink) !important;
+}
+
+.litm-starwars-character-sheet .themebook::before,
+.litm-starwars-character-sheet .theme-card::before,
+.litm-starwars-character-sheet [class*="themebook-card"]::before,
+.litm-starwars-character-sheet [data-item-type="themebook"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 72px;
+  height: 3px;
+  background: var(--litm-sheet-cyan);
+  box-shadow: 0 0 7px rgba(127, 211, 220, 0.38);
+  pointer-events: none;
+}
+
+/* Theme headings / bands. Existing theme-specific colors can still show on
+ * individual controls, but the large parchment headers become technical. */
+.litm-starwars-character-sheet .themebook header,
+.litm-starwars-character-sheet .theme-card header,
+.litm-starwars-character-sheet [class*="themebook-card"] header,
+.litm-starwars-character-sheet .theme-header,
+.litm-starwars-character-sheet [class*="theme-title"] {
+  background: rgba(18, 30, 36, 0.92) !important;
+  border-bottom: 1px solid #557078 !important;
+  color: #e5f1f3 !important;
+  text-shadow: none !important;
+}
+
+/* Inputs / editors: dark recessed fields instead of parchment boxes. */
+.litm-starwars-character-sheet input:not([type="checkbox"]):not([type="radio"]),
+.litm-starwars-character-sheet textarea,
+.litm-starwars-character-sheet select {
+  background: rgba(8, 15, 19, 0.88) !important;
+  border: 1px solid #47676e !important;
+  border-radius: 0 !important;
+  color: #e4f0f2 !important;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.42) !important;
+}
+
+.litm-starwars-character-sheet input:focus,
+.litm-starwars-character-sheet textarea:focus,
+.litm-starwars-character-sheet select:focus {
+  outline: 1px solid var(--litm-sheet-cyan) !important;
+  border-color: var(--litm-sheet-cyan) !important;
+}
+
+/* Buttons are kept compact and mechanical. */
+.litm-starwars-character-sheet button,
+.litm-starwars-character-sheet .button {
+  border-radius: 0 !important;
+  border-color: #45636a !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Remove the obvious rustic decorations when the system exposes them as
+ * image elements/classes. The actor portrait/artwork is not targeted. */
+.litm-starwars-character-sheet .litm-sheet-decoration-hidden,
+.litm-starwars-character-sheet img[src*="birdskull" i],
+.litm-starwars-character-sheet img[src*="bird-skull" i],
+.litm-starwars-character-sheet img[src*="bird_skull" i],
+.litm-starwars-character-sheet img[src*="flower" i],
+.litm-starwars-character-sheet img[src*="floral" i] {
+  display: none !important;
+}
+
+/* Reduce ornamental shadows/textures that make the original sheet read as
+ * parchment while keeping layout, controls, and theme data untouched. */
+.litm-starwars-character-sheet [class*="parchment"],
+.litm-starwars-character-sheet [class*="paper"] {
+  background-image: none !important;
+  background-color: var(--litm-sheet-card) !important;
+  box-shadow: none !important;
 }
