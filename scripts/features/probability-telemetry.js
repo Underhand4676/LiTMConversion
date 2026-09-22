@@ -566,13 +566,22 @@ Hooks.on("getSceneControlButtons", controls => {
   };
 });
 
-Hooks.on("createChatMessage", (message, _options, userId) => {
+Hooks.on("createChatMessage", (message) => {
   if (game.settings.get(MODULE_ID, "paused")) return;
-  if (userId !== game.user.id) return;
   if (!message.rolls?.length) return;
   if (!game.settings.get(MODULE_ID, "allowHiddenRolls") && messageIsHidden(message)) return;
 
+  // Only the client belonging to the message author stores the result. Using
+  // the ChatMessage author is reliable across Foundry v14 hook signatures and
+  // prevents every connected client from recording the same dice.
+  const authorId = message.author?.id ?? message.user?.id ?? message.user ?? null;
+  if (authorId !== game.user.id) return;
+
   const values = [];
   for (const roll of message.rolls) values.push(...extractD6Results(roll));
-  if (values.length) queueValues(values, game.user);
+
+  if (values.length) {
+    queueValues(values, game.user);
+    console.debug(`${MODULE_ID} | Recorded ${values.length} d6 result(s) from chat message ${message.id}`);
+  }
 });

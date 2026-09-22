@@ -1,0 +1,358 @@
+/* =========================================================
+   LiTM CONVERSION // STAR WARS CHARACTER SHEET
+
+   This stylesheet is intentionally scoped to the alternate sheet class.
+   The system's original Character and Character (compact) sheets remain
+   completely untouched.
+   ========================================================= */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet {
+  --litm-sw-bg-0: #090f12;
+  --litm-sw-bg-1: #111a1f;
+  --litm-sw-bg-2: #18242a;
+  --litm-sw-panel: #c7d0ce;
+  --litm-sw-panel-2: #aebbb9;
+  --litm-sw-ink: #152127;
+  --litm-sw-text: #d9e8ea;
+  --litm-sw-muted: #81959a;
+  --litm-sw-line: #42656d;
+  --litm-sw-cyan: #79c8d1;
+  --litm-sw-amber: #c79a53;
+  --litm-sw-rust: #9d6253;
+  --litm-sw-blue: #537f8d;
+  --litm-sw-neutral: #596b70;
+}
+
+/* ---------------------------------------------------------
+   APPLICATION SHELL
+   --------------------------------------------------------- */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .window-header {
+  background: linear-gradient(90deg, #091115 0%, #111d22 72%, #0b1418 100%) !important;
+  border-bottom: 1px solid #355860 !important;
+  color: #d9eef0 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .window-title {
+  font-family: monospace !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+/* Replace only the system's default parchment/forest background. Actor-picked
+   custom backgrounds remain functional and are left to the base sheet. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .window-content:not(.litm-conversion-has-custom-background) {
+  background-image:
+    linear-gradient(rgba(121, 200, 209, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(121, 200, 209, 0.014) 1px, transparent 1px),
+    radial-gradient(circle at 16% 38%, rgba(72, 101, 108, 0.16), transparent 32%),
+    linear-gradient(145deg, var(--litm-sw-bg-1), var(--litm-sw-bg-0) 68%) !important;
+  background-size: 28px 28px, 28px 28px, auto, auto !important;
+  background-repeat: repeat, repeat, no-repeat, no-repeat !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .window-content {
+  color: var(--litm-sw-text) !important;
+}
+
+/* ---------------------------------------------------------
+   IDENTITY + TOP CONTROLS
+   --------------------------------------------------------- */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet h1.charname,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .short-description {
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif !important;
+  text-shadow: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet h1.charname {
+  color: #e7f1f2 !important;
+  letter-spacing: 0.035em;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .roll-button,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .themekit-button,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .empty-message button,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .change-custom-background-btn {
+  background: linear-gradient(180deg, #25383f, #17262c) !important;
+  border: 1px solid #4f737b !important;
+  border-radius: 0 !important;
+  color: #e4eff1 !important;
+  box-shadow: inset 3px 0 0 rgba(199, 154, 83, 0.78) !important;
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.035em;
+  text-shadow: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .roll-button:hover:not(:disabled),
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .themekit-button:hover:not(:disabled),
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .empty-message button:hover:not(:disabled),
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .change-custom-background-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #30474f, #1d3037) !important;
+  border-color: var(--litm-sw-cyan) !important;
+  box-shadow:
+    inset 3px 0 0 var(--litm-sw-amber),
+    0 0 7px rgba(121, 200, 209, 0.16) !important;
+}
+
+/* Tags & statuses becomes a clean equipment/status tray rather than paper. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .floating-status-container-character,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .container-card-with-border.floating-tags-and-status-container {
+  border-image: none !important;
+  border: 5px solid transparent !important;
+  background:
+    linear-gradient(145deg, #d4dcda, #bac5c3) padding-box,
+    linear-gradient(135deg, #60777b, #263b41) border-box !important;
+  color: var(--litm-sw-ink) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.32) !important;
+}
+
+/* ---------------------------------------------------------
+   TABS
+   --------------------------------------------------------- */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .litm-character-sheet-tabs {
+  background: rgba(7, 14, 18, 0.94) !important;
+  border: 1px solid #314e55 !important;
+  border-radius: 0 !important;
+  box-shadow: inset 0 -1px 0 rgba(121, 200, 209, 0.12) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-character-sheet-tabs [data-action="tab"] {
+  color: #8fa5aa !important;
+  font-family: monospace !important;
+  font-size: 12px !important;
+  letter-spacing: 0.10em !important;
+  text-transform: uppercase !important;
+  text-shadow: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-character-sheet-tabs [data-action="tab"].active {
+  color: #a9eef4 !important;
+  background: rgba(121, 200, 209, 0.07) !important;
+  box-shadow: inset 0 -2px 0 var(--litm-sw-cyan) !important;
+}
+
+/* ---------------------------------------------------------
+   THEMEBOOK / SINGLETON CARDS
+   --------------------------------------------------------- */
+
+/* Preserve approximately the same box model as the original 10px border-image
+   while replacing the parchment frame with a manufactured panel. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .container-themebook-with-border {
+  border-image: none !important;
+  border: 8px solid transparent !important;
+  border-radius: 0 !important;
+  background:
+    linear-gradient(145deg, var(--litm-sw-panel), var(--litm-sw-panel-2)) padding-box,
+    linear-gradient(135deg, #65777a, #24383e) border-box !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.30),
+    0 3px 10px rgba(0,0,0,0.28) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style {
+  background: transparent !important;
+  color: var(--litm-sw-ink) !important;
+}
+
+/* Replace parchment-image title strips with solid technical bands. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style > h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style > .themebook-item > h2 {
+  background-image: none !important;
+  background-color: #344b52 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.18) !important;
+  color: #f0f6f6 !important;
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.045em !important;
+  text-shadow: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-adventure > h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-adventure > .themebook-item > h2 {
+  background-color: #9a6e39 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-origin > h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-origin > .themebook-item > h2 {
+  background-color: #8c594e !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-greatness > h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-greatness > .themebook-item > h2 {
+  background-color: #4f7d89 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-variable > h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-variable > .themebook-item > h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-backpack > h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-quintessence > h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-fellowship-relationship > h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-fellowship-themecard > h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-style.litm-rote > h2 {
+  background-color: #4d6268 !important;
+}
+
+/* Quest/improvement typography: remove the handwritten/fantasy feel while
+   retaining all existing content and controls. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .quest-container h3,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .special-improvement-section-label,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .development-partial-container,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .fellowship-promises-container,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .quest-text,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .empty-message {
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif !important;
+  text-shadow: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .quest-container h3,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .special-improvement-section-label {
+  background: rgba(24, 42, 48, 0.12) !important;
+  color: #2d444a !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .quest-text,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .empty-message,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .item-powertag-line,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .item-weakness-line,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .item-storytag-line {
+  color: #26383d !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .item-weakness-line {
+  text-shadow: none !important;
+}
+
+/* ---------------------------------------------------------
+   REMOVE RUSTIC DECORATIVE PROPS
+   Exact selectors are from Mist Engine 14.5.4.
+   --------------------------------------------------------- */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebooks-container-stylized > :nth-child(2)::before,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebooks-container-stylized > :nth-child(3)::before,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .backpack-stylized::before,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .fellowship-themebook-stylized::before {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+/* ---------------------------------------------------------
+   BIOGRAPHY + NOTES
+   --------------------------------------------------------- */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-biography.container-card-with-border,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-notes.container-card-with-border {
+  border-image: none !important;
+  border: 8px solid transparent !important;
+  background:
+    linear-gradient(145deg, #121d22, #0c1418) padding-box,
+    linear-gradient(135deg, #4f6e75, #21373d) border-box !important;
+  color: #d9e8ea !important;
+  box-shadow: inset 0 0 22px rgba(0,0,0,0.42) !important;
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-biography h1,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-biography h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-biography h3,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-notes h1,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-notes h2,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-notes h3 {
+  color: #9bdce2 !important;
+  font-family: monospace !important;
+  text-shadow: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-biography .editor-content,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-notes .editor-content,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-biography prose-mirror,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .tab-notes prose-mirror {
+  color: #d9e8ea !important;
+}
+
+/* ---------------------------------------------------------
+   EDIT MODE INPUTS
+   --------------------------------------------------------- */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  input:not([type="checkbox"]):not([type="radio"]),
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet textarea,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet select {
+  background: #0d171b !important;
+  border: 1px solid #46656c !important;
+  border-radius: 0 !important;
+  color: #e1edef !important;
+  box-shadow: inset 0 0 7px rgba(0,0,0,0.45) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  input:focus,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet textarea:focus,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet select:focus {
+  outline: 1px solid var(--litm-sw-cyan) !important;
+  border-color: var(--litm-sw-cyan) !important;
+}
+
+/* ---------------------------------------------------------
+   DRAG / DROP FEEDBACK
+   --------------------------------------------------------- */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-container.drag-over,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .card-grid.drag-over-append,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .sheet-tabs a[data-action="tab"].drag-over {
+  outline-color: var(--litm-sw-cyan) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .card-drag-handle {
+  color: rgba(30, 52, 58, 0.48) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebook-container:hover .card-drag-handle {
+  color: #29454b !important;
+}

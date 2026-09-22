@@ -2,15 +2,9 @@
 
 Foundry VTT v14 module for LiTM conversion support and utilities.
 
-## Current features
+Current features include D6 Probability Telemetry, sci-fi pause/chat styling, and an optional Star Wars-inspired character sheet that preserves the Mist Engine character sheet mechanics.
 
-- **Probability Telemetry** — tracks d6 roll results and provides a sci-fi luck/statistics display.
-
-More features will be added as the conversion develops.
-
-## Install
-
-Foundry manifest URL:
+Manifest:
 
 ```text
 https://github.com/Underhand4676/LiTMConversion/releases/latest/download/module.json
