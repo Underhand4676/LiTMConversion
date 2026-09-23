@@ -26,12 +26,28 @@
 
     <label class="pt-control-group">
       <span>SCAN FROM</span>
-      <input type="date" value="{{dateFrom}}" data-pt-field="from">
+      <select data-pt-field="from" {{#unless hasDates}}disabled{{/unless}}>
+        {{#if hasDates}}
+          {{#each dateFromOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        {{else}}
+          <option value="" selected>NO RECORDED DATES</option>
+        {{/if}}
+      </select>
     </label>
 
     <label class="pt-control-group">
       <span>SCAN TO</span>
-      <input type="date" value="{{dateTo}}" data-pt-field="to">
+      <select data-pt-field="to" {{#unless hasDates}}disabled{{/unless}}>
+        {{#if hasDates}}
+          {{#each dateToOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        {{else}}
+          <option value="" selected>NO RECORDED DATES</option>
+        {{/if}}
+      </select>
     </label>
 
     {{#if isGM}}
@@ -130,6 +146,9 @@
           </button>
           <button type="button" class="pt-button" data-action="importUser">
             <i class="fa-solid fa-file-import"></i> IMPORT SUBJECT
+          </button>
+          <button type="button" class="pt-button danger" data-action="deleteDate">
+            <i class="fa-solid fa-calendar-xmark"></i> PURGE DATE
           </button>
           <button type="button" class="pt-button danger" data-action="deleteUser">
             <i class="fa-solid fa-user-slash"></i> PURGE SUBJECT

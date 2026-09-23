@@ -303,6 +303,7 @@ class ProbabilityTelemetryApp extends HandlebarsApplicationMixin(ApplicationV2) 
       resetAll: this.resetAll,
       exportUser: this.exportUser,
       importUser: this.importUser,
+      deleteDate: this.deleteDate,
       deleteUser: this.deleteUser
     }
   };
@@ -332,16 +333,39 @@ class ProbabilityTelemetryApp extends HandlebarsApplicationMixin(ApplicationV2) 
     }
 
     const data = getUserData(selectedUser);
-    const dates = Object.keys(data).sort();
-    const today = localDateKey();
-    const firstRecordedDate = dates[0] ?? today;
-    const lastRecordedDate = dates[dates.length - 1] ?? today;
 
-    if (!this.dateFrom) this.dateFrom = firstRecordedDate;
-    if (!this.dateTo) this.dateTo = lastRecordedDate;
-    if (this.dateFrom > this.dateTo) this.dateTo = this.dateFrom;
+    // Only expose dates which actually contain recorded d6 results.
+    // This makes the archive useful as a session/date browser instead of
+    // forcing the user to remember calendar dates manually.
+    const dates = Object.entries(data)
+      .filter(([, day]) => normalizeDay(day).totalRolls > 0)
+      .map(([date]) => date)
+      .sort();
 
-    const aggregate = aggregateRange(data, this.dateFrom, this.dateTo);
+    const hasDates = dates.length > 0;
+
+    if (hasDates) {
+      if (!this.dateFrom || !dates.includes(this.dateFrom)) {
+        this.dateFrom = dates[0];
+      }
+
+      if (!this.dateTo || !dates.includes(this.dateTo)) {
+        this.dateTo = dates[dates.length - 1];
+      }
+
+      if (this.dateFrom > this.dateTo) {
+        this.dateTo = this.dateFrom;
+      }
+    }
+
+    else {
+      this.dateFrom = null;
+      this.dateTo = null;
+    }
+
+    const aggregate = hasDates
+      ? aggregateRange(data, this.dateFrom, this.dateTo)
+      : { total: 0, counts: new Array(6).fill(0) };
     const stats = calculateStats(aggregate.counts);
     const bars = buildBars(aggregate.counts, aggregate.total);
     const paused = game.settings.get(MODULE_ID, "paused");
@@ -357,10 +381,21 @@ class ProbabilityTelemetryApp extends HandlebarsApplicationMixin(ApplicationV2) 
         name: user.name,
         selected: user.id === selectedUser.id
       })),
-      dateFrom: this.dateFrom,
-      dateTo: this.dateTo,
-      fromLabel: formatDateKey(this.dateFrom),
-      toLabel: formatDateKey(this.dateTo),
+      hasDates,
+      dateFrom: this.dateFrom ?? "",
+      dateTo: this.dateTo ?? "",
+      dateFromOptions: dates.map(date => ({
+        value: date,
+        label: formatDateKey(date),
+        selected: date === this.dateFrom
+      })),
+      dateToOptions: dates.map(date => ({
+        value: date,
+        label: formatDateKey(date),
+        selected: date === this.dateTo
+      })),
+      fromLabel: this.dateFrom ? formatDateKey(this.dateFrom) : "NO DATA",
+      toLabel: this.dateTo ? formatDateKey(this.dateTo) : "NO DATA",
       totalRolls: aggregate.total,
       bars,
       mean: stats.mean,
@@ -389,14 +424,28 @@ class ProbabilityTelemetryApp extends HandlebarsApplicationMixin(ApplicationV2) 
     });
 
     root.querySelector('[data-pt-field="from"]')?.addEventListener("change", event => {
-      this.dateFrom = event.currentTarget.value;
-      if (this.dateFrom > this.dateTo) this.dateTo = this.dateFrom;
+      const value = event.currentTarget.value;
+      if (!value) return;
+
+      this.dateFrom = value;
+
+      if (!this.dateTo || this.dateFrom > this.dateTo) {
+        this.dateTo = this.dateFrom;
+      }
+
       this.render({ force: true });
     });
 
     root.querySelector('[data-pt-field="to"]')?.addEventListener("change", event => {
-      this.dateTo = event.currentTarget.value;
-      if (this.dateTo < this.dateFrom) this.dateFrom = this.dateTo;
+      const value = event.currentTarget.value;
+      if (!value) return;
+
+      this.dateTo = value;
+
+      if (!this.dateFrom || this.dateTo < this.dateFrom) {
+        this.dateFrom = this.dateTo;
+      }
+
       this.render({ force: true });
     });
   }
@@ -517,6 +566,180 @@ class ProbabilityTelemetryApp extends HandlebarsApplicationMixin(ApplicationV2) 
     }, { once: true });
 
     input.click();
+  }
+
+  static async deleteDate() {
+    if (!game.user.isGM) return;
+
+    const user = game.users.get(this.selectedUserId);
+    if (!user) return;
+
+    const data = getUserData(user);
+
+    const dates = Object.entries(data)
+      .filter(([, day]) => normalizeDay(day).totalRolls > 0)
+      .map(([date]) => date)
+      .sort();
+
+    if (!dates.length) {
+      await DialogV2.prompt({
+        window: { title: "ARCHIVE NODE // NO DATA" },
+        content: brandedConfirmContent(
+          "NO RECORDED DATE NODES",
+          `NO D6 TELEMETRY EXISTS FOR ${foundry.utils.escapeHTML(user.name).toUpperCase()}.`
+        ),
+        ok: {
+          label: "ACKNOWLEDGE",
+          icon: "fa-solid fa-check"
+        },
+        modal: true
+      });
+
+      return;
+    }
+
+    const defaultDate =
+      dates.includes(this.dateTo)
+        ? this.dateTo
+        : dates[dates.length - 1];
+
+    const result = await DialogV2.prompt({
+      window: {
+        title: "ARCHIVE NODE PURGE // DATE SELECT"
+      },
+
+      content: `
+        <div style="
+          padding:16px;
+          background:
+            repeating-linear-gradient(
+              0deg,
+              rgba(255,255,255,.012) 0px,
+              rgba(255,255,255,.012) 1px,
+              transparent 1px,
+              transparent 4px
+            ),
+            linear-gradient(145deg,#10181d,#0a1115);
+          border:1px solid #5f493b;
+          color:#d9eef0;
+          font-family:monospace;
+          box-shadow:inset 0 0 18px rgba(0,0,0,.55);
+        ">
+
+          <div style="
+            color:#d28a66;
+            font-size:11px;
+            font-weight:bold;
+            letter-spacing:1.8px;
+            padding-bottom:8px;
+            margin-bottom:11px;
+            border-bottom:1px solid #554034;
+          ">
+            ⚠ DATE NODE PURGE
+          </div>
+
+          <div style="
+            color:#81999d;
+            font-size:8px;
+            letter-spacing:1.1px;
+            margin-bottom:6px;
+          ">
+            SUBJECT // ${foundry.utils.escapeHTML(user.name).toUpperCase()}
+          </div>
+
+          <select
+            name="date"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              height:32px;
+              background:#0b1317;
+              color:#e0e8e7;
+              border:1px solid #665246;
+              border-left:3px solid #b36750;
+              border-radius:0;
+              padding:5px 8px;
+              font-family:monospace;
+              font-size:11px;
+            "
+          >
+            ${dates.map(date => {
+              const count = normalizeDay(data[date]).totalRolls;
+              const selected = date === defaultDate ? "selected" : "";
+
+              return `
+                <option value="${date}" ${selected}>
+                  ${formatDateKey(date)} // ${count} D6 RECORDED
+                </option>
+              `;
+            }).join("")}
+          </select>
+
+          <div style="
+            margin-top:10px;
+            color:#765f56;
+            font-size:8px;
+            letter-spacing:1px;
+          ">
+            ONLY THE SELECTED DATE NODE WILL BE REMOVED
+          </div>
+
+        </div>
+      `,
+
+      ok: {
+        label: "PURGE DATE NODE",
+        icon: "fa-solid fa-calendar-xmark",
+        callback: (_event, button) => ({
+          date: button.form.elements.date.value
+        })
+      },
+
+      rejectClose: false,
+      modal: true
+    });
+
+    if (!result?.date || !data[result.date]) return;
+
+    const count = normalizeDay(data[result.date]).totalRolls;
+
+    const confirmed = await DialogV2.confirm({
+      window: {
+        title: "DATE NODE PURGE // CONFIRMATION"
+      },
+
+      content: brandedConfirmContent(
+        "⚠ CONFIRM DATE NODE PURGE",
+        `DELETE ${count} RECORDED D6 FROM ${formatDateKey(result.date)} FOR ${foundry.utils.escapeHTML(user.name).toUpperCase()}?`
+      ),
+
+      yes: {
+        label: "PURGE DATE",
+        icon: "fa-solid fa-trash"
+      },
+
+      no: {
+        label: "ABORT",
+        icon: "fa-solid fa-xmark"
+      },
+
+      modal: true,
+      rejectClose: false
+    });
+
+    if (!confirmed) return;
+
+    delete data[result.date];
+
+    if (Object.keys(data).length) {
+      await user.setFlag(MODULE_ID, FLAG_KEY, data);
+    } else {
+      await user.unsetFlag(MODULE_ID, FLAG_KEY);
+    }
+
+    this.dateFrom = null;
+    this.dateTo = null;
+    this.render({ force: true });
   }
 
   static async deleteUser() {
