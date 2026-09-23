@@ -1332,6 +1332,485 @@ async function handleStarWarsDetailedRoll(event, target) {
     detailed: true
   });
 }
+
+
+async function handleStarWarsReactionRoll(event, target) {
+  event.preventDefault();
+
+  await launchStarWarsProbabilityRoll(this, {
+    rollType: "reaction",
+    detailed: false
+  });
+}
+
+function sacrificeOutcomePresentation({
+  outcome,
+  levelLabel,
+  lessenedLabel
+}) {
+  if (outcome === "miracle") {
+    return {
+      code: "MIRACLE",
+      threshold: "10+",
+      color: "#8fc7a0",
+      border: "#547660",
+      objective: "OBJECTIVE STATUS // ACHIEVED",
+      consequence: `CONSEQUENCE LOAD // REDUCED ONE LEVEL`,
+      transition: `${levelLabel} → ${lessenedLabel}`,
+      text: game.i18n.localize("MIST_ENGINE.SACRIFICE.MiracleText")
+    };
+  }
+
+  if (outcome === "fate") {
+    return {
+      code: "FATE",
+      threshold: "7–9",
+      color: "#d4aa63",
+      border: "#8a7044",
+      objective: "OBJECTIVE STATUS // ACHIEVED",
+      consequence: "CONSEQUENCE LOAD // FULL",
+      transition: levelLabel,
+      text: game.i18n.localize("MIST_ENGINE.SACRIFICE.FateText")
+    };
+  }
+
+  return {
+    code: "IN VAIN",
+    threshold: "6−",
+    color: "#c95f63",
+    border: "#8e4145",
+    objective: "OBJECTIVE STATUS // FAILED",
+    consequence: "CONSEQUENCE LOAD // FULL",
+    transition: levelLabel,
+    text: game.i18n.localize("MIST_ENGINE.SACRIFICE.InVainText")
+  };
+}
+
+async function handleStarWarsSacrificeRoll(event, target) {
+  event.preventDefault();
+
+  const actor = this.actor;
+  if (!actor) return;
+
+  const levels = ["painful", "scarring", "grave"];
+
+  const content = `
+    <div style="
+      padding:16px;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(126,198,207,.018) 0px,
+          rgba(126,198,207,.018) 1px,
+          transparent 1px,
+          transparent 4px
+        ),
+        linear-gradient(145deg,#0b1417,#111b1e);
+      border:1px solid #49686e;
+      box-shadow:inset 0 0 20px rgba(0,0,0,.55);
+      color:#dbe8e8;
+      font-family:monospace;
+    ">
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:12px;
+        padding-bottom:10px;
+        margin-bottom:13px;
+        border-bottom:1px solid #30484d;
+      ">
+        <div>
+          <div style="
+            color:#8ed0d5;
+            font-size:11px;
+            font-weight:700;
+            letter-spacing:1.8px;
+          ">
+            ◈ EXTREME COMMITMENT PROTOCOL
+          </div>
+
+          <div style="
+            margin-top:4px;
+            color:#6f8589;
+            font-size:8px;
+            letter-spacing:1px;
+            line-height:1.45;
+          ">
+            REPUBLIC INTELLIGENCE // SACRIFICE AUTHORIZATION
+          </div>
+        </div>
+
+        <div style="
+          color:#c5a96f;
+          font-size:8px;
+          letter-spacing:1px;
+          text-align:right;
+        ">
+          RI/OPS-SAC
+        </div>
+      </div>
+
+
+      <div style="
+        padding:9px 11px;
+        margin-bottom:12px;
+        background:#091114;
+        border-left:3px solid #b46c5d;
+        color:#bfcacc;
+        font-size:9px;
+        letter-spacing:.6px;
+        line-height:1.5;
+      ">
+        COMMIT A SACRIFICE TO FORCE AN IMMEDIATE OUTCOME.
+        CONSEQUENCE EXPOSURE IS DETERMINED BY THE SELECTED COMMITMENT LEVEL.
+      </div>
+
+
+      <div style="
+        display:grid;
+        grid-template-columns:145px 1fr;
+        gap:10px;
+        align-items:center;
+        margin-bottom:10px;
+      ">
+        <span style="
+          color:#78979b;
+          font-size:8px;
+          font-weight:700;
+          letter-spacing:1.3px;
+        ">
+          COMMITMENT LEVEL
+        </span>
+
+        <select name="level" style="
+          width:100%;
+          box-sizing:border-box;
+          background:#0a1518;
+          color:#e6eeee;
+          border:1px solid #45646a;
+          border-left:2px solid #b46c5d;
+          border-radius:0;
+          padding:7px 8px;
+          font-family:monospace;
+          font-size:10px;
+        ">
+          ${levels.map(level => `
+            <option value="${level}">
+              ${game.i18n.localize(`MIST_ENGINE.SACRIFICE.Levels.${level}`)}
+            </option>
+          `).join("")}
+        </select>
+      </div>
+
+
+      <div style="
+        display:grid;
+        grid-template-columns:145px 1fr;
+        gap:10px;
+        align-items:center;
+      ">
+        <span style="
+          color:#78979b;
+          font-size:8px;
+          font-weight:700;
+          letter-spacing:1.3px;
+        ">
+          TACTICAL MODIFIER
+        </span>
+
+        <input
+          name="modifier"
+          type="number"
+          step="1"
+          value="0"
+          style="
+            width:100%;
+            box-sizing:border-box;
+            margin:0;
+            background:#081114;
+            color:#f0eee5;
+            border:1px solid #45646a;
+            border-left:2px solid #8ea9ad;
+            padding:8px;
+            font-family:monospace;
+            font-size:14px;
+            text-align:right;
+          "
+        >
+      </div>
+
+
+      <div style="
+        margin-top:13px;
+        padding-top:8px;
+        border-top:1px solid #263b40;
+        color:#5f777b;
+        font-size:8px;
+        letter-spacing:1px;
+      ">
+        AUTHORIZATION ROUTE // HIGH-RISK EXECUTION CHANNEL OPEN
+      </div>
+
+    </div>
+  `;
+
+  const result = await foundry.applications.api.DialogV2.prompt({
+    window: {
+      title: "REPUBLIC INTELLIGENCE // SACRIFICE AUTHORIZATION",
+      icon: "fa-solid fa-heart-crack"
+    },
+
+    classes: [
+      "mist-engine",
+      "dialog",
+      "sacrifice-roll-dialog",
+      "litm-sw-sacrifice-dialog"
+    ],
+
+    content,
+
+    ok: {
+      label: "EXECUTE SACRIFICE",
+      icon: "fa-solid fa-triangle-exclamation",
+      callback: (_event, button) => ({
+        level: button.form.elements.level.value,
+        modifier: parseInt(button.form.elements.modifier.value) || 0
+      })
+    },
+
+    rejectClose: false,
+    modal: true
+  });
+
+  if (!result) return;
+
+
+  // ---------------------------------------------------------
+  // ORIGINAL MIST ENGINE SACRIFICE MECHANICS
+  // ---------------------------------------------------------
+
+  let formula = "2d6";
+
+  if (result.modifier > 0) {
+    formula += ` + ${result.modifier}`;
+  }
+
+  else if (result.modifier < 0) {
+    formula += ` - ${Math.abs(result.modifier)}`;
+  }
+
+  const roll = new Roll(formula, actor.getRollData());
+  await roll.evaluate();
+
+  let outcome = "invain";
+
+  if (roll.total >= 10) {
+    outcome = "miracle";
+  }
+
+  else if (roll.total >= 7) {
+    outcome = "fate";
+  }
+
+  const lessened = {
+    grave: "scarring",
+    scarring: "painful",
+    painful: "none"
+  }[result.level];
+
+  const levelLabel =
+    game.i18n.localize(`MIST_ENGINE.SACRIFICE.Levels.${result.level}`);
+
+  const lessenedLabel =
+    game.i18n.localize(`MIST_ENGINE.SACRIFICE.Levels.${lessened}`);
+
+  const display = sacrificeOutcomePresentation({
+    outcome,
+    levelLabel,
+    lessenedLabel
+  });
+
+  const rollHtml = await roll.render();
+
+
+  // ---------------------------------------------------------
+  // SACRIFICE TELEMETRY CARD
+  // ---------------------------------------------------------
+
+  const chatContent = `
+    <div style="
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,.012) 0px,
+          rgba(255,255,255,.012) 1px,
+          transparent 1px,
+          transparent 4px
+        ),
+        linear-gradient(145deg,#0d1416,#090e10);
+      border:1px solid #465b5e;
+      padding:12px;
+      color:#ddd8c8;
+      font-family:monospace;
+      box-shadow:inset 0 0 18px rgba(0,0,0,.58);
+    ">
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:10px;
+        padding-bottom:8px;
+        margin-bottom:10px;
+        border-bottom:1px solid #2b3b3e;
+      ">
+        <div>
+          <div style="
+            color:#93d5d9;
+            font-size:11px;
+            font-weight:bold;
+            letter-spacing:1.8px;
+          ">
+            ◈ SACRIFICE TELEMETRY
+          </div>
+
+          <div style="
+            margin-top:3px;
+            color:#6f8589;
+            font-size:8px;
+            letter-spacing:1px;
+          ">
+            EXTREME COMMITMENT // ${String(levelLabel).toUpperCase()}
+          </div>
+        </div>
+
+        <div style="
+          color:#aaa797;
+          font-size:8px;
+          letter-spacing:1px;
+          text-align:right;
+        ">
+          2D6 ${result.modifier >= 0 ? "+" : "−"} ${Math.abs(result.modifier)}
+        </div>
+      </div>
+
+
+      <div style="
+        margin-bottom:10px;
+        padding:7px;
+        background:#0a1112;
+        border-left:3px solid #465b5e;
+      ">
+        ${rollHtml}
+      </div>
+
+
+      <div style="
+        background:#090e10;
+        border-left:4px solid ${display.border};
+        padding:10px 11px;
+      ">
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:baseline;
+          gap:12px;
+          margin-bottom:8px;
+        ">
+          <span style="
+            color:${display.color};
+            font-size:13px;
+            font-weight:bold;
+            letter-spacing:1px;
+          ">
+            RESULT CODE // ${display.code}
+          </span>
+
+          <span style="
+            color:#aaa797;
+            font-size:9px;
+            font-weight:bold;
+          ">
+            ${display.threshold} // TOTAL ${roll.total}
+          </span>
+        </div>
+
+
+        <div style="
+          display:grid;
+          gap:5px;
+          padding:7px 8px;
+          background:#101719;
+          border:1px solid #27383b;
+        ">
+          <div style="
+            color:#cfd7d4;
+            font-size:9px;
+            letter-spacing:.7px;
+          ">
+            ${display.objective}
+          </div>
+
+          <div style="
+            color:#cfd7d4;
+            font-size:9px;
+            letter-spacing:.7px;
+          ">
+            ${display.consequence}
+          </div>
+
+          <div style="
+            color:${display.color};
+            font-size:9px;
+            font-weight:bold;
+            letter-spacing:.6px;
+          ">
+            COMMITMENT PROFILE // ${String(display.transition).toUpperCase()}
+          </div>
+        </div>
+
+
+        <div style="
+          margin-top:8px;
+          color:#9fa9a7;
+          font-size:9px;
+          line-height:1.45;
+        ">
+          ${display.text}
+        </div>
+
+      </div>
+
+
+      <div style="
+        margin-top:9px;
+        padding-top:7px;
+        border-top:1px solid #2b3b3e;
+        color:#687673;
+        font-size:8px;
+        letter-spacing:1px;
+      ">
+        SACRIFICE RESOLUTION // COMMITMENT LOCKED
+      </div>
+
+    </div>
+  `;
+
+
+  // Attach the evaluated Roll to the chat message rather than manually asking
+  // Dice So Nice to animate it. That preserves one physical roll animation and
+  // lets LiTM Conversion's d6 telemetry see the sacrifice dice as well.
+  await ChatMessage.create({
+    user: game.user.id,
+    speaker: ChatMessage.getSpeaker({ actor }),
+    rolls: [roll],
+    content: chatContent
+  });
+}
+
 function wireProbabilityRollButtons(sheet) {
   const root = sheet.element;
   if (!root || sheet.actor?.system?.editMode) return;
@@ -1352,6 +1831,24 @@ function wireProbabilityRollButtons(sheet) {
   if (detailedButton) {
     detailedButton.dataset.action = "litmProbabilityDetailedRoll";
     detailedButton.title = "Open Detailed Probability Processor";
+  }
+
+  const reactionButton = root.querySelector(
+    'button.roll-button[data-action="clickRoll"][data-roll-type="reaction"]'
+  );
+
+  if (reactionButton) {
+    reactionButton.dataset.action = "litmProbabilityReactionRoll";
+    reactionButton.title = "Open Probability Processor";
+  }
+
+  const sacrificeButton = root.querySelector(
+    'button.roll-button[data-action="clickSacrificeRoll"]'
+  );
+
+  if (sacrificeButton) {
+    sacrificeButton.dataset.action = "litmStarWarsSacrificeRoll";
+    sacrificeButton.title = "Open Sacrifice Authorization";
   }
 }
 
@@ -1395,6 +1892,8 @@ Hooks.once("init", async () => {
           ...BaseFullSheet.DEFAULT_OPTIONS.actions,
           litmProbabilityQuickRoll: handleStarWarsQuickRoll,
           litmProbabilityDetailedRoll: handleStarWarsDetailedRoll,
+          litmProbabilityReactionRoll: handleStarWarsReactionRoll,
+          litmStarWarsSacrificeRoll: handleStarWarsSacrificeRoll,
           createLiTMBackpackSlotItem: handleCreateBackpackSlotItem,
           editLiTMBackpackSlot: handleEditBackpackSlot
         }
@@ -1471,6 +1970,8 @@ Hooks.once("init", async () => {
           ...BaseCompactSheet.DEFAULT_OPTIONS.actions,
           litmProbabilityQuickRoll: handleStarWarsQuickRoll,
           litmProbabilityDetailedRoll: handleStarWarsDetailedRoll,
+          litmProbabilityReactionRoll: handleStarWarsReactionRoll,
+          litmStarWarsSacrificeRoll: handleStarWarsSacrificeRoll,
           createLiTMBackpackSlotItem: handleCreateBackpackSlotItem,
           editLiTMBackpackSlot: handleEditBackpackSlot
         }
