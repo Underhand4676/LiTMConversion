@@ -990,35 +990,26 @@
 }
 
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
-  .burn-indicator.litm-sw-burn-control .burn-icon {
-  position: relative !important;
+  .burn-indicator.litm-sw-burn-control .litm-sw-burn-flame {
   width: 16px !important;
   height: 16px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background-image: none !important;
-  background: none !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  color: currentColor !important;
+  pointer-events: none !important;
 }
 
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
-  .burn-indicator.litm-sw-burn-control .burn-icon::before {
-  content: "\f06d";
-  font-family: "Font Awesome 6 Free";
-  font-style: normal;
-  font-weight: 900;
-  font-size: 12px;
-  line-height: 1;
-  color: currentColor;
-}
-
-.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
-  .burn-indicator.litm-sw-burn-control .burn-icon.to-burn {
+  .burn-indicator.litm-sw-burn-control .litm-sw-burn-flame.to-burn {
   color: #ff9f43 !important;
+  text-shadow: 0 0 7px rgba(255,159,67,.45) !important;
 }
 
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
-  .burn-indicator.litm-sw-burn-control:has(.burn-icon.to-burn) {
+  .burn-indicator.litm-sw-burn-control:has(.litm-sw-burn-flame.to-burn) {
   border-color: rgba(255, 132, 64, .92) !important;
   background: rgba(196, 75, 35, .19) !important;
   box-shadow:

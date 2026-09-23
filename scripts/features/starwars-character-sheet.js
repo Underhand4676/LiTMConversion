@@ -362,18 +362,217 @@ function applyUsageTooltip(element, usage) {
   element.dataset.tooltipDirection = "UP";
 }
 
+async function clearOtherQueuedBurns(actor, keepDoc, keepKey, keepIndex) {
+  if (!actor) return;
+
+  const updates = [];
+  const keepIndexNumber = Number.parseInt(keepIndex, 10);
+
+  const clearArray = (doc, key) => {
+    if (!doc) return;
+    const current = foundry.utils.getProperty(doc, key);
+    if (!Array.isArray(current) || !current.length) return;
+
+    let changed = false;
+    const next = current.map((entry, index) => {
+      const keep = doc === keepDoc && key === keepKey && index === keepIndexNumber;
+      if (entry?.toBurn && !keep) {
+        changed = true;
+        return { ...entry, toBurn: false };
+      }
+      return entry;
+    });
+
+    if (changed) updates.push(doc.update({ [key]: next }));
+  };
+
+  for (const item of actor.items) {
+    if (item.type === "themebook") clearArray(item, "system.powertags");
+    if (item.type === "backpack") clearArray(item, "system.items");
+  }
+
+  const sharedTheme = game.actors.get(actor.system.actorSharedSingleThemecardId);
+  if (sharedTheme) clearArray(sharedTheme, "system.powertags");
+
+  await Promise.all(updates);
+}
+
+async function togglePowerTagQueuedBurn(sheet, target) {
+  const index = Number.parseInt(target.dataset.powertagIndex, 10);
+  const doc = resolveTagDocument(sheet, target.dataset.source ?? "", target.dataset.itemId);
+  if (!doc || !Number.isInteger(index)) return;
+
+  const powertags = foundry.utils.deepClone(
+    Array.from(foundry.utils.getProperty(doc, "system.powertags") ?? [])
+  );
+  const tag = powertags[index];
+  if (!tag || tag.burned) return;
+
+  const willBurn = !Boolean(tag.toBurn);
+  tag.toBurn = willBurn;
+  tag.selected = willBurn;
+
+  sheet._saveScrollPositions?.();
+  await doc.update({ "system.powertags": powertags });
+
+  if (willBurn) {
+    await clearOtherQueuedBurns(sheet.actor, doc, "system.powertags", index);
+  }
+
+  if (target.dataset.source === "fellowship-themecard") {
+    sheet.reloadFellowshipThemecard?.();
+  }
+
+  sheet.render();
+}
+
+async function toggleStoryTagQueuedBurn(sheet, target) {
+  const index = Number.parseInt(target.dataset.index, 10);
+  const key = target.dataset.key || "system.items";
+  const doc = resolveTagDocument(sheet, target.dataset.source ?? "", target.dataset.itemId);
+  if (!doc || !Number.isInteger(index)) return;
+
+  const entries = foundry.utils.deepClone(
+    Array.from(foundry.utils.getProperty(doc, key) ?? [])
+  );
+  const tag = entries[index];
+  if (!tag || tag.burned || tag.expired) return;
+
+  const willBurn = !Boolean(tag.toBurn);
+  tag.toBurn = willBurn;
+  tag.selected = willBurn;
+
+  sheet._saveScrollPositions?.();
+  await doc.update({ [key]: entries });
+
+  if (willBurn) {
+    await clearOtherQueuedBurns(sheet.actor, doc, key, index);
+  }
+
+  sheet.render();
+}
+
+async function togglePowerTagBurnedState(sheet, target) {
+  const index = Number.parseInt(target.dataset.powertagIndex, 10);
+  const doc = resolveTagDocument(sheet, target.dataset.source ?? "", target.dataset.itemId);
+  if (!doc || !Number.isInteger(index)) return;
+
+  const powertags = foundry.utils.deepClone(
+    Array.from(foundry.utils.getProperty(doc, "system.powertags") ?? [])
+  );
+  const tag = powertags[index];
+  if (!tag) return;
+
+  const burned = !Boolean(tag.burned);
+  tag.burned = burned;
+  if (burned) {
+    tag.selected = false;
+    tag.toBurn = false;
+  }
+
+  sheet._saveScrollPositions?.();
+  await doc.update({ "system.powertags": powertags });
+
+  if (target.dataset.source === "fellowship-themecard") {
+    sheet.reloadFellowshipThemecard?.();
+  }
+
+  sheet.render();
+}
+
+async function toggleStoryTagBurnedState(sheet, target) {
+  const index = Number.parseInt(target.dataset.index, 10);
+  const key = target.dataset.key || "system.items";
+  const doc = resolveTagDocument(sheet, target.dataset.source ?? "", target.dataset.itemId);
+  if (!doc || !Number.isInteger(index)) return;
+
+  const entries = foundry.utils.deepClone(
+    Array.from(foundry.utils.getProperty(doc, key) ?? [])
+  );
+  const tag = entries[index];
+  if (!tag) return;
+
+  const burned = !Boolean(tag.burned);
+  tag.burned = burned;
+  if (burned) {
+    tag.selected = false;
+    tag.toBurn = false;
+  }
+
+  sheet._saveScrollPositions?.();
+  await doc.update({ [key]: entries });
+  sheet.render();
+}
+
+function installReliableBurnControls(sheet, root) {
+  // We deliberately own the burn button behavior on this sheet instead of
+  // relying on the inherited data-action dispatcher. The rest of the sheet
+  // still uses Mist Engine's normal mechanics and data model.
+  for (const burn of root.querySelectorAll(".burn-indicator[data-action]")) {
+    const nativeAction = burn.dataset.action;
+    burn.classList.add("litm-sw-burn-control");
+
+    // Prevent the ApplicationV2 action dispatcher from also toggling the same
+    // tag after our handler runs.
+    burn.removeAttribute("data-action");
+    burn.dataset.litmNativeAction = nativeAction;
+
+    burn.dataset.tooltip = "Queue this tag to burn for extra power.";
+    burn.dataset.tooltipDirection = "UP";
+    burn.setAttribute("aria-label", "Queue tag to burn for extra power");
+    burn.setAttribute("role", "button");
+    burn.setAttribute("tabindex", "0");
+
+    // Use a real Font Awesome element instead of a raw unicode glyph. Foundry
+    // supplies Font Awesome itself, so this survives theme/font differences.
+    const wasQueued = Boolean(burn.querySelector(".burn-icon.to-burn"));
+    const icon = document.createElement("i");
+    icon.className = `fa-solid fa-fire litm-sw-burn-flame${wasQueued ? " to-burn" : ""}`;
+    burn.replaceChildren(icon);
+
+    const activate = async event => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      if (nativeAction === "toggleStoryTagBurn") {
+        await toggleStoryTagQueuedBurn(sheet, burn);
+      } else {
+        await togglePowerTagQueuedBurn(sheet, burn);
+      }
+    };
+
+    burn.addEventListener("click", activate, { capture: true });
+    burn.addEventListener("keydown", async event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      await activate(event);
+    });
+  }
+
+  // Restore the original Mist Engine right-click-to-scratch behavior explicitly.
+  // Capture-phase listeners run before the anonymous listeners installed by the
+  // base sheet, so the operation happens exactly once instead of double toggling.
+  for (const tag of root.querySelectorAll(".litm-pc-powertag.pt-selectable")) {
+    tag.addEventListener("contextmenu", async event => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      await togglePowerTagBurnedState(sheet, tag);
+    }, { capture: true });
+  }
+
+  for (const tag of root.querySelectorAll(".litm-pc-storytag.storytag-selectable")) {
+    tag.addEventListener("contextmenu", async event => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      await toggleStoryTagBurnedState(sheet, tag);
+    }, { capture: true });
+  }
+}
+
 function enhanceTagUsageUi(sheet) {
   const root = sheet.element;
   if (!root) return;
 
-  // Make the burn affordance self-explanatory. CSS turns this into a clear
-  // flame control; the action is still Mist Engine's native burn action.
-  for (const burn of root.querySelectorAll(".burn-indicator[data-action]")) {
-    burn.classList.add("litm-sw-burn-control");
-    burn.dataset.tooltip = "Queue this tag to burn for extra power.";
-    burn.dataset.tooltipDirection = "UP";
-    burn.setAttribute("aria-label", "Queue tag to burn for extra power");
-  }
+  installReliableBurnControls(sheet, root);
 
   // Locked-mode power tags.
   for (const tag of root.querySelectorAll(".litm-pc-powertag.pt-selectable")) {
