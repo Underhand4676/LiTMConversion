@@ -3,6 +3,8 @@
 
 export async function openProbabilityProcessor({
   initialPool = "",
+  initialCut = "",
+  detailed = false,
   actor = null,
   onRollCommitted = null
 } = {}) {
@@ -132,6 +134,12 @@ export async function openProbabilityProcessor({
   const initialPoolValue =
     Number.isFinite(parsedInitialPool) && parsedInitialPool >= 0
       ? String(parsedInitialPool)
+      : "";
+
+  const parsedInitialCut = Math.floor(Number(initialCut));
+  const initialCutValue =
+    Number.isFinite(parsedInitialCut) && parsedInitialCut >= 0
+      ? String(parsedInitialCut)
       : "";
 
 
@@ -271,7 +279,7 @@ export async function openProbabilityProcessor({
               name="cut"
               type="text"
               inputmode="numeric"
-              value=""
+              value="${initialCutValue}"
 
               oninput="
                 this.value = this.value.replace(/[^0-9]/g, '');
@@ -305,7 +313,9 @@ export async function openProbabilityProcessor({
           letter-spacing:1px;
           color:${COLOR.ivoryDim};
         ">
-          CUT DEGRADES HIGHEST RETURNS FIRST
+          ${detailed
+            ? "DETAILED TELEMETRY // POWER YIELD ANALYSIS ENABLED"
+            : "CUT DEGRADES HIGHEST RETURNS FIRST"}
         </div>
 
       </div>
@@ -412,6 +422,13 @@ export async function openProbabilityProcessor({
   const remainingDice = rolledDice.slice(cutCount);
 
 
+  // Detailed Roll derives Power only from VALID returns after Cut.
+  // Each surviving 4, 5, or 6 contributes one Power.
+  const powerCount = detailed
+    ? remainingDice.filter(value => value >= 4).length
+    : 0;
+
+
   // ---------------------------------------------------------
   // DETERMINE OUTCOME
   // ---------------------------------------------------------
@@ -456,6 +473,28 @@ export async function openProbabilityProcessor({
   // ---------------------------------------------------------
 
   function activeDie(value) {
+    const isPowerReturn = detailed && value >= 4;
+
+    const dieBorder = isPowerReturn
+      ? COLOR.amber
+      : "#728487";
+
+    const dieBottomBorder = isPowerReturn
+      ? COLOR.amber
+      : COLOR.cyan;
+
+    const dieColor = isPowerReturn
+      ? "#fff0c9"
+      : COLOR.ivoryBright;
+
+    const dieBackground = isPowerReturn
+      ? "#1b1810"
+      : "#151d1e";
+
+    const dieGlow = isPowerReturn
+      ? "0 0 7px rgba(212,170,99,0.32)"
+      : "0 0 3px rgba(0,0,0,0.4)";
+
     return `
       <div style="
         display:inline-flex;
@@ -467,15 +506,15 @@ export async function openProbabilityProcessor({
 
         margin:3px;
 
-        background:#151d1e;
-        border:1px solid #728487;
-        border-bottom:2px solid ${COLOR.cyan};
+        background:${dieBackground};
+        border:1px solid ${dieBorder};
+        border-bottom:2px solid ${dieBottomBorder};
 
         box-shadow:
           inset 0 0 6px ${COLOR.backgroundDeep},
-          0 0 3px rgba(0,0,0,0.4);
+          ${dieGlow};
 
-        color:${COLOR.ivoryBright};
+        color:${dieColor};
 
         font-family:monospace;
         font-size:20px;
@@ -485,7 +524,6 @@ export async function openProbabilityProcessor({
       </div>
     `;
   }
-
 
   function cutDie(value) {
     return `
@@ -668,6 +706,35 @@ export async function openProbabilityProcessor({
               ${outcome}
             </div>
 
+            ${detailed ? `
+              <div style="
+                display:flex;
+                align-items:baseline;
+                gap:7px;
+                margin-top:7px;
+                padding-top:6px;
+                border-top:1px solid ${COLOR.steelDim};
+              ">
+                <span style="
+                  color:${COLOR.cyanDim};
+                  font-size:8px;
+                  font-weight:bold;
+                  letter-spacing:1.5px;
+                ">
+                  POWER YIELD
+                </span>
+
+                <span style="
+                  color:${COLOR.amber};
+                  font-size:12px;
+                  font-weight:bold;
+                  letter-spacing:1px;
+                ">
+                  // ${powerCount}
+                </span>
+              </div>
+            ` : ""}
+
           </div>
 
 
@@ -739,6 +806,20 @@ export async function openProbabilityProcessor({
             NO VALID RETURN
           </div>
 
+          ${detailed ? `
+            <div style="
+              margin-top:7px;
+              padding-top:6px;
+              border-top:1px solid ${COLOR.steelDim};
+              color:${COLOR.cyanDim};
+              font-size:8px;
+              font-weight:bold;
+              letter-spacing:1.5px;
+            ">
+              POWER YIELD <span style="color:${COLOR.amber};">// 0</span>
+            </div>
+          ` : ""}
+
         </div>
       `;
 
@@ -793,7 +874,7 @@ export async function openProbabilityProcessor({
           font-weight:bold;
           letter-spacing:2px;
         ">
-          ◈ PROBABILITY TELEMETRY
+          ◈ ${detailed ? "DETAILED " : ""}PROBABILITY TELEMETRY
         </span>
 
         <span style="

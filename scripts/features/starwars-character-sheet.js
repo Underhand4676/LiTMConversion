@@ -1258,45 +1258,56 @@ async function getMistDiceRollAppClass() {
   return cachedMistDiceRollApp;
 }
 
-function calculateSelectedTagDicePool(selectedTags) {
-  return Array.from(selectedTags ?? []).reduce((pool, tag) => {
-    // A normal selected tag contributes one d6.
-    // A tag queued to burn contributes two d6 total.
-    return pool + (tag?.toBurn ? 2 : 1);
-  }, 0);
+function calculateProbabilityInputs(selectedTags) {
+  let dicePool = 0;
+  let cut = 0;
+
+  for (const tag of Array.from(selectedTags ?? [])) {
+    // Selected Weakness Tags hinder the roll rather than adding a d6.
+    if (tag?.weakness) {
+      cut += 1;
+      continue;
+    }
+
+    // Every other selected tag contributes one d6. A tag queued to burn
+    // contributes two dice total instead of one.
+    dicePool += tag?.toBurn ? 2 : 1;
+  }
+
+  return { dicePool, cut };
 }
 
-async function handleStarWarsQuickRoll(event, target) {
-  event.preventDefault();
-
-  const actor = this.actor;
+async function launchStarWarsProbabilityRoll(sheet, {
+  rollType = "quick",
+  detailed = false
+} = {}) {
+  const actor = sheet.actor;
   if (!actor) return;
 
   const DiceRollApp = await getMistDiceRollAppClass();
 
-  // Reuse the system's own selector/parser instead of trying to rediscover
-  // every possible selected tag source ourselves. This includes normal
-  // Themebook tags, Weaknesses, Backpack tags, Crew tags, and the actor's
-  // floating Tags & Statuses.
+  // Use Mist Engine's own preparation layer so the processor sees exactly the
+  // tags the base roller would have seen.
   const nativeRollApp = DiceRollApp.getInstance({
     actor,
-    type: "quick"
+    type: rollType
   });
 
   nativeRollApp.updateTagsAndStatuses(false);
 
-  const initialPool = calculateSelectedTagDicePool(
+  const { dicePool, cut } = calculateProbabilityInputs(
     nativeRollApp.selectedTags
   );
 
   await openProbabilityProcessor({
     actor,
-    initialPool,
+    initialPool: dicePool,
+    initialCut: cut,
+    detailed,
 
-    // Do not consume anything merely by opening or canceling the dialog.
-    // Once RUN SOLUTION produces a real Roll, use Mist Engine's own resetTags()
-    // lifecycle. It deselects used tags and turns the queued burn into the
-    // persistent burned/scratched state.
+    // Nothing is consumed by merely opening/canceling the processor.
+    // After RUN SOLUTION actually generates a roll, Mist Engine's own cleanup
+    // deselects used tags and converts queued burns into burned/struck tags.
     onRollCommitted: async () => {
       nativeRollApp.updateTagsAndStatuses(false);
       await nativeRollApp.resetTags();
@@ -1304,7 +1315,24 @@ async function handleStarWarsQuickRoll(event, target) {
   });
 }
 
-function wireProbabilityQuickRollButton(sheet) {
+async function handleStarWarsQuickRoll(event, target) {
+  event.preventDefault();
+
+  await launchStarWarsProbabilityRoll(this, {
+    rollType: "quick",
+    detailed: false
+  });
+}
+
+async function handleStarWarsDetailedRoll(event, target) {
+  event.preventDefault();
+
+  await launchStarWarsProbabilityRoll(this, {
+    rollType: "detailed",
+    detailed: true
+  });
+}
+function wireProbabilityRollButtons(sheet) {
   const root = sheet.element;
   if (!root || sheet.actor?.system?.editMode) return;
 
@@ -1312,12 +1340,19 @@ function wireProbabilityQuickRollButton(sheet) {
     'button.roll-button[data-action="clickRoll"][data-roll-type="quick"]'
   );
 
-  if (!quickButton) return;
+  if (quickButton) {
+    quickButton.dataset.action = "litmProbabilityQuickRoll";
+    quickButton.title = "Open Probability Processor";
+  }
 
-  // Detailed / Reaction stay on Mist Engine's native roller.
-  // Only Quick Roll is rerouted.
-  quickButton.dataset.action = "litmProbabilityQuickRoll";
-  quickButton.title = "Open Probability Processor";
+  const detailedButton = root.querySelector(
+    'button.roll-button[data-action="clickRoll"][data-roll-type="detailed"]'
+  );
+
+  if (detailedButton) {
+    detailedButton.dataset.action = "litmProbabilityDetailedRoll";
+    detailedButton.title = "Open Detailed Probability Processor";
+  }
 }
 
 Hooks.once("init", async () => {
@@ -1359,6 +1394,7 @@ Hooks.once("init", async () => {
         actions: {
           ...BaseFullSheet.DEFAULT_OPTIONS.actions,
           litmProbabilityQuickRoll: handleStarWarsQuickRoll,
+          litmProbabilityDetailedRoll: handleStarWarsDetailedRoll,
           createLiTMBackpackSlotItem: handleCreateBackpackSlotItem,
           editLiTMBackpackSlot: handleEditBackpackSlot
         }
@@ -1393,7 +1429,7 @@ Hooks.once("init", async () => {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
         enhanceLivingStandardUi(this);
-        wireProbabilityQuickRollButton(this);
+        wireProbabilityRollButtons(this);
       }
 
       async assignFellowshipThemecard() {
@@ -1434,6 +1470,7 @@ Hooks.once("init", async () => {
         actions: {
           ...BaseCompactSheet.DEFAULT_OPTIONS.actions,
           litmProbabilityQuickRoll: handleStarWarsQuickRoll,
+          litmProbabilityDetailedRoll: handleStarWarsDetailedRoll,
           createLiTMBackpackSlotItem: handleCreateBackpackSlotItem,
           editLiTMBackpackSlot: handleEditBackpackSlot
         }
@@ -1468,7 +1505,7 @@ Hooks.once("init", async () => {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
         enhanceLivingStandardUi(this);
-        wireProbabilityQuickRollButton(this);
+        wireProbabilityRollButtons(this);
       }
 
       async assignFellowshipThemecard() {
