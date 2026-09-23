@@ -1,15 +1,73 @@
-<section class="tab {{tabs.other.id}} {{tabs.other.cssClass}} scrollable" id="other"
-    data-tab="{{tabs.other.id}}" data-group="{{tabs.other.group}}">
-    <div class="character-sheet-divider flexrow">
-        <div class="right-side {{#if system.editMode}}edit-mode{{/if}}">
-            <div class="litm-character-themebooks-container">
-                <div class="themebooks-container card-grid {{#unless system.editMode}}themebooks-container-stylized{{/unless}} grid grid-4col grid-themebook-container {{#if system.editMode}}edit-mode{{/if}}"
-                     data-tab-category="other">
-                    {{#each otherCards as |card|}}
-                    {{> 'modules/litm-conversion/templates/actor/parts/starwars-card-dispatch.hbs' card=card}}
-                    {{/each}}
-                </div>
+<section class="tab {{tabs.other.id}} {{tabs.other.cssClass}} scrollable litm-sw-portrait-tab"
+    id="other"
+    data-tab="{{tabs.other.id}}"
+    data-group="{{tabs.other.group}}">
+
+    <div class="litm-sw-portrait-console">
+
+        <div class="litm-sw-portrait-heading">
+            <div>
+                <div class="litm-sw-portrait-eyebrow">VISUAL IDENTIFICATION // SUBJECT FILE</div>
+                <div class="litm-sw-portrait-title">CHARACTER PORTRAIT</div>
             </div>
+
+            <div class="litm-sw-portrait-code">RI/VIS-ID</div>
         </div>
+
+
+        <div class="litm-sw-portrait-frame {{#unless system.customBackground}}is-empty{{/unless}}">
+
+            {{#if system.customBackground}}
+                <img
+                    class="litm-sw-portrait-image"
+                    src="{{system.customBackground}}"
+                    alt="{{actor.name}}"
+                >
+            {{else}}
+                <div class="litm-sw-portrait-empty">
+                    <i class="fa-solid fa-user-secret"></i>
+                    <div>NO VISUAL RECORD ON FILE</div>
+                    <span>SUBJECT IMAGE AWAITING ACQUISITION</span>
+                </div>
+            {{/if}}
+
+        </div>
+
+
+        {{#if system.editMode}}
+        <div class="litm-sw-portrait-controls">
+
+            <button
+                type="button"
+                class="litm-sw-portrait-button"
+                data-action="clickedCustomBackground"
+            >
+                <i class="fa-solid fa-image"></i>
+                {{#if system.customBackground}}
+                    REPLACE PORTRAIT
+                {{else}}
+                    SELECT PORTRAIT
+                {{/if}}
+            </button>
+
+            {{#if system.customBackground}}
+            <button
+                type="button"
+                class="litm-sw-portrait-button danger"
+                data-action="clickedRemoveCustomBackground"
+            >
+                <i class="fa-solid fa-trash"></i>
+                REMOVE PORTRAIT
+            </button>
+            {{/if}}
+
+        </div>
+
+        <div class="litm-sw-portrait-help">
+            IMAGE FILE IS STORED WITH THE CHARACTER DOSSIER // SHEET BACKGROUND REMAINS SYSTEM-LOCKED
+        </div>
+        {{/if}}
+
     </div>
+
 </section>

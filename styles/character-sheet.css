@@ -1488,3 +1488,262 @@
   .litm-sw-dossier-row {
   flex-wrap: wrap;
 }
+
+
+/* =========================================================
+   SACRIFICE AUTHORIZATION WINDOW // v0.1.20
+   Remove Mist Engine's parchment shell and keep the custom intel-console UI.
+   ========================================================= */
+
+.application.litm-sw-sacrifice-dialog > .window-header,
+.litm-sw-sacrifice-dialog > .window-header {
+  background: #071014 !important;
+  border-bottom: 1px solid rgba(127, 203, 211, .34) !important;
+  color: #dce8e8 !important;
+}
+
+.application.litm-sw-sacrifice-dialog > .window-content,
+.litm-sw-sacrifice-dialog > .window-content {
+  padding: 10px !important;
+  border: 0 !important;
+  border-image: none !important;
+  background:
+    linear-gradient(rgba(127, 203, 211, .018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(127, 203, 211, .014) 1px, transparent 1px),
+    linear-gradient(145deg, #081216, #050b0e) !important;
+  background-size: 28px 28px, 28px 28px, auto !important;
+  color: #dce8e8 !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  box-shadow: inset 0 0 22px rgba(0,0,0,.58) !important;
+}
+
+.application.litm-sw-sacrifice-dialog .form-footer,
+.litm-sw-sacrifice-dialog .form-footer {
+  margin-top: 8px !important;
+  padding-top: 8px !important;
+  border-top: 1px solid rgba(97, 137, 144, .26) !important;
+  background: transparent !important;
+}
+
+.application.litm-sw-sacrifice-dialog .form-footer button,
+.litm-sw-sacrifice-dialog .form-footer button {
+  min-height: 36px !important;
+  border: 1px solid rgba(184, 100, 88, .72) !important;
+  border-radius: 0 !important;
+  background: rgba(67, 36, 31, .48) !important;
+  color: #e7c7bf !important;
+  box-shadow:
+    inset 3px 0 0 rgba(184,100,88,.9),
+    inset 0 1px 0 rgba(255,255,255,.035) !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .08em !important;
+}
+
+.application.litm-sw-sacrifice-dialog .form-footer button:hover,
+.litm-sw-sacrifice-dialog .form-footer button:hover {
+  background: rgba(91, 44, 36, .66) !important;
+  border-color: rgba(222, 124, 105, .9) !important;
+}
+
+
+/* =========================================================
+   PORTRAIT TAB // VISUAL IDENTIFICATION DOSSIER // v0.1.20
+   ========================================================= */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-tab {
+  padding: 14px 18px 22px !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-console {
+  width: min(720px, 92%);
+  margin: 0 auto;
+  padding: 14px;
+  box-sizing: border-box;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(127,203,211,.015) 0px,
+      rgba(127,203,211,.015) 1px,
+      transparent 1px,
+      transparent 5px
+    ),
+    rgba(7, 17, 21, .74);
+  border: 1px solid rgba(111,155,164,.38);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.018),
+    inset 0 0 30px rgba(0,0,0,.28),
+    0 8px 22px rgba(0,0,0,.2);
+  backdrop-filter: blur(4px);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(111,155,164,.28);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-eyebrow {
+  color: #607d82;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-title {
+  margin-top: 4px;
+  color: #dce8e8;
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .055em;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-code {
+  color: #b79b5f;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 8px;
+  letter-spacing: .12em;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-frame {
+  position: relative;
+  min-height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(127,203,211,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(127,203,211,.018) 1px, transparent 1px),
+    #071115;
+  background-size: 26px 26px, 26px 26px, auto;
+  border: 1px solid rgba(111,155,164,.44);
+  box-shadow:
+    inset 0 0 38px rgba(0,0,0,.48),
+    inset 3px 0 0 rgba(127,203,211,.34);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-frame::before,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-frame::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-frame::before {
+  inset: 9px;
+  border:
+    1px solid rgba(127,203,211,.11);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-frame::after {
+  left: 16px;
+  top: 16px;
+  width: 30px;
+  height: 10px;
+  border-top: 2px solid rgba(200,155,82,.66);
+  border-left: 2px solid rgba(200,155,82,.66);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 440px;
+  max-height: 590px;
+  object-fit: contain;
+  object-position: center;
+  background: rgba(2,8,10,.65);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #71898d;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-align: center;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-empty i {
+  margin-bottom: 5px;
+  color: #6f8f95;
+  font-size: 48px;
+  opacity: .42;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-empty span {
+  color: #536d72;
+  font-size: 8px;
+  letter-spacing: .11em;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-button {
+  flex: 1 1 0;
+  min-height: 32px;
+  margin: 0 !important;
+  border: 1px solid rgba(111,155,164,.42) !important;
+  border-radius: 0 !important;
+  background: rgba(22,42,49,.72) !important;
+  color: #dbe8e8 !important;
+  box-shadow:
+    inset 3px 0 0 rgba(200,155,82,.72),
+    inset 0 1px 0 rgba(255,255,255,.035) !important;
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: .045em !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-button.danger {
+  box-shadow:
+    inset 3px 0 0 rgba(184,100,88,.82),
+    inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-help {
+  margin-top: 8px;
+  color: #536d72;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 7px;
+  letter-spacing: .1em;
+  text-align: center;
+}
+

@@ -1565,7 +1565,6 @@ async function handleStarWarsSacrificeRoll(event, target) {
     classes: [
       "mist-engine",
       "dialog",
-      "sacrifice-roll-dialog",
       "litm-sw-sacrifice-dialog"
     ],
 
@@ -1811,6 +1810,23 @@ async function handleStarWarsSacrificeRoll(event, target) {
   });
 }
 
+
+function removeLegacyBackgroundControls(sheet) {
+  const root = sheet.element;
+  if (!root) return;
+
+  const editIdentity =
+    root.querySelector(".col-character-name.edit-mode") ??
+    root.querySelector(".col-compact-identity.edit-mode");
+
+  if (!editIdentity) return;
+
+  // The old controls were designed to paint an entire sheet background.
+  // Portrait selection/removal now lives in the PORTRAIT tab instead.
+  const legacyGrid = editIdentity.querySelector(".grid.grid-4col");
+  legacyGrid?.remove();
+}
+
 function wireProbabilityRollButtons(sheet) {
   const root = sheet.element;
   if (!root || sheet.actor?.system?.editMode) return;
@@ -1882,6 +1898,18 @@ Hooks.once("init", async () => {
     ]);
 
     class LiTMStarWarsCharacterSheet extends BaseFullSheet {
+      static TABS = {
+        "litm-character-sheet": {
+          tabs: [
+            { id: "character", group: "litm-character-sheet", label: "MIST_ENGINE.LABELS.MainThemebooks" },
+            { id: "other", group: "litm-character-sheet", label: "PORTRAIT" },
+            { id: "biography", group: "litm-character-sheet", label: "MIST_ENGINE.LABELS.Biography" },
+            { id: "notes", group: "litm-character-sheet", label: "MIST_ENGINE.LABELS.Notes" }
+          ],
+          initial: "character"
+        }
+      };
+
       static DEFAULT_OPTIONS = {
         classes: ["litm-conversion-starwars-sheet"],
         position: {
@@ -1928,6 +1956,7 @@ Hooks.once("init", async () => {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
         enhanceLivingStandardUi(this);
+        removeLegacyBackgroundControls(this);
         wireProbabilityRollButtons(this);
       }
 
@@ -1939,25 +1968,16 @@ Hooks.once("init", async () => {
         return createAndAssignCrewThemecard(this);
       }
 
-      /** Preserve Mist Engine's actor-picked custom background option. */
-      _applyCustomBackground() {
-        const el = this.element.querySelector?.(".window-content") ?? this.element;
-        const customBackground = this.actor.system.customBackground;
-
-        el.classList.toggle(
-          "litm-conversion-has-custom-background",
-          Boolean(customBackground)
-        );
-
-        if (customBackground) {
-          el.style.setProperty("background-image", `url("${customBackground}")`);
-        } else {
-          el.style.removeProperty("background-image");
-        }
-      }
+      /**
+       * LiTM Conversion repurposes system.customBackground as the character's
+       * dossier portrait. It must never paint across the sheet itself.
+       */
+      _applyCustomBackground() {}
     }
 
     class LiTMStarWarsCompactCharacterSheet extends BaseCompactSheet {
+      static TABS = LiTMStarWarsCharacterSheet.TABS;
+
       static DEFAULT_OPTIONS = {
         classes: [
           "litm-conversion-starwars-sheet",
@@ -2006,6 +2026,7 @@ Hooks.once("init", async () => {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
         enhanceLivingStandardUi(this);
+        removeLegacyBackgroundControls(this);
         wireProbabilityRollButtons(this);
       }
 
