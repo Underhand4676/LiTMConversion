@@ -1195,3 +1195,60 @@
   color: #ff9f43 !important;
   text-shadow: 0 0 8px rgba(255,159,67,.55) !important;
 }
+
+
+/* =========================================================
+   BURN SVG + CREW ROW ALIGNMENT // v0.1.13
+   ========================================================= */
+
+/* Inline SVG avoids the missing Font Awesome glyph problem entirely while
+   leaving the native Mist Engine burn wrapper/actions untouched. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .burn-indicator.litm-sw-burn-control > .litm-sw-burn-svg {
+  display: block !important;
+  width: 15px !important;
+  height: 15px !important;
+  overflow: visible !important;
+  color: #c9ab67 !important;
+  fill: currentColor !important;
+  stroke: none !important;
+  filter: drop-shadow(0 0 2px rgba(201,171,103,.22));
+  pointer-events: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .burn-indicator.litm-sw-burn-control > .litm-sw-burn-svg .litm-sw-burn-svg-core {
+  fill: #15252a !important;
+  opacity: .92 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .burn-indicator.litm-sw-burn-control > .litm-sw-burn-svg.to-burn {
+  color: #ff9f43 !important;
+  filter:
+    drop-shadow(0 0 2px rgba(255,159,67,.8))
+    drop-shadow(0 0 5px rgba(255,126,55,.45));
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .burn-indicator.litm-sw-burn-control > .litm-sw-burn-svg.to-burn .litm-sw-burn-svg-core {
+  fill: #ffe1a6 !important;
+  opacity: .95 !important;
+}
+
+/* Crew power tags intentionally have no burn control. The stock weakness
+   chevron therefore created a one-off left column and made the weakness row
+   look shifted relative to the three power tags. On Crew only, remove that
+   decorative marker and let the weakness text use the same full-width row. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-crew-card .item-weakness-line .weakness-indicator {
+  display: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-crew-card .item-weakness-line .litm-pc-weakness {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  text-align: center !important;
+  margin: 0 !important;
+}

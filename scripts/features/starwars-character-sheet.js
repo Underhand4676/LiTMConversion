@@ -399,9 +399,11 @@ function applyUsageTooltip(element, usage) {
 }
 
 function enhanceBurnControls(root) {
-  // Presentation only. The parent .burn-indicator keeps its native Mist Engine
-  // data-action and therefore all native click behavior. We only replace the
-  // stock scratch artwork INSIDE that clickable element with a visible flame.
+  // Presentation only.
+  //
+  // The parent .burn-indicator and its native data-action stay completely
+  // untouched. The icon is drawn as inline SVG so it does not depend on
+  // Font Awesome glyph fonts, which were rendering as a missing-glyph box.
   for (const burn of root.querySelectorAll(".burn-indicator[data-action]")) {
     burn.classList.add("litm-sw-burn-control");
     burn.dataset.tooltipText = "Queue this tag to burn for extra power.";
@@ -409,13 +411,37 @@ function enhanceBurnControls(root) {
     burn.setAttribute("aria-label", "Queue tag to burn for extra power");
 
     const stockIcon = burn.querySelector(".burn-icon");
-    const wasQueued = Boolean(stockIcon?.classList.contains("to-burn"));
+    const existingIcon = burn.querySelector(".litm-sw-burn-svg");
+    const wasQueued = Boolean(
+      stockIcon?.classList.contains("to-burn") ||
+      existingIcon?.classList.contains("to-burn")
+    );
 
-    const icon = document.createElement("i");
-    icon.className = `fa-solid fa-fire litm-sw-burn-flame${wasQueued ? " to-burn" : ""}`;
+    const svgNS = "http://www.w3.org/2000/svg";
+    const icon = document.createElementNS(svgNS, "svg");
+    icon.setAttribute("viewBox", "0 0 24 24");
     icon.setAttribute("aria-hidden", "true");
+    icon.setAttribute("focusable", "false");
+    icon.classList.add("litm-sw-burn-svg");
+    if (wasQueued) icon.classList.add("to-burn");
 
-    // Keep the native clickable wrapper intact. Only its visual child changes.
+    const outer = document.createElementNS(svgNS, "path");
+    outer.setAttribute(
+      "d",
+      "M13.5 2.5c.4 2.3-.3 3.8-1.6 5.2-1.2-2.1-2.9-3.5-4.2-4.2.2 2.6-.7 4.5-2.1 6.1C4.3 11 3.5 12.8 3.5 15a8.5 8.5 0 0 0 17 0c0-4.8-2.8-8.7-7-12.5Z"
+    );
+
+    const inner = document.createElementNS(svgNS, "path");
+    inner.setAttribute(
+      "d",
+      "M12.3 20.2c-2.2 0-4-1.6-4-3.8 0-1.7 1-3 2.2-4.2.1 1.1.5 2 1.3 2.7.7-.8 1.1-1.8 1-3 1.7 1.2 3.5 2.8 3.5 4.7 0 2-1.8 3.6-4 3.6Z"
+    );
+    inner.classList.add("litm-sw-burn-svg-core");
+
+    icon.append(outer, inner);
+
+    // Preserve the native clickable wrapper and its data-action. Only replace
+    // the visual child.
     burn.replaceChildren(icon);
   }
 }
