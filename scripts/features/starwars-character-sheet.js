@@ -1,3 +1,5 @@
+import { openProbabilityProcessor } from "./probability-processor.js";
+
 const MODULE_ID = "litm-conversion";
 const SYSTEM_ID = "mist-engine-fvtt";
 const CHARACTER_TYPE = "litm-character";
@@ -1236,6 +1238,88 @@ async function createAndAssignCrewThemecard(sheet) {
  * Register alternate Hero sheets which inherit Mist Engine's own character
  * sheet classes and replace only presentation plus selected card renderers.
  */
+
+let cachedMistDiceRollApp = null;
+
+async function getMistDiceRollAppClass() {
+  if (cachedMistDiceRollApp) return cachedMistDiceRollApp;
+
+  const route = foundry.utils.getRoute(
+    `systems/${SYSTEM_ID}/module/apps/dice-roll-app.mjs`
+  );
+
+  const module = await import(route);
+  cachedMistDiceRollApp = module.DiceRollApp;
+
+  if (!cachedMistDiceRollApp) {
+    throw new Error("Mist Engine DiceRollApp could not be loaded.");
+  }
+
+  return cachedMistDiceRollApp;
+}
+
+function calculateSelectedTagDicePool(selectedTags) {
+  return Array.from(selectedTags ?? []).reduce((pool, tag) => {
+    // A normal selected tag contributes one d6.
+    // A tag queued to burn contributes two d6 total.
+    return pool + (tag?.toBurn ? 2 : 1);
+  }, 0);
+}
+
+async function handleStarWarsQuickRoll(event, target) {
+  event.preventDefault();
+
+  const actor = this.actor;
+  if (!actor) return;
+
+  const DiceRollApp = await getMistDiceRollAppClass();
+
+  // Reuse the system's own selector/parser instead of trying to rediscover
+  // every possible selected tag source ourselves. This includes normal
+  // Themebook tags, Weaknesses, Backpack tags, Crew tags, and the actor's
+  // floating Tags & Statuses.
+  const nativeRollApp = DiceRollApp.getInstance({
+    actor,
+    type: "quick"
+  });
+
+  nativeRollApp.updateTagsAndStatuses(false);
+
+  const initialPool = calculateSelectedTagDicePool(
+    nativeRollApp.selectedTags
+  );
+
+  await openProbabilityProcessor({
+    actor,
+    initialPool,
+
+    // Do not consume anything merely by opening or canceling the dialog.
+    // Once RUN SOLUTION produces a real Roll, use Mist Engine's own resetTags()
+    // lifecycle. It deselects used tags and turns the queued burn into the
+    // persistent burned/scratched state.
+    onRollCommitted: async () => {
+      nativeRollApp.updateTagsAndStatuses(false);
+      await nativeRollApp.resetTags();
+    }
+  });
+}
+
+function wireProbabilityQuickRollButton(sheet) {
+  const root = sheet.element;
+  if (!root || sheet.actor?.system?.editMode) return;
+
+  const quickButton = root.querySelector(
+    'button.roll-button[data-action="clickRoll"][data-roll-type="quick"]'
+  );
+
+  if (!quickButton) return;
+
+  // Detailed / Reaction stay on Mist Engine's native roller.
+  // Only Quick Roll is rerouted.
+  quickButton.dataset.action = "litmProbabilityQuickRoll";
+  quickButton.title = "Open Probability Processor";
+}
+
 Hooks.once("init", async () => {
   if (game.system?.id !== SYSTEM_ID) return;
 
@@ -1274,6 +1358,7 @@ Hooks.once("init", async () => {
         },
         actions: {
           ...BaseFullSheet.DEFAULT_OPTIONS.actions,
+          litmProbabilityQuickRoll: handleStarWarsQuickRoll,
           createLiTMBackpackSlotItem: handleCreateBackpackSlotItem,
           editLiTMBackpackSlot: handleEditBackpackSlot
         }
@@ -1308,6 +1393,7 @@ Hooks.once("init", async () => {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
         enhanceLivingStandardUi(this);
+        wireProbabilityQuickRollButton(this);
       }
 
       async assignFellowshipThemecard() {
@@ -1347,6 +1433,7 @@ Hooks.once("init", async () => {
         },
         actions: {
           ...BaseCompactSheet.DEFAULT_OPTIONS.actions,
+          litmProbabilityQuickRoll: handleStarWarsQuickRoll,
           createLiTMBackpackSlotItem: handleCreateBackpackSlotItem,
           editLiTMBackpackSlot: handleEditBackpackSlot
         }
@@ -1381,6 +1468,7 @@ Hooks.once("init", async () => {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
         enhanceLivingStandardUi(this);
+        wireProbabilityQuickRollButton(this);
       }
 
       async assignFellowshipThemecard() {
