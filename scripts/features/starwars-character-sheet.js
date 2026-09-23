@@ -21,7 +21,28 @@ function isFilledBackpackEntry(entry) {
 }
 
 function isConsumableEntry(entry) {
-  return entry?.question === CONSUMABLE_MARKER;
+  return String(entry?.question ?? "").startsWith(CONSUMABLE_MARKER);
+}
+
+function getTagUsage(entry) {
+  let value = String(entry?.question ?? "");
+
+  // Backpack consumables use the beginning of the existing `question` field
+  // as a category marker. Everything after the marker is the human-readable
+  // adjudication note.
+  if (value.startsWith(CONSUMABLE_MARKER)) {
+    value = value.slice(CONSUMABLE_MARKER.length).replace(/^\s+/, "");
+  }
+
+  return value;
+}
+
+function setBackpackTagUsage(entry, usage) {
+  const cleanUsage = String(usage ?? "").trim();
+  if (isConsumableEntry(entry)) {
+    return `${CONSUMABLE_MARKER}${cleanUsage ? `\n${cleanUsage}` : ""}`;
+  }
+  return cleanUsage;
 }
 
 function buildBackpackSlots(backpack) {
@@ -228,13 +249,232 @@ async function handleEditBackpackSlot(event, target) {
   const itemName = String(result.name ?? "").trim();
   if (!itemName) return;
 
+  const existingUsage = getTagUsage(existing);
+
   entries[entryIndex] = {
     ...existing,
     name: itemName,
-    question: category === "consumable" ? CONSUMABLE_MARKER : ""
+    question: category === "consumable"
+      ? `${CONSUMABLE_MARKER}${existingUsage ? `\n${existingUsage}` : ""}`
+      : existingUsage
   };
 
   await backpack.update({ "system.items": entries });
+}
+
+
+function resolveTagDocument(sheet, source, itemId) {
+  if (source === "fellowship-themecard") {
+    return sheet.actorFellowshipThemecard ?? null;
+  }
+
+  return sheet.actor.items.get(itemId) ?? null;
+}
+
+function entryAt(doc, arrayPath, index) {
+  const array = foundry.utils.getProperty(doc, arrayPath);
+  if (!Array.isArray(array)) return null;
+  return array[index] ?? null;
+}
+
+async function updateTagUsage(sheet, {
+  source = "",
+  itemId = "",
+  arrayPath,
+  index,
+  value,
+  backpack = false
+}) {
+  const doc = resolveTagDocument(sheet, source, itemId);
+  if (!doc) return;
+
+  const array = foundry.utils.deepClone(
+    Array.from(foundry.utils.getProperty(doc, arrayPath) ?? [])
+  );
+
+  if (!Number.isInteger(index) || index < 0 || index >= array.length) return;
+
+  sheet._saveScrollPositions?.();
+
+  if (backpack) {
+    array[index].question = setBackpackTagUsage(array[index], value);
+  } else {
+    array[index].question = String(value ?? "").trim();
+  }
+
+  await doc.update({ [arrayPath]: array });
+
+  if (source === "fellowship-themecard") {
+    sheet.reloadFellowshipThemecard?.();
+  }
+}
+
+function addUsageEditor(sheet, row, {
+  source = "",
+  itemId = "",
+  arrayPath,
+  index,
+  entry,
+  backpack = false
+}) {
+  if (!row || row.nextElementSibling?.classList?.contains("litm-sw-tag-usage-editor")) {
+    return;
+  }
+
+  const editor = document.createElement("div");
+  editor.className = `litm-sw-tag-usage-editor${backpack ? " backpack-usage" : ""}`;
+
+  const label = document.createElement("div");
+  label.className = "litm-sw-tag-usage-label";
+  label.textContent = "USE / ADJUDICATION NOTE";
+
+  const textarea = document.createElement("textarea");
+  textarea.className = "litm-sw-tag-usage-input";
+  textarea.rows = 2;
+  textarea.placeholder = "When should this tag apply?";
+  textarea.value = getTagUsage(entry);
+
+  textarea.addEventListener("change", async event => {
+    await updateTagUsage(sheet, {
+      source,
+      itemId,
+      arrayPath,
+      index,
+      value: event.currentTarget.value,
+      backpack
+    });
+  });
+
+  editor.append(label, textarea);
+  row.insertAdjacentElement("afterend", editor);
+}
+
+function applyUsageTooltip(element, usage) {
+  if (!element) return;
+
+  // The stock sheet uses the title attribute to say "right click to toggle burn
+  // state." On this sheet the burn control itself explains that action, so the
+  // tag name is free to carry the adjudication note.
+  element.removeAttribute("title");
+
+  const note = String(usage ?? "").trim();
+  element.dataset.tooltip = note || "No adjudication note configured.";
+  element.dataset.tooltipDirection = "UP";
+}
+
+function enhanceTagUsageUi(sheet) {
+  const root = sheet.element;
+  if (!root) return;
+
+  // Make the burn affordance self-explanatory. CSS turns this into a clear
+  // flame control; the action is still Mist Engine's native burn action.
+  for (const burn of root.querySelectorAll(".burn-indicator[data-action]")) {
+    burn.classList.add("litm-sw-burn-control");
+    burn.dataset.tooltip = "Queue this tag to burn for extra power.";
+    burn.dataset.tooltipDirection = "UP";
+    burn.setAttribute("aria-label", "Queue tag to burn for extra power");
+  }
+
+  // Locked-mode power tags.
+  for (const tag of root.querySelectorAll(".litm-pc-powertag.pt-selectable")) {
+    const index = Number(tag.dataset.powertagIndex);
+    const source = tag.dataset.source ?? "";
+    const doc = resolveTagDocument(sheet, source, tag.dataset.itemId);
+    const entry = doc ? entryAt(doc, "system.powertags", index) : null;
+    applyUsageTooltip(tag, getTagUsage(entry));
+  }
+
+  // Locked-mode weakness tags.
+  for (const tag of root.querySelectorAll(".litm-pc-weakness.wt-selectable")) {
+    const index = Number(tag.dataset.weaknesstagIndex);
+    const source = tag.dataset.source ?? "";
+    const doc = resolveTagDocument(sheet, source, tag.dataset.itemId);
+    const entry = doc ? entryAt(doc, "system.weaknesstags", index) : null;
+    applyUsageTooltip(tag, getTagUsage(entry));
+  }
+
+  // Locked-mode backpack/story tags.
+  for (const tag of root.querySelectorAll(".litm-pc-storytag.storytag-selectable")) {
+    const index = Number(tag.dataset.index);
+    const source = tag.dataset.source ?? "";
+    const arrayPath = tag.dataset.key || "system.items";
+    const doc = resolveTagDocument(sheet, source, tag.dataset.itemId);
+    const entry = doc ? entryAt(doc, arrayPath, index) : null;
+    applyUsageTooltip(tag, getTagUsage(entry));
+  }
+
+  if (!sheet.actor.system.editMode) return;
+
+  // Unlocked-mode power tags: add a dedicated explanatory field under each tag.
+  for (const row of root.querySelectorAll(".item-powertag-line")) {
+    const nameInput = row.querySelector(
+      '.themebook-entry-input[data-array="system.powertags"][data-key="name"]'
+    );
+    if (!nameInput) continue;
+
+    const index = Number(nameInput.dataset.index);
+    const source = nameInput.dataset.source ?? "";
+    const itemId = nameInput.dataset.itemId ?? "";
+    const doc = resolveTagDocument(sheet, source, itemId);
+    const entry = doc ? entryAt(doc, "system.powertags", index) : null;
+    if (!entry) continue;
+
+    addUsageEditor(sheet, row, {
+      source,
+      itemId,
+      arrayPath: "system.powertags",
+      index,
+      entry
+    });
+  }
+
+  // Unlocked-mode weakness tags.
+  for (const row of root.querySelectorAll(".item-weakness-line")) {
+    const nameInput = row.querySelector(
+      '.themebook-entry-input[data-array="system.weaknesstags"][data-key="name"]'
+    );
+    if (!nameInput) continue;
+
+    const index = Number(nameInput.dataset.index);
+    const source = nameInput.dataset.source ?? "";
+    const itemId = nameInput.dataset.itemId ?? "";
+    const doc = resolveTagDocument(sheet, source, itemId);
+    const entry = doc ? entryAt(doc, "system.weaknesstags", index) : null;
+    if (!entry) continue;
+
+    addUsageEditor(sheet, row, {
+      source,
+      itemId,
+      arrayPath: "system.weaknesstags",
+      index,
+      entry
+    });
+  }
+
+  // Unlocked-mode story tags, including backpack equipment and consumables.
+  for (const row of root.querySelectorAll(".item-storytag-line")) {
+    const nameInput = row.querySelector(
+      '.storytag-item-editable[type="text"]'
+    );
+    if (!nameInput) continue;
+
+    const index = Number(nameInput.dataset.index);
+    const source = nameInput.dataset.source ?? "";
+    const itemId = nameInput.dataset.itemId ?? "";
+    const arrayPath = nameInput.dataset.key || "system.items";
+    const doc = resolveTagDocument(sheet, source, itemId);
+    const entry = doc ? entryAt(doc, arrayPath, index) : null;
+    if (!entry) continue;
+
+    addUsageEditor(sheet, row, {
+      source,
+      itemId,
+      arrayPath,
+      index,
+      entry,
+      backpack: arrayPath === "system.items"
+    });
+  }
 }
 
 function availableCrewThemecards(sheet) {
@@ -407,6 +647,11 @@ Hooks.once("init", async () => {
         return prepareStarWarsContext(context);
       }
 
+      _onRender(context, options) {
+        super._onRender(context, options);
+        enhanceTagUsageUi(this);
+      }
+
       async assignFellowshipThemecard() {
         return assignCrewThemecard(this);
       }
@@ -471,6 +716,11 @@ Hooks.once("init", async () => {
       async _prepareContext(options) {
         const context = await super._prepareContext(options);
         return prepareStarWarsContext(context);
+      }
+
+      _onRender(context, options) {
+        super._onRender(context, options);
+        enhanceTagUsageUi(this);
       }
 
       async assignFellowshipThemecard() {
