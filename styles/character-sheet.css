@@ -1163,3 +1163,35 @@
   font-size: 12px;
   letter-spacing: .015em;
 }
+
+
+/* =========================================================
+   BURN ICON VISUAL REPAIR // v0.1.12
+   Mechanics stay native; this only guarantees the replacement FA flame renders.
+   ========================================================= */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .burn-indicator.litm-sw-burn-control > .litm-sw-burn-flame {
+  background: none !important;
+  background-image: none !important;
+  mask: none !important;
+  -webkit-mask: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 16px !important;
+  height: 16px !important;
+  font-family: "Font Awesome 6 Free" !important;
+  font-size: 13px !important;
+  font-style: normal !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  color: #c8ad75 !important;
+  pointer-events: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .burn-indicator.litm-sw-burn-control > .litm-sw-burn-flame.to-burn {
+  color: #ff9f43 !important;
+  text-shadow: 0 0 8px rgba(255,159,67,.55) !important;
+}

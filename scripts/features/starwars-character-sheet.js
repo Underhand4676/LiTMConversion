@@ -354,7 +354,7 @@ function applyUsageTooltip(element, usage) {
 
   // The stock sheet uses the title attribute to say "right click to toggle burn
   // state." The Star Wars sheet instead shows the adjudication note after a
-  // deliberate hover. Foundry's normal tooltip delay is 500ms; use 1000ms here
+  // deliberate hover. Foundry's normal tooltip delay is 500ms; use 750ms here
   // so these richer per-tag notes do not pop up while simply moving the mouse.
   element.removeAttribute("title");
   element.removeAttribute("data-tooltip");
@@ -390,7 +390,7 @@ function applyUsageTooltip(element, usage) {
         direction: "UP",
         cssClass: "litm-sw-tag-tooltip"
       });
-    }, 1000);
+    }, 750);
   });
 
   element.addEventListener("pointerleave", deactivateOwnTooltip);
@@ -399,29 +399,26 @@ function applyUsageTooltip(element, usage) {
 }
 
 function enhanceBurnControls(root) {
-  // IMPORTANT: Presentation only.
-  //
-  // Mist Engine already owns all tag mechanics:
-  //   - click tag name -> select/deselect
-  //   - right-click tag name -> burned/scratched state
-  //   - click burn indicator -> queue/unqueue the tag to burn
-  //
-  // Earlier versions intercepted those events to draw a custom flame, which
-  // accidentally broke the native behavior. Keep every native data-action and
-  // listener intact and only decorate the existing burn icon.
+  // Presentation only. The parent .burn-indicator keeps its native Mist Engine
+  // data-action and therefore all native click behavior. We only replace the
+  // stock scratch artwork INSIDE that clickable element with a visible flame.
   for (const burn of root.querySelectorAll(".burn-indicator[data-action]")) {
     burn.classList.add("litm-sw-burn-control");
     burn.dataset.tooltipText = "Queue this tag to burn for extra power.";
     burn.dataset.tooltipDirection = "UP";
     burn.setAttribute("aria-label", "Queue tag to burn for extra power");
 
-    const icon = burn.querySelector(".burn-icon");
-    if (!icon) continue;
+    const stockIcon = burn.querySelector(".burn-icon");
+    const wasQueued = Boolean(stockIcon?.classList.contains("to-burn"));
 
-    icon.classList.add("fa-solid", "fa-fire", "litm-sw-burn-flame");
+    const icon = document.createElement("i");
+    icon.className = `fa-solid fa-fire litm-sw-burn-flame${wasQueued ? " to-burn" : ""}`;
+    icon.setAttribute("aria-hidden", "true");
+
+    // Keep the native clickable wrapper intact. Only its visual child changes.
+    burn.replaceChildren(icon);
   }
 }
-
 
 function enhanceTagUsageUi(sheet) {
   const root = sheet.element;
