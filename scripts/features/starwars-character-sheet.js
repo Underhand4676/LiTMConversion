@@ -18,6 +18,389 @@ const LIVING_STANDARDS = {
   rich:      { label: "Rich",      spend: "ᖬ5,000" }
 };
 
+
+const CURRENT_CREDITS_FLAG = "currentCredits";
+
+function getCurrentCredits(actor) {
+  const raw = Number(actor?.getFlag(MODULE_ID, CURRENT_CREDITS_FLAG) ?? 0);
+
+  if (!Number.isFinite(raw)) return 0;
+
+  return Math.max(0, Math.trunc(raw));
+}
+
+function formatCredits(value) {
+  const amount = Math.max(0, Math.trunc(Number(value) || 0));
+  return `ᖬ${amount.toLocaleString("en-US")}`;
+}
+
+function canModifyCredits(actor) {
+  return Boolean(game.user.isGM || actor?.isOwner);
+}
+
+async function showFinancialFault(message) {
+  await foundry.applications.api.DialogV2.prompt({
+    window: {
+      title: "FINANCIAL ACCESS FAULT // REPUBLIC INTELLIGENCE"
+    },
+
+    content: `
+      <div style="
+        padding:16px;
+        background:linear-gradient(135deg,#171312 0%,#231916 100%);
+        border:1px solid #9b5e4a;
+        box-shadow:inset 0 0 0 1px #0d0908;
+        color:#f1ded8;
+        font-family:monospace;
+      ">
+        <div style="
+          color:#e18768;
+          font-size:11px;
+          font-weight:bold;
+          letter-spacing:2px;
+          padding-bottom:8px;
+          margin-bottom:10px;
+          border-bottom:1px solid #704438;
+        ">
+          LEDGER MODIFICATION REJECTED
+        </div>
+
+        <div style="
+          border-left:3px solid #b36750;
+          padding:8px 11px;
+          color:#f1c9bd;
+          font-size:10px;
+          letter-spacing:.7px;
+          line-height:1.5;
+        ">
+          ${escapeHtml(message)}
+        </div>
+
+        <div style="
+          margin-top:10px;
+          color:#86665d;
+          font-size:8px;
+          letter-spacing:1.1px;
+        ">
+          BANK RELAY CLOSED // NO ACCOUNT DATA ALTERED
+        </div>
+      </div>
+    `,
+
+    ok: {
+      label: "ACKNOWLEDGE",
+      icon: "fa-solid fa-triangle-exclamation"
+    },
+
+    modal: true
+  });
+}
+
+async function modifyCurrentCredits(sheet) {
+  if (!canModifyCredits(sheet.actor)) return;
+
+  const current = getCurrentCredits(sheet.actor);
+
+  let result;
+  try {
+    result = await foundry.applications.api.DialogV2.prompt({
+      window: {
+        title: "REPUBLIC INTELLIGENCE // FINANCIAL LEDGER ACCESS"
+      },
+
+      content: `
+        <div style="
+          padding:16px;
+          background:
+            repeating-linear-gradient(
+              0deg,
+              rgba(126,198,207,.018) 0px,
+              rgba(126,198,207,.018) 1px,
+              transparent 1px,
+              transparent 4px
+            ),
+            linear-gradient(145deg,#0b1417,#111b1e);
+          border:1px solid #49686e;
+          box-shadow:inset 0 0 20px rgba(0,0,0,.55);
+          color:#dbe8e8;
+          font-family:monospace;
+        ">
+
+          <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:12px;
+            padding-bottom:10px;
+            margin-bottom:13px;
+            border-bottom:1px solid #30484d;
+          ">
+            <div>
+              <div style="
+                color:#8ed0d5;
+                font-size:11px;
+                font-weight:700;
+                letter-spacing:1.8px;
+              ">
+                ◈ COVERT FINANCIAL INTERCEPT
+              </div>
+
+              <div style="
+                margin-top:4px;
+                color:#668085;
+                font-size:8px;
+                letter-spacing:1px;
+              ">
+                CIVILIAN BANK NODE // CREDENTIAL SPOOF ACTIVE
+              </div>
+            </div>
+
+            <div style="
+              color:#b9a574;
+              font-size:8px;
+              letter-spacing:1px;
+              text-align:right;
+            ">
+              RI/FIN-LEDGER
+            </div>
+          </div>
+
+
+          <div style="
+            display:grid;
+            grid-template-columns:1fr auto;
+            align-items:end;
+            gap:12px;
+            padding:10px 11px;
+            margin-bottom:12px;
+            background:#091114;
+            border-left:3px solid #b79b5f;
+          ">
+            <div>
+              <div style="
+                color:#708b90;
+                font-size:8px;
+                letter-spacing:1.4px;
+                margin-bottom:4px;
+              ">
+                VERIFIED ACCOUNT BALANCE
+              </div>
+
+              <div style="
+                color:#efe4c9;
+                font-size:21px;
+                font-weight:700;
+                letter-spacing:.5px;
+              ">
+                ${formatCredits(current)}
+              </div>
+            </div>
+
+            <div style="
+              color:#6d7d7f;
+              font-size:7px;
+              letter-spacing:1px;
+              text-align:right;
+            ">
+              LEDGER SYNCED
+            </div>
+          </div>
+
+
+          <div style="
+            display:grid;
+            grid-template-columns:1fr;
+            gap:10px;
+          ">
+
+            <label style="
+              display:grid;
+              grid-template-columns:145px 1fr;
+              align-items:center;
+              gap:10px;
+            ">
+              <span style="
+                color:#79979b;
+                font-size:8px;
+                font-weight:700;
+                letter-spacing:1.3px;
+              ">
+                LEDGER ACTION
+              </span>
+
+              <select name="operation" style="
+                width:100%;
+                box-sizing:border-box;
+                background:#0a1518;
+                color:#e1ebeb;
+                border:1px solid #45646a;
+                border-radius:0;
+                padding:7px 8px;
+                font-family:monospace;
+                font-size:10px;
+              ">
+                <option value="set">DIRECT BALANCE OVERRIDE</option>
+                <option value="add">CREDIT INJECTION</option>
+                <option value="subtract">DEBIT EXTRACTION</option>
+              </select>
+            </label>
+
+
+            <label style="
+              display:grid;
+              grid-template-columns:145px 1fr;
+              align-items:center;
+              gap:10px;
+            ">
+              <span style="
+                color:#79979b;
+                font-size:8px;
+                font-weight:700;
+                letter-spacing:1.3px;
+              ">
+                CREDIT VALUE
+              </span>
+
+              <span style="
+                display:grid;
+                grid-template-columns:auto 1fr;
+                align-items:center;
+                background:#081114;
+                border:1px solid #45646a;
+                border-left:2px solid #b79b5f;
+              ">
+                <span style="
+                  padding-left:9px;
+                  color:#d6bc7a;
+                  font-size:15px;
+                  font-weight:700;
+                ">
+                  ᖬ
+                </span>
+
+                <input
+                  name="amount"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  step="1"
+                  value="${current}"
+                  autofocus
+                  style="
+                    width:100%;
+                    box-sizing:border-box;
+                    margin:0;
+                    background:transparent;
+                    color:#f0eee5;
+                    border:0;
+                    padding:8px;
+                    font-family:monospace;
+                    font-size:15px;
+                    text-align:right;
+                    outline:none;
+                  "
+                >
+              </span>
+            </label>
+
+          </div>
+
+
+          <div style="
+            margin-top:13px;
+            padding-top:8px;
+            border-top:1px solid #263b40;
+            color:#5f777b;
+            font-size:8px;
+            letter-spacing:1px;
+          ">
+            ROUTE MASKED // REPUBLIC INTELLIGENCE CLEARANCE ACCEPTED
+          </div>
+
+        </div>
+      `,
+
+      ok: {
+        label: "COMMIT LEDGER CHANGE",
+        icon: "fa-solid fa-key",
+        callback: (_event, button) => ({
+          operation: String(button.form.elements.operation.value ?? "set"),
+          amount: button.form.elements.amount.value
+        })
+      },
+
+      modal: true
+    });
+  } catch (_error) {
+    return;
+  }
+
+  if (!result) return;
+
+  const amount = Number(result.amount);
+
+  if (!Number.isFinite(amount) || amount < 0 || !Number.isInteger(amount)) {
+    await showFinancialFault(
+      "CREDIT VALUE MUST BE A WHOLE NUMBER OF ZERO OR GREATER."
+    );
+    return;
+  }
+
+  let updated;
+
+  switch (result.operation) {
+    case "add":
+      updated = current + amount;
+      break;
+
+    case "subtract":
+      if (amount > current) {
+        await showFinancialFault(
+          `DEBIT EXTRACTION EXCEEDS VERIFIED BALANCE OF ${formatCredits(current)}.`
+        );
+        return;
+      }
+
+      updated = current - amount;
+      break;
+
+    case "set":
+    default:
+      updated = amount;
+      break;
+  }
+
+  await sheet.actor.setFlag(
+    MODULE_ID,
+    CURRENT_CREDITS_FLAG,
+    Math.trunc(updated)
+  );
+
+  sheet.render({ force: true });
+}
+
+function createCreditsModifyButton(sheet) {
+  if (!canModifyCredits(sheet.actor)) return null;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "litm-sw-credits-modify";
+  button.title = "Modify current credits";
+  button.setAttribute("aria-label", "Modify current credits");
+  button.innerHTML = `
+    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+    <span>MODIFY</span>
+  `;
+
+  button.addEventListener("click", async event => {
+    event.preventDefault();
+    event.stopPropagation();
+    await modifyCurrentCredits(sheet);
+  });
+
+  return button;
+}
+
 function getLivingStandard(actor) {
   const stored = String(
     actor?.getFlag(MODULE_ID, LIVING_STANDARD_FLAG) ?? "average"
@@ -588,6 +971,7 @@ function enhanceLivingStandardUi(sheet) {
   root.querySelectorAll(".litm-sw-living-standard").forEach(element => element.remove());
 
   const standard = getLivingStandard(sheet.actor);
+  const credits = getCurrentCredits(sheet.actor);
   const header = root.querySelector(".sheet-header");
   if (!header) return;
 
@@ -601,9 +985,9 @@ function enhanceLivingStandardUi(sheet) {
     const control = document.createElement("div");
     control.className = "litm-sw-living-standard litm-sw-living-standard-edit";
 
-    const label = document.createElement("label");
-    label.className = "litm-sw-living-standard-label";
-    label.textContent = "LIVING STANDARD";
+    const standardLabel = document.createElement("label");
+    standardLabel.className = "litm-sw-living-standard-label";
+    standardLabel.textContent = "LIVING STANDARD";
 
     const select = document.createElement("select");
     select.className = "litm-sw-living-standard-select";
@@ -624,9 +1008,31 @@ function enhanceLivingStandardUi(sheet) {
       await sheet.actor.setFlag(MODULE_ID, LIVING_STANDARD_FLAG, value);
     });
 
-    control.append(label, select);
+    const creditsLabel = document.createElement("span");
+    creditsLabel.className = "litm-sw-living-standard-label";
+    creditsLabel.textContent = "CURRENT CREDITS";
 
-    // Full sheet: put it above the custom-background controls.
+    const creditsControl = document.createElement("div");
+    creditsControl.className = "litm-sw-credits-control";
+
+    const creditsValue = document.createElement("span");
+    creditsValue.className = "litm-sw-credits-value";
+    creditsValue.textContent = formatCredits(credits);
+
+    creditsControl.append(creditsValue);
+
+    const modifyButton = createCreditsModifyButton(sheet);
+    if (modifyButton) creditsControl.append(modifyButton);
+
+    control.append(
+      standardLabel,
+      select,
+      creditsLabel,
+      creditsControl
+    );
+
+    // Full sheet: keep the economic profile immediately above the custom
+    // background controls so it reads as part of the character record.
     const backgroundControls = identity.querySelector(".grid.grid-4col");
     if (backgroundControls) {
       identity.insertBefore(control, backgroundControls);
@@ -637,7 +1043,7 @@ function enhanceLivingStandardUi(sheet) {
     return;
   }
 
-  // Locked mode: present it as dossier metadata, not as an editable control.
+  // Locked mode: present Living Standard and Credits as dossier metadata.
   const identity =
     header.querySelector(".character-name-container") ??
     header.querySelector(".col-compact-identity");
@@ -647,18 +1053,45 @@ function enhanceLivingStandardUi(sheet) {
   const dossier = document.createElement("div");
   dossier.className = "litm-sw-living-standard litm-sw-living-standard-dossier";
 
-  const label = document.createElement("span");
-  label.className = "litm-sw-living-standard-dossier-label";
-  label.textContent = "LIVING STANDARD";
+  const standardRow = document.createElement("div");
+  standardRow.className = "litm-sw-dossier-row";
 
-  const value = document.createElement("span");
-  value.className = "litm-sw-living-standard-dossier-value";
-  value.textContent = `${standard.label.toUpperCase()} // SPEND LEVEL ${standard.spend}`;
+  const standardLabel = document.createElement("span");
+  standardLabel.className = "litm-sw-living-standard-dossier-label";
+  standardLabel.textContent = "LIVING STANDARD";
 
-  dossier.append(label, value);
+  const standardValue = document.createElement("span");
+  standardValue.className = "litm-sw-living-standard-dossier-value";
+  standardValue.textContent =
+    `${standard.label.toUpperCase()} // SPEND LEVEL ${standard.spend}`;
+
+  standardRow.append(standardLabel, standardValue);
+
+
+  const creditsRow = document.createElement("div");
+  creditsRow.className = "litm-sw-dossier-row litm-sw-dossier-row-credits";
+
+  const creditsLabel = document.createElement("span");
+  creditsLabel.className = "litm-sw-living-standard-dossier-label";
+  creditsLabel.textContent = "CURRENT CREDITS";
+
+  const creditsRight = document.createElement("span");
+  creditsRight.className = "litm-sw-dossier-credit-cluster";
+
+  const creditsValue = document.createElement("span");
+  creditsValue.className = "litm-sw-living-standard-dossier-value litm-sw-current-credits";
+  creditsValue.textContent = formatCredits(credits);
+
+  creditsRight.append(creditsValue);
+
+  const modifyButton = createCreditsModifyButton(sheet);
+  if (modifyButton) creditsRight.append(modifyButton);
+
+  creditsRow.append(creditsLabel, creditsRight);
+
+  dossier.append(standardRow, creditsRow);
   identity.append(dossier);
 }
-
 
 function availableCrewThemecards(sheet) {
   const assignedUser = game.users.find(

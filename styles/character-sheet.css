@@ -1346,3 +1346,145 @@
   margin-top: 5px;
   padding-top: 5px;
 }
+
+
+/* =========================================================
+   CURRENT CREDITS // FINANCIAL LEDGER // v0.1.15
+   ========================================================= */
+
+/* Unlocked sheet: the existing two-column Living Standard grid becomes a
+   compact two-row economic profile. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-living-standard-edit {
+  grid-template-columns: minmax(118px, auto) minmax(190px, 240px) !important;
+  row-gap: 7px !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-credits-control {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(11, 24, 29, .82);
+  border: 1px solid rgba(94, 139, 148, .44);
+  box-shadow: inset 2px 0 0 rgba(200, 155, 82, .62);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-credits-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 5px 8px;
+  color: #d8c79d;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+
+/* The modify button intentionally reads like a tiny dossier control rather
+   than a large action button. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-credits-modify {
+  flex: 0 0 auto;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  margin: 0 3px 0 0 !important;
+  padding: 0 6px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 0 !important;
+  border-left: 1px solid rgba(93, 127, 133, .42) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #6e888d !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 7px !important;
+  font-weight: 700 !important;
+  letter-spacing: .10em;
+  line-height: 1 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-credits-modify i {
+  font-size: 8px;
+  color: #8ba4a8;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-credits-modify:hover,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-credits-modify:focus {
+  background: rgba(111, 167, 176, .08) !important;
+  color: #a8c6ca !important;
+  text-shadow: none !important;
+  outline: none !important;
+}
+
+
+/* Locked sheet: two restrained dossier rows. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-living-standard-dossier {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch !important;
+  gap: 4px !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-dossier-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-dossier-credit-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-current-credits {
+  color: #d8c79d !important;
+}
+
+/* Locked-sheet modify control is even quieter so it sits naturally inside the
+   flavor text. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-living-standard-dossier .litm-sw-credits-modify {
+  height: 17px !important;
+  min-height: 17px !important;
+  padding: 0 4px !important;
+  margin: 0 !important;
+  border-left-color: rgba(93, 127, 133, .25) !important;
+  font-size: 6px !important;
+  opacity: .72;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-living-standard-dossier .litm-sw-credits-modify:hover {
+  opacity: 1;
+}
+
+/* Compact sheet keeps the economic controls stacked and tidy. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet.litm-conversion-starwars-compact
+  .litm-sw-living-standard-edit {
+  grid-template-columns: 1fr !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet.litm-conversion-starwars-compact
+  .litm-sw-dossier-row {
+  flex-wrap: wrap;
+}
