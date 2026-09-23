@@ -1,5 +1,48 @@
 <section class="tab {{tabs.character.id}} {{tabs.character.cssClass}} scrollable" id="character"
     data-tab="{{tabs.character.id}}" data-group="{{tabs.character.group}}">
+
+    {{#if system.editMode}}
+    <div class="litm-sw-main-portrait-tools">
+
+        <div class="litm-sw-main-portrait-label">
+            <span>VISUAL RECORD</span>
+            <small>
+                {{#if system.customBackground}}
+                    SUBJECT IMAGE LINKED
+                {{else}}
+                    NO SUBJECT IMAGE
+                {{/if}}
+            </small>
+        </div>
+
+        <div class="litm-sw-main-portrait-actions">
+            <button
+                type="button"
+                class="litm-sw-portrait-button compact"
+                data-action="clickedCustomBackground"
+            >
+                <i class="fa-solid fa-image"></i>
+                {{#if system.customBackground}}
+                    REPLACE PORTRAIT
+                {{else}}
+                    SELECT PORTRAIT
+                {{/if}}
+            </button>
+
+            {{#if system.customBackground}}
+            <button
+                type="button"
+                class="litm-sw-portrait-button compact danger"
+                data-action="clickedRemoveCustomBackground"
+            >
+                <i class="fa-solid fa-trash"></i>
+                REMOVE
+            </button>
+            {{/if}}
+        </div>
+
+    </div>
+    {{/if}}
     <div class="character-sheet-divider flexrow">
         <div class="right-side {{#if system.editMode}}edit-mode{{/if}}">
             <div class="litm-character-themebooks-container">

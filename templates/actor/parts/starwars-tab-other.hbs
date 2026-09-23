@@ -11,62 +11,66 @@
                 <div class="litm-sw-portrait-title">CHARACTER PORTRAIT</div>
             </div>
 
-            <div class="litm-sw-portrait-code">RI/VIS-ID</div>
-        </div>
+            <div class="litm-sw-portrait-heading-right">
+                <div class="litm-sw-portrait-code">RI/VIS-ID</div>
 
+                {{#if system.editMode}}
+                <div class="litm-sw-portrait-heading-actions">
+                    <button
+                        type="button"
+                        class="litm-sw-portrait-button compact"
+                        data-action="clickedCustomBackground"
+                    >
+                        <i class="fa-solid fa-image"></i>
+                        {{#if system.customBackground}}
+                            REPLACE
+                        {{else}}
+                            SELECT
+                        {{/if}}
+                    </button>
 
-        <div class="litm-sw-portrait-frame {{#unless system.customBackground}}is-empty{{/unless}}">
-
-            {{#if system.customBackground}}
-                <img
-                    class="litm-sw-portrait-image"
-                    src="{{system.customBackground}}"
-                    alt="{{actor.name}}"
-                >
-            {{else}}
-                <div class="litm-sw-portrait-empty">
-                    <i class="fa-solid fa-user-secret"></i>
-                    <div>NO VISUAL RECORD ON FILE</div>
-                    <span>SUBJECT IMAGE AWAITING ACQUISITION</span>
+                    {{#if system.customBackground}}
+                    <button
+                        type="button"
+                        class="litm-sw-portrait-button compact danger"
+                        data-action="clickedRemoveCustomBackground"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                        REMOVE
+                    </button>
+                    {{/if}}
                 </div>
-            {{/if}}
-
-        </div>
-
-
-        {{#if system.editMode}}
-        <div class="litm-sw-portrait-controls">
-
-            <button
-                type="button"
-                class="litm-sw-portrait-button"
-                data-action="clickedCustomBackground"
-            >
-                <i class="fa-solid fa-image"></i>
-                {{#if system.customBackground}}
-                    REPLACE PORTRAIT
-                {{else}}
-                    SELECT PORTRAIT
                 {{/if}}
-            </button>
+            </div>
+        </div>
 
-            {{#if system.customBackground}}
-            <button
-                type="button"
-                class="litm-sw-portrait-button danger"
-                data-action="clickedRemoveCustomBackground"
-            >
-                <i class="fa-solid fa-trash"></i>
-                REMOVE PORTRAIT
-            </button>
-            {{/if}}
+
+        <div class="litm-sw-portrait-stage">
+
+            <div class="litm-sw-portrait-frame {{#if system.customBackground}}has-image{{else}}is-empty{{/if}}">
+
+                {{#if system.customBackground}}
+                    <img
+                        class="litm-sw-portrait-image"
+                        src="{{system.customBackground}}"
+                        alt="{{actor.name}}"
+                    >
+                {{else}}
+                    <div class="litm-sw-portrait-empty">
+                        <i class="fa-solid fa-user-secret"></i>
+                        <div>NO VISUAL RECORD ON FILE</div>
+                        <span>SUBJECT IMAGE AWAITING ACQUISITION</span>
+                    </div>
+                {{/if}}
+
+            </div>
 
         </div>
+
 
         <div class="litm-sw-portrait-help">
-            IMAGE FILE IS STORED WITH THE CHARACTER DOSSIER // SHEET BACKGROUND REMAINS SYSTEM-LOCKED
+            VISUAL RECORD ENCRYPTED // DOSSIER ACCESS HASH VERIFIED
         </div>
-        {{/if}}
 
     </div>
 

@@ -1747,3 +1747,161 @@
   text-align: center;
 }
 
+
+
+/* =========================================================
+   PORTRAIT RESPONSIVE FRAME + ACCESS CONTROLS // v0.2.0
+   ========================================================= */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-heading-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-heading-actions,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-main-portrait-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-stage {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* When a portrait exists, the FRAME is sized by the image itself.
+   Square images produce square frames; vertical images produce vertical
+   frames; landscapes remain landscape. No artificial canvas/letterbox. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-frame.has-image {
+  display: inline-block !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  line-height: 0;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-frame.has-image .litm-sw-portrait-image {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  max-height: 610px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  background: transparent !important;
+}
+
+/* The empty placeholder still has a useful visual footprint before an image
+   has been selected. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-frame.is-empty {
+  width: min(680px, 100%) !important;
+  min-height: 400px !important;
+}
+
+/* The previous v0.1.20 image rule used fixed height/min-height. Neutralize it
+   for real portrait images so the intrinsic aspect ratio controls the frame. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-frame.has-image > img {
+  min-height: 0 !important;
+}
+
+/* Compact top-of-panel controls. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-button.compact {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 25px !important;
+  height: 25px !important;
+  padding: 0 8px !important;
+  gap: 5px;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .075em !important;
+}
+
+/* Main-tab quick portrait access. This stays deliberately slim so it does not
+   steal vertical space from Theme Cards. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-main-portrait-tools {
+  width: calc(100% - 36px);
+  margin: 9px auto 7px;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(7,17,21,.52);
+  border-top: 1px solid rgba(111,155,164,.24);
+  border-bottom: 1px solid rgba(111,155,164,.28);
+  border-left: 2px solid rgba(200,155,82,.58);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-main-portrait-label {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-main-portrait-label > span {
+  color: #93b2b7;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .14em;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-main-portrait-label > small {
+  color: #5d767b;
+  font-size: 7px;
+  letter-spacing: .09em;
+}
+
+/* Replace the obvious/stating-the-obvious footer with an in-universe status
+   readout. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-portrait-help {
+  margin-top: 9px !important;
+  color: #607a7f !important;
+  font-size: 8px !important;
+  letter-spacing: .11em !important;
+}
+
+@media (max-width: 900px) {
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .litm-sw-main-portrait-tools {
+    flex-wrap: wrap;
+  }
+
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .litm-sw-portrait-heading {
+    align-items: flex-start;
+  }
+
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .litm-sw-portrait-heading-right {
+    max-width: 55%;
+  }
+}
