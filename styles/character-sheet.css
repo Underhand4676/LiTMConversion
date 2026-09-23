@@ -1094,3 +1094,72 @@
   text-underline-offset: 3px;
 }
 
+
+
+/* =========================================================
+   NATIVE TAG INTERACTION RESTORE // v0.1.11
+   Keep Mist Engine's native click/right-click/data-action mechanics.
+   We only restyle the existing burn icon and make state changes obvious.
+   ========================================================= */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .burn-indicator.litm-sw-burn-control .burn-icon.litm-sw-burn-flame {
+  background-image: none !important;
+  background: none !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+  font-family: "Font Awesome 6 Free" !important;
+  font-style: normal !important;
+  font-weight: 900 !important;
+  color: #c8ad75 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .burn-indicator.litm-sw-burn-control .burn-icon.litm-sw-burn-flame.to-burn {
+  color: #ff9f43 !important;
+  text-shadow: 0 0 8px rgba(255,159,67,.55) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .burn-indicator.litm-sw-burn-control:has(.burn-icon.to-burn) {
+  border-color: rgba(255, 132, 64, .92) !important;
+  background: rgba(196, 75, 35, .19) !important;
+  box-shadow:
+    inset 0 0 7px rgba(255,126,55,.12),
+    0 0 8px rgba(255,126,55,.25) !important;
+}
+
+/* Selected tags need a clear datapad state even when the stock hand-drawn
+   selection circle is subtle on a dark theme. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-pc-powertag.selected,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-pc-storytag.selected {
+  color: #f0fbfc !important;
+  text-shadow: 0 0 7px rgba(127,203,211,.45) !important;
+}
+
+/* Burned/scratched state must stay unmistakable even though our general tag
+   color rules use !important. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-pc-powertag.burned,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-pc-storytag.burned {
+  color: #7f9093 !important;
+  text-decoration-line: line-through !important;
+  text-decoration-style: solid !important;
+  text-decoration-thickness: 2px !important;
+  text-decoration-color: #d28a66 !important;
+  opacity: .74 !important;
+}
+
+/* The adjudication tooltip is intentionally a touch more substantial than
+   Foundry's tiny generic tooltip because it may contain a sentence. */
+#tooltip.litm-sw-tag-tooltip,
+.locked-tooltip.litm-sw-tag-tooltip {
+  max-width: 340px;
+  padding: 7px 9px;
+  line-height: 1.35;
+  font-size: 12px;
+  letter-spacing: .015em;
+}
