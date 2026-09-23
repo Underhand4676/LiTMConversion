@@ -103,7 +103,7 @@ async function modifyCurrentCredits(sheet) {
 
   let result;
   try {
-    result = await foundry.applications.api.DialogV2.prompt({
+    result = await foundry.applications.api.DialogV2.wait({
       window: {
         title: "REPUBLIC INTELLIGENCE // FINANCIAL LEDGER ACCESS"
       },
@@ -166,7 +166,8 @@ async function modifyCurrentCredits(sheet) {
           </div>
 
 
-          <div style="
+          <!-- EDITABLE VERIFIED BALANCE -->
+          <label style="
             display:grid;
             grid-template-columns:1fr auto;
             align-items:end;
@@ -176,95 +177,22 @@ async function modifyCurrentCredits(sheet) {
             background:#091114;
             border-left:3px solid #b79b5f;
           ">
+
             <div>
               <div style="
                 color:#708b90;
                 font-size:8px;
                 letter-spacing:1.4px;
-                margin-bottom:4px;
+                margin-bottom:5px;
               ">
                 VERIFIED ACCOUNT BALANCE
               </div>
-
-              <div style="
-                color:#efe4c9;
-                font-size:21px;
-                font-weight:700;
-                letter-spacing:.5px;
-              ">
-                ${formatCredits(current)}
-              </div>
-            </div>
-
-            <div style="
-              color:#6d7d7f;
-              font-size:7px;
-              letter-spacing:1px;
-              text-align:right;
-            ">
-              LEDGER SYNCED
-            </div>
-          </div>
-
-
-          <div style="
-            display:grid;
-            grid-template-columns:1fr;
-            gap:10px;
-          ">
-
-            <label style="
-              display:grid;
-              grid-template-columns:145px 1fr;
-              align-items:center;
-              gap:10px;
-            ">
-              <span style="
-                color:#79979b;
-                font-size:8px;
-                font-weight:700;
-                letter-spacing:1.3px;
-              ">
-                LEDGER ACTION
-              </span>
-
-              <select name="operation" style="
-                width:100%;
-                box-sizing:border-box;
-                background:#0a1518;
-                color:#e1ebeb;
-                border:1px solid #45646a;
-                border-radius:0;
-                padding:7px 8px;
-                font-family:monospace;
-                font-size:10px;
-              ">
-                <option value="set">DIRECT BALANCE OVERRIDE</option>
-                <option value="add">CREDIT INJECTION</option>
-                <option value="subtract">DEBIT EXTRACTION</option>
-              </select>
-            </label>
-
-
-            <label style="
-              display:grid;
-              grid-template-columns:145px 1fr;
-              align-items:center;
-              gap:10px;
-            ">
-              <span style="
-                color:#79979b;
-                font-size:8px;
-                font-weight:700;
-                letter-spacing:1.3px;
-              ">
-                CREDIT VALUE
-              </span>
 
               <span style="
                 display:grid;
                 grid-template-columns:auto 1fr;
                 align-items:center;
+                max-width:230px;
                 background:#081114;
                 border:1px solid #45646a;
                 border-left:2px solid #b79b5f;
@@ -272,20 +200,19 @@ async function modifyCurrentCredits(sheet) {
                 <span style="
                   padding-left:9px;
                   color:#d6bc7a;
-                  font-size:15px;
+                  font-size:17px;
                   font-weight:700;
                 ">
                   ᖬ
                 </span>
 
                 <input
-                  name="amount"
+                  name="balance"
                   type="number"
                   inputmode="numeric"
                   min="0"
                   step="1"
                   value="${current}"
-                  autofocus
                   style="
                     width:100%;
                     box-sizing:border-box;
@@ -295,15 +222,86 @@ async function modifyCurrentCredits(sheet) {
                     border:0;
                     padding:8px;
                     font-family:monospace;
-                    font-size:15px;
+                    font-size:18px;
+                    font-weight:700;
                     text-align:right;
                     outline:none;
                   "
                 >
               </span>
-            </label>
+            </div>
 
-          </div>
+            <div style="
+              color:#6d7d7f;
+              font-size:7px;
+              letter-spacing:1px;
+              text-align:right;
+            ">
+              LEDGER SYNCED<br>
+              DIRECT EDIT ENABLED
+            </div>
+
+          </label>
+
+
+          <!-- TRANSACTION VALUE -->
+          <label style="
+            display:grid;
+            grid-template-columns:145px 1fr;
+            align-items:center;
+            gap:10px;
+          ">
+            <span style="
+              color:#79979b;
+              font-size:8px;
+              font-weight:700;
+              letter-spacing:1.3px;
+            ">
+              CREDIT VALUE
+            </span>
+
+            <span style="
+              display:grid;
+              grid-template-columns:auto 1fr;
+              align-items:center;
+              background:#081114;
+              border:1px solid #45646a;
+              border-left:2px solid #6f9399;
+            ">
+              <span style="
+                padding-left:9px;
+                color:#8ea9ad;
+                font-size:15px;
+                font-weight:700;
+              ">
+                ᖬ
+              </span>
+
+              <input
+                name="amount"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                step="1"
+                value=""
+                placeholder="0"
+                autofocus
+                style="
+                  width:100%;
+                  box-sizing:border-box;
+                  margin:0;
+                  background:transparent;
+                  color:#f0eee5;
+                  border:0;
+                  padding:8px;
+                  font-family:monospace;
+                  font-size:15px;
+                  text-align:right;
+                  outline:none;
+                "
+              >
+            </span>
+          </label>
 
 
           <div style="
@@ -313,6 +311,17 @@ async function modifyCurrentCredits(sheet) {
             color:#5f777b;
             font-size:8px;
             letter-spacing:1px;
+            line-height:1.45;
+          ">
+            EDIT THE VERIFIED BALANCE DIRECTLY OR ENTER A TRANSACTION VALUE.
+            BLANK TRANSACTION VALUES ARE INTERPRETED AS ZERO.
+          </div>
+
+          <div style="
+            margin-top:6px;
+            color:#536a6e;
+            font-size:7px;
+            letter-spacing:1px;
           ">
             ROUTE MASKED // REPUBLIC INTELLIGENCE CLEARANCE ACCEPTED
           </div>
@@ -320,15 +329,31 @@ async function modifyCurrentCredits(sheet) {
         </div>
       `,
 
-      ok: {
-        label: "COMMIT LEDGER CHANGE",
-        icon: "fa-solid fa-key",
-        callback: (_event, button) => ({
-          operation: String(button.form.elements.operation.value ?? "set"),
-          amount: button.form.elements.amount.value
-        })
-      },
+      buttons: [
+        {
+          action: "inject",
+          label: "CREDIT INJECTION",
+          icon: "fa-solid fa-plus",
+          default: true,
+          callback: (_event, button) => ({
+            operation: "add",
+            balance: button.form.elements.balance.value,
+            amount: button.form.elements.amount.value
+          })
+        },
+        {
+          action: "extract",
+          label: "DEBIT EXTRACTION",
+          icon: "fa-solid fa-minus",
+          callback: (_event, button) => ({
+            operation: "subtract",
+            balance: button.form.elements.balance.value,
+            amount: button.form.elements.amount.value
+          })
+        }
+      ],
 
+      rejectClose: false,
       modal: true
     });
   } catch (_error) {
@@ -337,37 +362,52 @@ async function modifyCurrentCredits(sheet) {
 
   if (!result) return;
 
-  const amount = Number(result.amount);
+  // The displayed balance is always pre-filled, but if the user clears it,
+  // treat that as zero instead of throwing an error. The transaction field is
+  // intentionally blank by default and blank also means zero.
+  const balanceText = String(result.balance ?? "").trim();
+  const amountText = String(result.amount ?? "").trim();
 
-  if (!Number.isFinite(amount) || amount < 0 || !Number.isInteger(amount)) {
+  const baseBalance = balanceText === "" ? 0 : Number(balanceText);
+  const amount = amountText === "" ? 0 : Number(amountText);
+
+  if (
+    !Number.isFinite(baseBalance) ||
+    baseBalance < 0 ||
+    !Number.isInteger(baseBalance)
+  ) {
+    await showFinancialFault(
+      "VERIFIED ACCOUNT BALANCE MUST BE A WHOLE NUMBER OF ZERO OR GREATER."
+    );
+    return;
+  }
+
+  if (
+    !Number.isFinite(amount) ||
+    amount < 0 ||
+    !Number.isInteger(amount)
+  ) {
     await showFinancialFault(
       "CREDIT VALUE MUST BE A WHOLE NUMBER OF ZERO OR GREATER."
     );
     return;
   }
 
-  let updated;
+  let updated = baseBalance;
 
-  switch (result.operation) {
-    case "add":
-      updated = current + amount;
-      break;
+  if (result.operation === "add") {
+    updated = baseBalance + amount;
+  }
 
-    case "subtract":
-      if (amount > current) {
-        await showFinancialFault(
-          `DEBIT EXTRACTION EXCEEDS VERIFIED BALANCE OF ${formatCredits(current)}.`
-        );
-        return;
-      }
+  else if (result.operation === "subtract") {
+    if (amount > baseBalance) {
+      await showFinancialFault(
+        `DEBIT EXTRACTION OF ${formatCredits(amount)} EXCEEDS TARGET BALANCE OF ${formatCredits(baseBalance)}.`
+      );
+      return;
+    }
 
-      updated = current - amount;
-      break;
-
-    case "set":
-    default:
-      updated = amount;
-      break;
+    updated = baseBalance - amount;
   }
 
   await sheet.actor.setFlag(
