@@ -77,6 +77,47 @@ function extractD6Results(roll) {
   return values;
 }
 
+
+function extractD6ResultsFromSerializedRoll(rollData) {
+  if (!rollData) return [];
+
+  const values = [];
+  const terms = Array.from(rollData.terms ?? []);
+
+  for (const term of terms) {
+    if (Number(term?.faces) !== 6) continue;
+
+    for (const result of term?.results ?? []) {
+      const value = Number(result?.result);
+      if (Number.isInteger(value) && value >= 1 && value <= 6) {
+        values.push(value);
+      }
+    }
+  }
+
+  return values;
+}
+
+function extractD6ResultsFromMessage(message) {
+  const values = [];
+
+  // Normal Foundry path: hydrated Roll instances.
+  if (message?.rolls?.length) {
+    for (const roll of message.rolls) {
+      values.push(...extractD6Results(roll));
+    }
+    return values;
+  }
+
+  // Fallback for custom roll-bearing messages if a hook fires before the
+  // message's Roll objects are fully hydrated on a given client.
+  for (const rollData of message?._source?.rolls ?? []) {
+    values.push(...extractD6ResultsFromSerializedRoll(rollData));
+  }
+
+  return values;
+}
+
 async function saveValues(values, user = game.user) {
   if (!user || !values?.length) return 0;
   if (game.settings.get(MODULE_ID, "paused")) return 0;
@@ -545,7 +586,8 @@ Hooks.once("ready", () => {
     open: openTelemetry,
     recordRoll,
     recordValues,
-    extractD6Results
+    extractD6Results,
+    extractD6ResultsFromMessage
   };
 
   console.log(`${MODULE_ID} | Probability Telemetry online`);
@@ -566,23 +608,29 @@ Hooks.on("getSceneControlButtons", controls => {
   };
 });
 
-Hooks.on("createChatMessage", (message, _options, userId) => {
+Hooks.on("createChatMessage", message => {
   if (game.settings.get(MODULE_ID, "paused")) return;
-  if (!message.rolls?.length) return;
   if (!game.settings.get(MODULE_ID, "allowHiddenRolls") && messageIsHidden(message)) return;
 
-  // Foundry v14 supplies the creating client as the third hook argument. Use
-  // that when available, then fall back to the ChatMessage author. This keeps
-  // only one client responsible for storing a roll while still supporting
-  // custom roll-bearing messages such as the Probability Processor macro.
-  const sourceUserId = userId ?? message.author?.id ?? message.user?.id ?? message.user ?? null;
-  if (sourceUserId !== game.user.id) return;
+  // Every connected client receives createChatMessage. Only the browser
+  // belonging to the message author is allowed to write telemetry, preventing
+  // duplicate records while making custom macro-created roll messages reliable.
+  const authorId =
+    message.author?.id ??
+    message.user?.id ??
+    message.user ??
+    message._source?.user ??
+    null;
 
-  const values = [];
-  for (const roll of message.rolls) values.push(...extractD6Results(roll));
+  if (!authorId || authorId !== game.user.id) return;
 
-  if (values.length) {
-    queueValues(values, game.user);
-    console.debug(`${MODULE_ID} | Recorded ${values.length} d6 result(s) from chat message ${message.id}`);
-  }
+  const values = extractD6ResultsFromMessage(message);
+  if (!values.length) return;
+
+  const author = game.users.get(authorId) ?? game.user;
+
+  queueValues(values, author);
+  console.debug(
+    `${MODULE_ID} | Recorded ${values.length} d6 result(s) from chat message ${message.id}`
+  );
 });

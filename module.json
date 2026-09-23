@@ -3,7 +3,7 @@
   "type": "module",
   "title": "LiTM Conversion",
   "description": "Foundry VTT conversion tools and utilities for LiTM.",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "authors": [
     {
       "name": "Underhand4676",
@@ -24,7 +24,7 @@
   ],
   "url": "https://github.com/Underhand4676/LiTMConversion",
   "manifest": "https://github.com/Underhand4676/LiTMConversion/releases/latest/download/module.json",
-  "download": "https://github.com/Underhand4676/LiTMConversion/releases/download/v0.1.13/litm-conversion-v0.1.13.zip",
+  "download": "https://github.com/Underhand4676/LiTMConversion/releases/download/v0.1.14/litm-conversion-v0.1.14.zip",
   "license": "LICENSE",
   "readme": "README.md"
 }

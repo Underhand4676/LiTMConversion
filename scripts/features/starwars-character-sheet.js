@@ -7,6 +7,32 @@ const GEAR_CAPACITY = 4;
 const CONSUMABLE_CAPACITY = 2;
 const HIDDEN_CARD_TYPES = new Set(["quintessences", "fellowships"]);
 
+
+const LIVING_STANDARD_FLAG = "livingStandard";
+
+const LIVING_STANDARDS = {
+  destitute: { label: "Destitute", spend: "ᖬ10" },
+  poor:      { label: "Poor",      spend: "ᖬ40" },
+  average:   { label: "Average",   spend: "ᖬ200" },
+  wealthy:   { label: "Wealthy",   spend: "ᖬ1,000" },
+  rich:      { label: "Rich",      spend: "ᖬ5,000" }
+};
+
+function getLivingStandard(actor) {
+  const stored = String(
+    actor?.getFlag(MODULE_ID, LIVING_STANDARD_FLAG) ?? "average"
+  ).toLowerCase();
+
+  const key = Object.hasOwn(LIVING_STANDARDS, stored)
+    ? stored
+    : "average";
+
+  return {
+    key,
+    ...LIVING_STANDARDS[key]
+  };
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -554,6 +580,86 @@ function enhanceTagUsageUi(sheet) {
   }
 }
 
+
+function enhanceLivingStandardUi(sheet) {
+  const root = sheet.element;
+  if (!root) return;
+
+  root.querySelectorAll(".litm-sw-living-standard").forEach(element => element.remove());
+
+  const standard = getLivingStandard(sheet.actor);
+  const header = root.querySelector(".sheet-header");
+  if (!header) return;
+
+  if (sheet.actor.system.editMode) {
+    const identity =
+      header.querySelector(".col-character-name.edit-mode") ??
+      header.querySelector(".col-compact-identity.edit-mode");
+
+    if (!identity) return;
+
+    const control = document.createElement("div");
+    control.className = "litm-sw-living-standard litm-sw-living-standard-edit";
+
+    const label = document.createElement("label");
+    label.className = "litm-sw-living-standard-label";
+    label.textContent = "LIVING STANDARD";
+
+    const select = document.createElement("select");
+    select.className = "litm-sw-living-standard-select";
+    select.setAttribute("aria-label", "Living Standard");
+
+    for (const [key, entry] of Object.entries(LIVING_STANDARDS)) {
+      const option = document.createElement("option");
+      option.value = key;
+      option.textContent = entry.label;
+      option.selected = key === standard.key;
+      select.append(option);
+    }
+
+    select.addEventListener("change", async event => {
+      const value = String(event.currentTarget.value ?? "average");
+      if (!Object.hasOwn(LIVING_STANDARDS, value)) return;
+
+      await sheet.actor.setFlag(MODULE_ID, LIVING_STANDARD_FLAG, value);
+    });
+
+    control.append(label, select);
+
+    // Full sheet: put it above the custom-background controls.
+    const backgroundControls = identity.querySelector(".grid.grid-4col");
+    if (backgroundControls) {
+      identity.insertBefore(control, backgroundControls);
+    } else {
+      identity.append(control);
+    }
+
+    return;
+  }
+
+  // Locked mode: present it as dossier metadata, not as an editable control.
+  const identity =
+    header.querySelector(".character-name-container") ??
+    header.querySelector(".col-compact-identity");
+
+  if (!identity) return;
+
+  const dossier = document.createElement("div");
+  dossier.className = "litm-sw-living-standard litm-sw-living-standard-dossier";
+
+  const label = document.createElement("span");
+  label.className = "litm-sw-living-standard-dossier-label";
+  label.textContent = "LIVING STANDARD";
+
+  const value = document.createElement("span");
+  value.className = "litm-sw-living-standard-dossier-value";
+  value.textContent = `${standard.label.toUpperCase()} // SPEND LEVEL ${standard.spend}`;
+
+  dossier.append(label, value);
+  identity.append(dossier);
+}
+
+
 function availableCrewThemecards(sheet) {
   const assignedUser = game.users.find(
     user => user.character?._id === sheet.actor.id && !user.isGM
@@ -728,6 +834,7 @@ Hooks.once("init", async () => {
       _onRender(context, options) {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
+        enhanceLivingStandardUi(this);
       }
 
       async assignFellowshipThemecard() {
@@ -800,6 +907,7 @@ Hooks.once("init", async () => {
       _onRender(context, options) {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
+        enhanceLivingStandardUi(this);
       }
 
       async assignFellowshipThemecard() {

@@ -1252,3 +1252,97 @@
   text-align: center !important;
   margin: 0 !important;
 }
+
+
+/* =========================================================
+   LIVING STANDARD // DOSSIER RESOURCE PROFILE // v0.1.14
+   ========================================================= */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-living-standard {
+  box-sizing: border-box;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-living-standard-edit {
+  display: grid;
+  grid-template-columns: minmax(118px, auto) minmax(160px, 220px);
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 8px 0 10px;
+  padding: 6px 8px;
+  background: rgba(8, 18, 22, .56);
+  border-left: 2px solid rgba(200, 155, 82, .78);
+  border-bottom: 1px solid rgba(87, 125, 132, .32);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-living-standard-label {
+  color: #789397;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .14em;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-living-standard-select {
+  width: 100%;
+  min-height: 28px;
+  margin: 0 !important;
+  padding: 3px 28px 3px 8px !important;
+  border: 1px solid rgba(94, 139, 148, .55) !important;
+  border-radius: 0 !important;
+  background: rgba(11, 24, 29, .92) !important;
+  color: #e2ecec !important;
+  box-shadow: inset 2px 0 0 rgba(200, 155, 82, .72) !important;
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-living-standard-dossier {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px 8px;
+  margin-top: 10px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(89, 126, 133, .28);
+  color: #8fa5a8;
+  line-height: 1.25;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-living-standard-dossier-label {
+  color: #648187;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-living-standard-dossier-value {
+  color: #c9bc98;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .075em;
+}
+
+/* Compact sheet keeps the dossier line small enough to stay out of the way. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet.litm-conversion-starwars-compact
+  .litm-sw-living-standard-edit {
+  grid-template-columns: 1fr;
+  gap: 4px;
+  width: 100%;
+  margin: 5px 0;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet.litm-conversion-starwars-compact
+  .litm-sw-living-standard-dossier {
+  margin-top: 5px;
+  padding-top: 5px;
+}
