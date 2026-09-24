@@ -582,11 +582,7 @@
     0 0 0 1px rgba(136, 217, 225, 0.22) !important;
 }
 
-.litm-starwars-themebook-sheet button,
-.litm-starwars-themebook-sheet .button,
-.litm-starwars-themebook-sheet [type="button"],
-.litm-starwars-themebook-sheet .clickable,
-.litm-starwars-themebook-sheet a.button,
+.litm-starwars-themebook-sheet .litm-sw-themebook-action-bar,
 .litm-starwars-themebook-sheet .themebook-section-header {
   background: linear-gradient(180deg, rgba(58, 42, 19, 0.88), rgba(104, 66, 31, 0.92)) !important;
   border: 1px solid rgba(193, 135, 78, 0.62) !important;
@@ -596,24 +592,21 @@
     inset 3px 0 0 rgba(209, 150, 93, 0.88),
     inset 0 1px 0 rgba(255,255,255,0.06),
     0 0 10px rgba(0, 0, 0, 0.18) !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
   font-weight: 700 !important;
   letter-spacing: 0.06em !important;
   text-transform: uppercase !important;
   text-shadow: none !important;
 }
 
-.litm-starwars-themebook-sheet button:hover,
-.litm-starwars-themebook-sheet .button:hover,
-.litm-starwars-themebook-sheet [type="button"]:hover,
-.litm-starwars-themebook-sheet .clickable:hover,
-.litm-starwars-themebook-sheet a.button:hover,
+.litm-starwars-themebook-sheet .litm-sw-themebook-action-bar:hover,
 .litm-starwars-themebook-sheet .themebook-section-header:hover {
   filter: brightness(1.08);
 }
 
-.litm-starwars-themebook-sheet .themebook-section-header {
+.litm-starwars-themebook-sheet .themebook-section-header,
+.litm-starwars-themebook-sheet .litm-sw-themebook-action-bar {
   text-align: center !important;
-  padding: 6px 10px !important;
 }
 
 .litm-starwars-themebook-sheet h1,
@@ -688,61 +681,28 @@
 }
 
 
+
+
 /* =========================================================
-   THEMEBOOK SHEET BUGFIX / FIELD POLISH // v0.4.1
+   THEMEBOOK SHEET BUGFIX / FIELD POLISH // v0.4.2
    ========================================================= */
 
-/* The generic v0.4.0 button font override interfered with Mist Engine's
-   icon font. Keep action/header/delete glyphs on their native font stack. */
-.litm-starwars-themebook-sheet .window-header button,
-.litm-starwars-themebook-sheet .window-header a,
-.litm-starwars-themebook-sheet .item-control,
-.litm-starwars-themebook-sheet [data-action*="delete" i],
-.litm-starwars-themebook-sheet [data-action*="remove" i] {
-  font-family: inherit !important;
-  text-transform: none !important;
-  letter-spacing: normal !important;
-}
+/* Mist Engine's own icon/header/delete controls are intentionally NOT styled
+   here. Their native Font Awesome classes and click mechanics are left alone. */
 
-/* Explicitly restore Font Awesome when those controls use FA icons. */
-.litm-starwars-themebook-sheet .fa,
-.litm-starwars-themebook-sheet .fas,
-.litm-starwars-themebook-sheet .far,
-.litm-starwars-themebook-sheet .fa-solid,
-.litm-starwars-themebook-sheet .fa-regular {
-  font-family: "Font Awesome 6 Free", "Font Awesome 5 Free" !important;
-}
-
-.litm-starwars-themebook-sheet .fa-solid,
-.litm-starwars-themebook-sheet .fas {
-  font-weight: 900 !important;
-}
-
-/* Text-bearing action bars keep the technical monospace look. */
-.litm-starwars-themebook-sheet .themebook-section-header,
-.litm-starwars-themebook-sheet button:not(.item-control):not(.header-control):not([data-action*="delete" i]):not([data-action*="remove" i]) {
-  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
-}
-
-/* DATA / OPTIONS / DESCRIPTION were inheriting almost-black system text. */
-.litm-starwars-themebook-sheet th,
+/* DATA / OPTIONS / DESCRIPTION */
 .litm-starwars-themebook-sheet .litm-sw-themebook-column-heading {
-  color: #9ed5db !important;
-  background: rgba(10, 19, 24, 0.72) !important;
-  border-top: 1px solid rgba(77, 112, 120, 0.28) !important;
-  border-bottom: 1px solid rgba(77, 112, 120, 0.42) !important;
+  color: #a9dce1 !important;
+  background: rgba(8, 18, 23, 0.94) !important;
+  border-top: 1px solid rgba(92, 139, 148, 0.38) !important;
+  border-bottom: 1px solid rgba(92, 139, 148, 0.55) !important;
+  padding: 6px 8px !important;
   font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
   font-size: 10px !important;
   font-weight: 700 !important;
-  letter-spacing: 0.10em !important;
+  letter-spacing: 0.12em !important;
   text-transform: uppercase !important;
   text-shadow: none !important;
-}
-
-/* Some Mist Engine sheets render those headings as ordinary divs instead of
-   TH elements; the JS adds this class when their text matches. */
-.litm-starwars-themebook-sheet .litm-sw-themebook-column-heading {
-  padding: 6px 8px !important;
 }
 
 /* Tag first, adjudication note second. */
@@ -753,43 +713,17 @@
 }
 
 .litm-starwars-themebook-sheet .litm-sw-themebook-note-field {
-  color: #b8c8ca !important;
+  color: #b9cacc !important;
   border-left-color: #527980 !important;
   font-size: 11px !important;
 }
 
 .litm-starwars-themebook-sheet .litm-sw-themebook-tag-field::placeholder {
-  color: #d3b77b !important;
-  opacity: 0.78 !important;
+  color: #e0c486 !important;
+  opacity: 0.92 !important;
 }
 
 .litm-starwars-themebook-sheet .litm-sw-themebook-note-field::placeholder {
-  color: #789ca2 !important;
-  opacity: 0.78 !important;
-}
-
-/* Keep stock delete/utility controls compact and visibly clickable without
-   replacing their native data-action behavior. */
-.litm-starwars-themebook-sheet .item-control,
-.litm-starwars-themebook-sheet [data-action*="delete" i],
-.litm-starwars-themebook-sheet [data-action*="remove" i] {
-  min-width: 24px !important;
-  width: 24px !important;
-  height: 24px !important;
-  padding: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: rgba(76, 49, 24, 0.68) !important;
-  border: 1px solid rgba(196, 142, 80, 0.58) !important;
-  color: #e0bd78 !important;
-  box-shadow: inset 0 0 7px rgba(0,0,0,.32) !important;
-}
-
-.litm-starwars-themebook-sheet .item-control:hover,
-.litm-starwars-themebook-sheet [data-action*="delete" i]:hover,
-.litm-starwars-themebook-sheet [data-action*="remove" i]:hover {
-  color: #f1d9a5 !important;
-  border-color: #d8a15e !important;
-  background: rgba(105, 61, 25, 0.78) !important;
+  color: #86aeb4 !important;
+  opacity: 0.90 !important;
 }

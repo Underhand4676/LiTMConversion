@@ -127,97 +127,188 @@ function isThemebookSheet(app) {
   return classes.some(value => value.includes("themebook"));
 }
 
-function topLevelChildWithin(row, node) {
-  if (!(row instanceof HTMLElement) || !(node instanceof HTMLElement)) return node;
+function childBranchWithin(ancestor, node) {
+  if (!(ancestor instanceof HTMLElement) || !(node instanceof HTMLElement)) {
+    return node;
+  }
 
   let current = node;
 
-  while (current.parentElement && current.parentElement !== row) {
+  while (current.parentElement && current.parentElement !== ancestor) {
     current = current.parentElement;
   }
 
   return current;
 }
 
-function enhanceThemebookTagRows(root, arrayPath) {
-  const rows = root.querySelectorAll(
-    `.item-powertag-line, .item-weakness-line, [data-array="${arrayPath}"]`
+function findTagPair(questionInput, root) {
+  const placeholder = String(questionInput.getAttribute("placeholder") ?? "");
+
+  const isPower = /power\s*tag\s*question/i.test(placeholder);
+  const isWeakness = /weakness\s*(?:tag\s*)?question/i.test(placeholder);
+
+  if (!isPower && !isWeakness) return null;
+
+  // The stock Mist Engine Theme item currently renders each tag question and
+  // its "Answer / The Tag" input in the same local row/container, but those
+  // controls do not use the same classes/data attributes as the character
+  // sheet. Walk upward until we find the matching tag input.
+  let scope = questionInput.parentElement;
+
+  for (let depth = 0; scope && scope !== root && depth < 8; depth += 1) {
+    const tagInput = Array.from(
+      scope.querySelectorAll('input, textarea')
+    ).find(input => {
+      if (input === questionInput) return false;
+
+      const text = String(input.getAttribute("placeholder") ?? "");
+      return /answer\s*\/?\s*the\s*tag/i.test(text);
+    });
+
+    if (tagInput instanceof HTMLElement) {
+      return {
+        questionInput,
+        tagInput,
+        scope,
+        kind: isPower ? "power" : "weakness"
+      };
+    }
+
+    scope = scope.parentElement;
+  }
+
+  return null;
+}
+
+function reorderThemebookTagPair(pair) {
+  const { questionInput, tagInput, scope, kind } = pair;
+
+  questionInput.setAttribute("placeholder", "Adjudication Note");
+  questionInput.setAttribute("aria-label", "Adjudication Note");
+  questionInput.classList.add(
+    "litm-sw-themebook-note-field",
+    `litm-sw-themebook-${kind}-note`
   );
 
-  const processed = new Set();
+  tagInput.setAttribute("placeholder", "Tag");
+  tagInput.setAttribute("aria-label", "Tag");
+  tagInput.classList.add(
+    "litm-sw-themebook-tag-field",
+    `litm-sw-themebook-${kind}-tag`
+  );
 
-  for (const candidate of rows) {
-    const row =
-      candidate.closest?.(".item-powertag-line, .item-weakness-line") ??
-      candidate.parentElement;
+  const questionBranch = childBranchWithin(scope, questionInput);
+  const tagBranch = childBranchWithin(scope, tagInput);
 
-    if (!(row instanceof HTMLElement) || processed.has(row)) continue;
+  // The desired presentation is:
+  //   TAG
+  //   ADJUDICATION NOTE
+  //
+  // Only move existing DOM nodes. We deliberately do not recreate the inputs
+  // or alter their names/data attributes, so Mist Engine keeps ownership of
+  // all persistence and event handling.
+  if (
+    questionBranch instanceof HTMLElement &&
+    tagBranch instanceof HTMLElement &&
+    questionBranch !== tagBranch &&
+    questionBranch.parentElement === scope &&
+    tagBranch.parentElement === scope
+  ) {
+    scope.insertBefore(tagBranch, questionBranch);
+  }
 
-    const nameInput = row.querySelector(
-      `.themebook-entry-input[data-array="${arrayPath}"][data-key="name"]`
+  else if (
+    questionInput.parentElement &&
+    questionInput.parentElement === tagInput.parentElement
+  ) {
+    questionInput.parentElement.insertBefore(tagInput, questionInput);
+  }
+}
+
+function enhanceThemebookTagRows(root) {
+  const questionInputs = Array.from(
+    root.querySelectorAll('input[placeholder], textarea[placeholder]')
+  ).filter(input => {
+    const placeholder = String(input.getAttribute("placeholder") ?? "");
+
+    return (
+      /power\s*tag\s*question/i.test(placeholder) ||
+      /weakness\s*(?:tag\s*)?question/i.test(placeholder)
     );
+  });
 
-    const questionInput = row.querySelector(
-      `.themebook-entry-input[data-array="${arrayPath}"][data-key="question"]`
-    );
+  for (const questionInput of questionInputs) {
+    const pair = findTagPair(questionInput, root);
+    if (pair) reorderThemebookTagPair(pair);
+  }
+}
 
-    if (!(nameInput instanceof HTMLElement) || !(questionInput instanceof HTMLElement)) {
-      continue;
+function styleThemebookColumnHeadings(root) {
+  // v0.4.1 assumed these were TH/header-label elements. On the actual
+  // Item -> Themes sheet they are ordinary layout elements. Match the exact
+  // rendered text instead, then apply an explicit high-contrast class and
+  // inline-important fallback so the original parchment stylesheet cannot
+  // make them black again.
+  for (const element of root.querySelectorAll(
+    "div, span, label, p, a, th, td, strong"
+  )) {
+    const text = String(element.textContent ?? "").trim().toLowerCase();
+
+    if (!["data", "options", "description"].includes(text)) continue;
+
+    element.classList.add("litm-sw-themebook-column-heading");
+    element.style.setProperty("color", "#a9dce1", "important");
+    element.style.setProperty("font-family", "monospace", "important");
+    element.style.setProperty("font-size", "10px", "important");
+    element.style.setProperty("font-weight", "700", "important");
+    element.style.setProperty("letter-spacing", "0.12em", "important");
+    element.style.setProperty("text-transform", "uppercase", "important");
+    element.style.setProperty("text-shadow", "none", "important");
+  }
+}
+
+function classifyThemebookTextActions(root) {
+  // Only the two large add bars should receive the amber action-button skin.
+  // v0.4.0 styled *every* button/clickable element and that is what broke
+  // Mist Engine's Font Awesome header controls and delete/trash controls.
+  for (const element of root.querySelectorAll(
+    "button, a, [role='button'], .clickable"
+  )) {
+    const text = String(element.textContent ?? "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
+    if (text.includes("POWER TAGS") || text.includes("WEAKNESS TAGS")) {
+      element.classList.add("litm-sw-themebook-action-bar");
     }
-
-    processed.add(row);
-    row.classList.add("litm-sw-themebook-tag-row");
-
-    nameInput.setAttribute("placeholder", "Tag");
-    nameInput.setAttribute("aria-label", "Tag");
-
-    questionInput.setAttribute("placeholder", "Adjudication Note");
-    questionInput.setAttribute("aria-label", "Adjudication Note");
-
-    const nameBlock = topLevelChildWithin(row, nameInput);
-    const questionBlock = topLevelChildWithin(row, questionInput);
-
-    // Themebook sheets originally present Question first and Tag second.
-    // Move the Tag field above the adjudication note while preserving the
-    // system's existing inputs, data attributes, and event behavior.
-    if (nameBlock !== questionBlock) {
-      if (
-        nameBlock instanceof HTMLElement &&
-        questionBlock instanceof HTMLElement &&
-        nameBlock.parentElement === row &&
-        questionBlock.parentElement === row
-      ) {
-        row.insertBefore(nameBlock, questionBlock);
-      }
-    }
-
-    else if (
-      nameInput.parentElement &&
-      nameInput.parentElement === questionInput.parentElement
-    ) {
-      nameInput.parentElement.insertBefore(nameInput, questionInput);
-    }
-
-    nameInput.classList.add("litm-sw-themebook-tag-field");
-    questionInput.classList.add("litm-sw-themebook-note-field");
   }
 }
 
 function enhanceThemebookSheetUi(root) {
   if (!(root instanceof HTMLElement)) return;
 
-  // Make the three stock column headings readable without replacing the
-  // underlying sheet/table structure.
-  for (const cell of root.querySelectorAll("th, .table-header, .header-label")) {
-    const text = String(cell.textContent ?? "").trim().toLowerCase();
+  styleThemebookColumnHeadings(root);
+  enhanceThemebookTagRows(root);
+  classifyThemebookTextActions(root);
+}
 
-    if (["data", "options", "description"].includes(text)) {
-      cell.classList.add("litm-sw-themebook-column-heading");
-    }
-  }
+function observeThemebookSheet(root) {
+  if (!(root instanceof HTMLElement)) return;
+  if (root.dataset.litmThemebookObserver === "true") return;
 
-  enhanceThemebookTagRows(root, "system.powertags");
-  enhanceThemebookTagRows(root, "system.weaknesstags");
+  root.dataset.litmThemebookObserver = "true";
+
+  const observer = new MutationObserver(mutations => {
+    if (!mutations.some(mutation => mutation.type === "childList")) return;
+
+    requestAnimationFrame(() => enhanceThemebookSheetUi(root));
+  });
+
+  observer.observe(root, {
+    childList: true,
+    subtree: true
+  });
 }
 
 function styleThemebookSheet(app, html) {
@@ -232,6 +323,7 @@ function styleThemebookSheet(app, html) {
   root.querySelector(".window-header")?.classList?.add("litm-starwars-themebook-sheet-header");
 
   enhanceThemebookSheetUi(root);
+  observeThemebookSheet(root);
 }
 
 Hooks.on("renderItemSheet", (app, html) => {

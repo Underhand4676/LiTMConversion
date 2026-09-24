@@ -10,4 +10,4 @@ Manifest:
 https://github.com/Underhand4676/LiTMConversion/releases/latest/download/module.json
 ```
 
-Current development build: v0.4.1.
+Current development build: v0.4.2.
