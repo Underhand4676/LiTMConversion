@@ -452,3 +452,238 @@
   background-color: var(--litm-sheet-card) !important;
   box-shadow: none !important;
 }
+
+
+/* =========================================================
+   THEMEBOOK / STORY THEME SHEETS // SCI-FI DOSSIER RESKIN
+   ========================================================= */
+
+.litm-starwars-themebook-sheet {
+  --litm-themebook-bg: #091116;
+  --litm-themebook-bg-2: #0c151a;
+  --litm-themebook-panel: rgba(14, 24, 29, 0.94);
+  --litm-themebook-panel-soft: rgba(17, 28, 34, 0.86);
+  --litm-themebook-line: #35535a;
+  --litm-themebook-line-soft: rgba(83, 123, 131, 0.32);
+  --litm-themebook-cyan: #88d9e1;
+  --litm-themebook-cyan-dim: #6ea3aa;
+  --litm-themebook-amber: #c7a45c;
+  --litm-themebook-red: #b86957;
+  --litm-themebook-text: #dbe9eb;
+  --litm-themebook-muted: #80979c;
+  --litm-themebook-ink: #dbe9eb;
+}
+
+.application.litm-starwars-themebook-sheet,
+.litm-starwars-themebook-sheet.window-app,
+.litm-starwars-themebook-sheet {
+  background: var(--litm-themebook-bg) !important;
+  color: var(--litm-themebook-text) !important;
+}
+
+.application.litm-starwars-themebook-sheet .window-header,
+.litm-starwars-themebook-sheet .window-header,
+.litm-starwars-themebook-sheet-header {
+  background: linear-gradient(90deg, #081015, #132028) !important;
+  border-bottom: 1px solid var(--litm-themebook-line) !important;
+  color: var(--litm-themebook-cyan) !important;
+}
+
+.application.litm-starwars-themebook-sheet .window-title,
+.litm-starwars-themebook-sheet .window-title {
+  color: var(--litm-themebook-text) !important;
+  font-family: monospace !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+}
+
+.application.litm-starwars-themebook-sheet .window-content,
+.litm-starwars-themebook-sheet .window-content,
+.litm-starwars-themebook-sheet-content {
+  background:
+    linear-gradient(rgba(136, 217, 225, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(136, 217, 225, 0.02) 1px, transparent 1px),
+    linear-gradient(155deg, #0a1217, #091015 72%) !important;
+  background-size: 26px 26px, 26px 26px, auto !important;
+  color: var(--litm-themebook-text) !important;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.34) !important;
+}
+
+.litm-starwars-themebook-sheet form,
+.litm-starwars-themebook-sheet .sheet-body,
+.litm-starwars-themebook-sheet .sheet-content,
+.litm-starwars-themebook-sheet main {
+  background: transparent !important;
+  color: var(--litm-themebook-text) !important;
+}
+
+/* Major surface panels */
+.litm-starwars-themebook-sheet .sheet-header,
+.litm-starwars-themebook-sheet .sheet-content,
+.litm-starwars-themebook-sheet section,
+.litm-starwars-themebook-sheet article,
+.litm-starwars-themebook-sheet .themebook-questions,
+.litm-starwars-themebook-sheet .special-improvements,
+.litm-starwars-themebook-sheet .question-container,
+.litm-starwars-themebook-sheet .special-improvement-container,
+.litm-starwars-themebook-sheet .data-container {
+  background-color: transparent !important;
+  color: var(--litm-themebook-text) !important;
+}
+
+/* Remove parchment feel from common card/panel blocks */
+.litm-starwars-themebook-sheet .sheet-header > *,
+.litm-starwars-themebook-sheet .sheet-body > *,
+.litm-starwars-themebook-sheet .sheet-content > *,
+.litm-starwars-themebook-sheet .grid > *,
+.litm-starwars-themebook-sheet .flexcol > *,
+.litm-starwars-themebook-sheet .flexrow > * {
+  border-radius: 0 !important;
+}
+
+/* Portrait/icon block + title row */
+.litm-starwars-themebook-sheet img,
+.litm-starwars-themebook-sheet .item-image,
+.litm-starwars-themebook-sheet .profile-img,
+.litm-starwars-themebook-sheet .sheet-header img {
+  background: rgba(13, 23, 28, 0.85) !important;
+  border: 1px solid var(--litm-themebook-line) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.03),
+    inset 3px 0 0 rgba(199, 164, 92, 0.66) !important;
+}
+
+.litm-starwars-themebook-sheet input:not([type="checkbox"]):not([type="radio"]),
+.litm-starwars-themebook-sheet textarea,
+.litm-starwars-themebook-sheet select {
+  background: rgba(8, 15, 19, 0.94) !important;
+  border: 1px solid var(--litm-themebook-line) !important;
+  border-left: 3px solid rgba(199, 164, 92, 0.82) !important;
+  border-radius: 0 !important;
+  color: #ebf8fa !important;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.4) !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+}
+
+.litm-starwars-themebook-sheet textarea {
+  min-height: 72px;
+  line-height: 1.4;
+}
+
+.litm-starwars-themebook-sheet input:focus,
+.litm-starwars-themebook-sheet textarea:focus,
+.litm-starwars-themebook-sheet select:focus {
+  outline: 1px solid var(--litm-themebook-cyan) !important;
+  border-color: var(--litm-themebook-cyan) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(136, 217, 225, 0.95),
+    0 0 0 1px rgba(136, 217, 225, 0.22) !important;
+}
+
+.litm-starwars-themebook-sheet button,
+.litm-starwars-themebook-sheet .button,
+.litm-starwars-themebook-sheet [type="button"],
+.litm-starwars-themebook-sheet .clickable,
+.litm-starwars-themebook-sheet a.button,
+.litm-starwars-themebook-sheet .themebook-section-header {
+  background: linear-gradient(180deg, rgba(58, 42, 19, 0.88), rgba(104, 66, 31, 0.92)) !important;
+  border: 1px solid rgba(193, 135, 78, 0.62) !important;
+  border-radius: 0 !important;
+  color: #f2e8d6 !important;
+  box-shadow:
+    inset 3px 0 0 rgba(209, 150, 93, 0.88),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 0 10px rgba(0, 0, 0, 0.18) !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  text-shadow: none !important;
+}
+
+.litm-starwars-themebook-sheet button:hover,
+.litm-starwars-themebook-sheet .button:hover,
+.litm-starwars-themebook-sheet [type="button"]:hover,
+.litm-starwars-themebook-sheet .clickable:hover,
+.litm-starwars-themebook-sheet a.button:hover,
+.litm-starwars-themebook-sheet .themebook-section-header:hover {
+  filter: brightness(1.08);
+}
+
+.litm-starwars-themebook-sheet .themebook-section-header {
+  text-align: center !important;
+  padding: 6px 10px !important;
+}
+
+.litm-starwars-themebook-sheet h1,
+.litm-starwars-themebook-sheet h2,
+.litm-starwars-themebook-sheet h3,
+.litm-starwars-themebook-sheet legend,
+.litm-starwars-themebook-sheet .section-title,
+.litm-starwars-themebook-sheet .title {
+  color: #ead7ae !important;
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif !important;
+  letter-spacing: 0.04em !important;
+  text-shadow: none !important;
+}
+
+/* Big section titles like QUESTIONS / SPECIAL IMPROVEMENTS */
+.litm-starwars-themebook-sheet h2,
+.litm-starwars-themebook-sheet h3 {
+  margin: 12px 0 8px !important;
+  padding-bottom: 6px !important;
+  border-bottom: 1px solid var(--litm-themebook-line-soft) !important;
+}
+
+/* Generic label styling */
+.litm-starwars-themebook-sheet label,
+.litm-starwars-themebook-sheet .form-group > label,
+.litm-starwars-themebook-sheet th,
+.litm-starwars-themebook-sheet .label,
+.litm-starwars-themebook-sheet .header-label {
+  color: var(--litm-themebook-cyan-dim) !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+/* Lists/rows */
+.litm-starwars-themebook-sheet li,
+.litm-starwars-themebook-sheet .themebook-entry-line,
+.litm-starwars-themebook-sheet .special-improvement-line,
+.litm-starwars-themebook-sheet .question-line,
+.litm-starwars-themebook-sheet tr {
+  border-color: var(--litm-themebook-line-soft) !important;
+  color: var(--litm-themebook-text) !important;
+}
+
+.litm-starwars-themebook-sheet hr {
+  border: 0 !important;
+  border-top: 1px solid var(--litm-themebook-line-soft) !important;
+}
+
+/* Trash / icon controls read as utility glyphs, not fantasy props */
+.litm-starwars-themebook-sheet i,
+.litm-starwars-themebook-sheet .fas,
+.litm-starwars-themebook-sheet .fa-solid {
+  color: #d9c089 !important;
+}
+
+/* Scrollbars */
+.litm-starwars-themebook-sheet *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.litm-starwars-themebook-sheet *::-webkit-scrollbar-thumb {
+  background: #31484f;
+  border: 1px solid #1d2d31;
+}
+
+.litm-starwars-themebook-sheet *::-webkit-scrollbar-track {
+  background: #091116;
+}

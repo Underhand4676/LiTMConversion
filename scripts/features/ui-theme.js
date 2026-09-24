@@ -88,3 +88,61 @@ Hooks.on("renderChatMessageHTML", (message, html) => {
   if (message.isRoll) html.classList.add("litm-roll-message");
   else html.classList.add("litm-text-message");
 });
+
+
+// ---------------------------------------------------------------------------
+// THEMEBOOK / STORY THEME SHEET THEME
+// ---------------------------------------------------------------------------
+
+function resolveRenderedRoot(app, html) {
+  if (html instanceof HTMLElement) return html;
+  if (html?.[0] instanceof HTMLElement) return html[0];
+
+  const appElement = app?.element;
+
+  if (appElement instanceof HTMLElement) return appElement;
+  if (appElement?.[0] instanceof HTMLElement) return appElement[0];
+
+  return null;
+}
+
+function isThemebookSheet(app) {
+  const documentType = (
+    app?.document?.type ??
+    app?.item?.type ??
+    app?.object?.type ??
+    ""
+  ).toLowerCase();
+
+  if (documentType === "themebook") return true;
+
+  const title = String(app?.title ?? "").toLowerCase();
+  if (title.includes("themebook") || title.includes("story theme")) return true;
+
+  const classes = [
+    ...(app?.options?.classes ?? []),
+    ...(app?.constructor?.DEFAULT_OPTIONS?.classes ?? [])
+  ].map(value => String(value).toLowerCase());
+
+  return classes.some(value => value.includes("themebook"));
+}
+
+function styleThemebookSheet(app, html) {
+  if (!isThemebookSheet(app)) return;
+
+  const root = resolveRenderedRoot(app, html);
+  if (!(root instanceof HTMLElement)) return;
+
+  root.classList.add("litm-starwars-themebook-sheet");
+
+  root.querySelector(".window-content")?.classList?.add("litm-starwars-themebook-sheet-content");
+  root.querySelector(".window-header")?.classList?.add("litm-starwars-themebook-sheet-header");
+}
+
+Hooks.on("renderItemSheet", (app, html) => {
+  styleThemebookSheet(app, html);
+});
+
+Hooks.on("renderApplicationV2", (app, element) => {
+  styleThemebookSheet(app, element);
+});
