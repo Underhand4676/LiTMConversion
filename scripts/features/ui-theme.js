@@ -127,6 +127,99 @@ function isThemebookSheet(app) {
   return classes.some(value => value.includes("themebook"));
 }
 
+function topLevelChildWithin(row, node) {
+  if (!(row instanceof HTMLElement) || !(node instanceof HTMLElement)) return node;
+
+  let current = node;
+
+  while (current.parentElement && current.parentElement !== row) {
+    current = current.parentElement;
+  }
+
+  return current;
+}
+
+function enhanceThemebookTagRows(root, arrayPath) {
+  const rows = root.querySelectorAll(
+    `.item-powertag-line, .item-weakness-line, [data-array="${arrayPath}"]`
+  );
+
+  const processed = new Set();
+
+  for (const candidate of rows) {
+    const row =
+      candidate.closest?.(".item-powertag-line, .item-weakness-line") ??
+      candidate.parentElement;
+
+    if (!(row instanceof HTMLElement) || processed.has(row)) continue;
+
+    const nameInput = row.querySelector(
+      `.themebook-entry-input[data-array="${arrayPath}"][data-key="name"]`
+    );
+
+    const questionInput = row.querySelector(
+      `.themebook-entry-input[data-array="${arrayPath}"][data-key="question"]`
+    );
+
+    if (!(nameInput instanceof HTMLElement) || !(questionInput instanceof HTMLElement)) {
+      continue;
+    }
+
+    processed.add(row);
+    row.classList.add("litm-sw-themebook-tag-row");
+
+    nameInput.setAttribute("placeholder", "Tag");
+    nameInput.setAttribute("aria-label", "Tag");
+
+    questionInput.setAttribute("placeholder", "Adjudication Note");
+    questionInput.setAttribute("aria-label", "Adjudication Note");
+
+    const nameBlock = topLevelChildWithin(row, nameInput);
+    const questionBlock = topLevelChildWithin(row, questionInput);
+
+    // Themebook sheets originally present Question first and Tag second.
+    // Move the Tag field above the adjudication note while preserving the
+    // system's existing inputs, data attributes, and event behavior.
+    if (nameBlock !== questionBlock) {
+      if (
+        nameBlock instanceof HTMLElement &&
+        questionBlock instanceof HTMLElement &&
+        nameBlock.parentElement === row &&
+        questionBlock.parentElement === row
+      ) {
+        row.insertBefore(nameBlock, questionBlock);
+      }
+    }
+
+    else if (
+      nameInput.parentElement &&
+      nameInput.parentElement === questionInput.parentElement
+    ) {
+      nameInput.parentElement.insertBefore(nameInput, questionInput);
+    }
+
+    nameInput.classList.add("litm-sw-themebook-tag-field");
+    questionInput.classList.add("litm-sw-themebook-note-field");
+  }
+}
+
+function enhanceThemebookSheetUi(root) {
+  if (!(root instanceof HTMLElement)) return;
+
+  // Make the three stock column headings readable without replacing the
+  // underlying sheet/table structure.
+  for (const cell of root.querySelectorAll("th, .table-header, .header-label")) {
+    const text = String(cell.textContent ?? "").trim().toLowerCase();
+
+    if (["data", "options", "description"].includes(text)) {
+      cell.classList.add("litm-sw-themebook-column-heading");
+    }
+  }
+
+  enhanceThemebookTagRows(root, "system.powertags");
+  enhanceThemebookTagRows(root, "system.weaknesstags");
+}
+
 function styleThemebookSheet(app, html) {
   if (!isThemebookSheet(app)) return;
 
@@ -137,6 +230,8 @@ function styleThemebookSheet(app, html) {
 
   root.querySelector(".window-content")?.classList?.add("litm-starwars-themebook-sheet-content");
   root.querySelector(".window-header")?.classList?.add("litm-starwars-themebook-sheet-header");
+
+  enhanceThemebookSheetUi(root);
 }
 
 Hooks.on("renderItemSheet", (app, html) => {
