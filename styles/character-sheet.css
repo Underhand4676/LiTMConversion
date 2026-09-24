@@ -3458,3 +3458,332 @@
     filter: brightness(1.02) saturate(1.06) !important;
   }
 }
+
+
+/* =========================================================
+   CONDITION LED IRREGULAR SPUTTER // v0.6.6
+   ========================================================= */
+
+/*
+ * The physical glass/housing stays completely static.
+ * Only the internal emitter changes output.
+ *
+ * Instead of one repeating blink, individual pips now use different
+ * electrical-fault patterns: a hard voltage sag followed by one or two
+ * sputters, a double flicker, a triple chatter, or an isolated dip.
+ *
+ * The cycles are also substantially longer. With multiple active pips the
+ * row still feels alive, but low condition levels should now go long stretches
+ * without doing anything.
+ */
+
+/* Severity controls how often each individual lamp experiences a fault. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-1 {
+  --litm-led-cycle: 58s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-2 {
+  --litm-led-cycle: 45s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-3 {
+  --litm-led-cycle: 38s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-4 {
+  --litm-led-cycle: 32s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-5 {
+  --litm-led-cycle: 27s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-6 {
+  --litm-led-cycle: 23s;
+}
+
+/* Default emitter stays strongly lit. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active::before {
+  opacity: .94;
+  filter: brightness(1.02) saturate(1.06);
+  animation-duration: var(--litm-led-cycle) !important;
+  animation-timing-function: steps(1, end) !important;
+  animation-iteration-count: infinite !important;
+}
+
+/* ---------------------------------------------------------
+   IRREGULAR FAILURE PATTERNS
+   --------------------------------------------------------- */
+
+/*
+ * Pattern A:
+ * voltage sags hard, partially recovers, sputters twice, then stabilizes.
+ * The emitter gets dim, but never disappears; the lens is untouched.
+ */
+@keyframes litm-led-sputter-a {
+  0%, 60.9%, 66%, 100% {
+    opacity: .94;
+    filter: brightness(1.02) saturate(1.06);
+    box-shadow:
+      0 0 2px color-mix(in srgb, var(--condition-active) 62%, white 38%),
+      0 0 4px var(--condition-active),
+      0 0 7px var(--condition-glow);
+  }
+
+  61%, 62.1% {
+    opacity: .34;
+    filter: brightness(.50) saturate(.77);
+    box-shadow:
+      0 0 1px var(--condition-active),
+      0 0 2px var(--condition-glow);
+  }
+
+  62.2%, 62.9% {
+    opacity: .72;
+    filter: brightness(.79) saturate(.91);
+  }
+
+  63%, 63.55% {
+    opacity: .45;
+    filter: brightness(.58) saturate(.80);
+  }
+
+  63.56%, 64.3% {
+    opacity: .82;
+    filter: brightness(.88) saturate(.95);
+  }
+
+  64.31%, 64.75% {
+    opacity: .50;
+    filter: brightness(.62) saturate(.82);
+  }
+
+  64.76%, 65.99% {
+    opacity: .86;
+    filter: brightness(.92) saturate(.98);
+  }
+}
+
+/* Pattern B: two sharp failures back-to-back. */
+@keyframes litm-led-sputter-b {
+  0%, 28.9%, 33.4%, 100% {
+    opacity: .94;
+    filter: brightness(1.02) saturate(1.06);
+    box-shadow:
+      0 0 2px color-mix(in srgb, var(--condition-active) 62%, white 38%),
+      0 0 4px var(--condition-active),
+      0 0 7px var(--condition-glow);
+  }
+
+  29%, 29.8% {
+    opacity: .42;
+    filter: brightness(.56) saturate(.80);
+    box-shadow:
+      0 0 1px var(--condition-active),
+      0 0 2px var(--condition-glow);
+  }
+
+  29.81%, 30.55% {
+    opacity: .84;
+    filter: brightness(.90) saturate(.96);
+  }
+
+  30.56%, 31.35% {
+    opacity: .38;
+    filter: brightness(.52) saturate(.77);
+    box-shadow:
+      0 0 1px var(--condition-active),
+      0 0 2px var(--condition-glow);
+  }
+
+  31.36%, 33.39% {
+    opacity: .80;
+    filter: brightness(.86) saturate(.94);
+  }
+}
+
+/* Pattern C: isolated sag, then a delayed little after-flicker. */
+@keyframes litm-led-sputter-c {
+  0%, 72.9%, 75.2%, 77.5%, 79%, 100% {
+    opacity: .94;
+    filter: brightness(1.02) saturate(1.06);
+    box-shadow:
+      0 0 2px color-mix(in srgb, var(--condition-active) 62%, white 38%),
+      0 0 4px var(--condition-active),
+      0 0 7px var(--condition-glow);
+  }
+
+  73%, 74.2% {
+    opacity: .36;
+    filter: brightness(.51) saturate(.78);
+    box-shadow:
+      0 0 1px var(--condition-active),
+      0 0 2px var(--condition-glow);
+  }
+
+  74.21%, 75.19% {
+    opacity: .78;
+    filter: brightness(.85) saturate(.93);
+  }
+
+  77.6%, 78.25% {
+    opacity: .48;
+    filter: brightness(.60) saturate(.82);
+  }
+
+  78.26%, 78.99% {
+    opacity: .82;
+    filter: brightness(.89) saturate(.95);
+  }
+}
+
+/* Pattern D: brief three-hit chatter, like a loose contact. */
+@keyframes litm-led-sputter-d {
+  0%, 43.9%, 48.8%, 100% {
+    opacity: .94;
+    filter: brightness(1.02) saturate(1.06);
+    box-shadow:
+      0 0 2px color-mix(in srgb, var(--condition-active) 62%, white 38%),
+      0 0 4px var(--condition-active),
+      0 0 7px var(--condition-glow);
+  }
+
+  44%, 44.5% {
+    opacity: .49;
+    filter: brightness(.61) saturate(.82);
+  }
+
+  44.51%, 45.05% {
+    opacity: .86;
+    filter: brightness(.92) saturate(.98);
+  }
+
+  45.06%, 45.55% {
+    opacity: .40;
+    filter: brightness(.54) saturate(.78);
+    box-shadow:
+      0 0 1px var(--condition-active),
+      0 0 2px var(--condition-glow);
+  }
+
+  45.56%, 46.25% {
+    opacity: .80;
+    filter: brightness(.87) saturate(.94);
+  }
+
+  46.26%, 46.75% {
+    opacity: .46;
+    filter: brightness(.59) saturate(.81);
+  }
+
+  46.76%, 48.79% {
+    opacity: .84;
+    filter: brightness(.90) saturate(.96);
+  }
+}
+
+/*
+ * Different lamps use different fault patterns and slightly different cycle
+ * lengths. This prevents the flicker from feeling periodic even after watching
+ * the sheet for a while.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(1)::before {
+  animation-name: litm-led-sputter-a !important;
+  animation-duration: calc(var(--litm-led-cycle) + 2.8s) !important;
+  animation-delay: -8.3s !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(2)::before {
+  animation-name: litm-led-sputter-c !important;
+  animation-duration: calc(var(--litm-led-cycle) - 1.9s) !important;
+  animation-delay: -19.7s !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(3)::before {
+  animation-name: litm-led-sputter-b !important;
+  animation-duration: calc(var(--litm-led-cycle) + 5.1s) !important;
+  animation-delay: -3.4s !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(4)::before {
+  animation-name: litm-led-sputter-d !important;
+  animation-duration: calc(var(--litm-led-cycle) + .6s) !important;
+  animation-delay: -26.2s !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(5)::before {
+  animation-name: litm-led-sputter-a !important;
+  animation-duration: calc(var(--litm-led-cycle) + 7.4s) !important;
+  animation-delay: -13.1s !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(6)::before {
+  animation-name: litm-led-sputter-b !important;
+  animation-duration: calc(var(--litm-led-cycle) + 3.3s) !important;
+  animation-delay: -31.6s !important;
+}
+
+/* STRAINED intentionally gets a different arrangement. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(1)::before {
+  animation-name: litm-led-sputter-d !important;
+  animation-duration: calc(var(--litm-led-cycle) + 4.6s) !important;
+  animation-delay: -22.8s !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(2)::before {
+  animation-name: litm-led-sputter-b !important;
+  animation-duration: calc(var(--litm-led-cycle) + 1.2s) !important;
+  animation-delay: -6.9s !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(3)::before {
+  animation-name: litm-led-sputter-c !important;
+  animation-duration: calc(var(--litm-led-cycle) + 6.8s) !important;
+  animation-delay: -29.4s !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(4)::before {
+  animation-name: litm-led-sputter-a !important;
+  animation-duration: calc(var(--litm-led-cycle) - .8s) !important;
+  animation-delay: -15.2s !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(5)::before {
+  animation-name: litm-led-sputter-d !important;
+  animation-duration: calc(var(--litm-led-cycle) + 8.5s) !important;
+  animation-delay: -35.7s !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(6)::before {
+  animation-name: litm-led-sputter-c !important;
+  animation-duration: calc(var(--litm-led-cycle) + 2.1s) !important;
+  animation-delay: -10.6s !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .litm-sw-condition-light.active::before {
+    animation: none !important;
+    opacity: .94 !important;
+    filter: brightness(1.02) saturate(1.06) !important;
+  }
+}
