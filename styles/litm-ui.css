@@ -1244,3 +1244,43 @@
   box-shadow: none !important;
 }
 
+
+
+/* =========================================================
+   THEME KIT TAB RAIL HOTFIX // v0.8.1
+   ========================================================= */
+
+/*
+ * Theme Kit navigation controls must never inherit content-panel sizing.
+ * Keep this defensive rule even though the JS classifier now separates them.
+ */
+.litm-starwars-themekit-sheet nav.tabs,
+.litm-starwars-themekit-sheet .tabs {
+  min-height: 32px !important;
+  height: auto !important;
+  max-height: 40px !important;
+  align-items: stretch !important;
+}
+
+.litm-starwars-themekit-sheet nav .litm-sw-themekit-tab,
+.litm-starwars-themekit-sheet .tabs > .litm-sw-themekit-tab,
+.litm-starwars-themekit-sheet nav .litm-sw-themekit-panel,
+.litm-starwars-themekit-sheet .tabs > .litm-sw-themekit-panel {
+  min-height: 31px !important;
+  height: 31px !important;
+  max-height: 31px !important;
+  padding: 8px 10px !important;
+  align-self: stretch !important;
+}
+
+/* Never let a navigation control receive the Description editor dimensions. */
+.litm-starwars-themekit-sheet nav .litm-sw-themekit-description-panel,
+.litm-starwars-themekit-sheet .tabs > .litm-sw-themekit-description-panel {
+  min-height: 31px !important;
+  height: 31px !important;
+  max-height: 31px !important;
+  padding: 8px 10px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}

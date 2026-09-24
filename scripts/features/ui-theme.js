@@ -599,18 +599,66 @@ function classifyThemeKitActions(root) {
 function markThemeKitPanels(root) {
   if (!(root instanceof HTMLElement)) return;
 
-  for (const panel of root.querySelectorAll(
-    ".tab, [data-tab], .sheet-body, .sheet-content"
+  /*
+   * Theme Kit tab buttons and tab CONTENT panels both use data-tab.
+   * v0.8.0 treated every [data-tab] element as a content panel, which put
+   * the 410px panel min-height on the tab buttons themselves.
+   *
+   * First strip panel classes from anything that is clearly a tab control,
+   * then only mark genuine content containers.
+   */
+  for (const control of root.querySelectorAll(
+    "nav [data-tab], " +
+    "nav a, " +
+    "nav button, " +
+    ".tabs > [data-tab], " +
+    ".tabs > a, " +
+    ".tabs > button, " +
+    '[role="tab"]'
   )) {
+    control.classList.remove(
+      "litm-sw-themekit-panel",
+      "litm-sw-themekit-description-panel"
+    );
+  }
+
+  for (const panel of root.querySelectorAll(
+    ".tab, .sheet-body, .sheet-content, [data-tab]"
+  )) {
+    if (!(panel instanceof HTMLElement)) continue;
+
+    if (
+      panel.matches("a, button, [role='tab']") ||
+      panel.closest("nav")
+    ) {
+      continue;
+    }
+
+    /*
+     * A direct child of a .tabs navigation rail is also a tab selector even
+     * if the system uses a div/span instead of a link or button.
+     */
+    if (panel.parentElement?.classList?.contains("tabs")) continue;
+
     panel.classList.add("litm-sw-themekit-panel");
   }
 
   for (const panel of root.querySelectorAll(
-    '[data-tab="description"], ' +
     '.tab.description, ' +
     '.description.tab, ' +
+    '[data-tab="description"], ' +
     '[data-tab*="description" i]'
   )) {
+    if (!(panel instanceof HTMLElement)) continue;
+
+    if (
+      panel.matches("a, button, [role='tab']") ||
+      panel.closest("nav") ||
+      panel.parentElement?.classList?.contains("tabs")
+    ) {
+      continue;
+    }
+
     panel.classList.add("litm-sw-themekit-description-panel");
   }
 }
