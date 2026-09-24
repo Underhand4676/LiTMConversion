@@ -23,6 +23,21 @@ const LIVING_STANDARDS = {
 
 const CURRENT_CREDITS_FLAG = "currentCredits";
 
+
+const CONDITION_MAX = 6;
+
+const CONDITION_TRACKERS = {
+  wounded: {
+    flag: "wounded",
+    label: "WOUNDED"
+  },
+  strained: {
+    flag: "strained",
+    label: "STRAINED"
+  }
+};
+
+
 function getCurrentCredits(actor) {
   const raw = Number(actor?.getFlag(MODULE_ID, CURRENT_CREDITS_FLAG) ?? 0);
 
@@ -1003,6 +1018,155 @@ function enhanceTagUsageUi(sheet) {
       backpack: arrayPath === "system.items"
     });
   }
+}
+
+
+
+function getConditionLevel(actor, key) {
+  const tracker = CONDITION_TRACKERS[key];
+  if (!tracker) return 0;
+
+  const raw = Number(actor?.getFlag(MODULE_ID, tracker.flag) ?? 0);
+
+  if (!Number.isFinite(raw)) return 0;
+
+  return Math.max(
+    0,
+    Math.min(CONDITION_MAX, Math.trunc(raw))
+  );
+}
+
+function canModifyConditionTrackers(actor) {
+  return Boolean(game.user.isGM || actor?.isOwner);
+}
+
+async function setConditionLevel(sheet, key, value) {
+  const tracker = CONDITION_TRACKERS[key];
+  if (!tracker || !canModifyConditionTrackers(sheet.actor)) return;
+
+  const next = Math.max(
+    0,
+    Math.min(CONDITION_MAX, Math.trunc(Number(value) || 0))
+  );
+
+  await sheet.actor.setFlag(
+    MODULE_ID,
+    tracker.flag,
+    next
+  );
+
+  sheet.render({ force: true });
+}
+
+function createConditionTrackerRow(sheet, key) {
+  const tracker = CONDITION_TRACKERS[key];
+  const level = getConditionLevel(sheet.actor, key);
+  const editable = canModifyConditionTrackers(sheet.actor);
+
+  const row = document.createElement("div");
+  row.className =
+    `litm-sw-condition-row litm-sw-condition-${key} litm-sw-condition-level-${level}`;
+
+  row.dataset.condition = key;
+
+  const label = document.createElement("span");
+  label.className = "litm-sw-condition-label";
+  label.textContent = tracker.label;
+
+  const decrease = document.createElement("button");
+  decrease.type = "button";
+  decrease.className = "litm-sw-condition-button";
+  decrease.textContent = "−";
+  decrease.title = `Reduce ${tracker.label}`;
+  decrease.setAttribute("aria-label", `Reduce ${tracker.label}`);
+  decrease.disabled = !editable || level <= 0;
+
+  decrease.addEventListener("click", async event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    await setConditionLevel(
+      sheet,
+      key,
+      getConditionLevel(sheet.actor, key) - 1
+    );
+  });
+
+  const lights = document.createElement("span");
+  lights.className = "litm-sw-condition-lights";
+  lights.setAttribute(
+    "aria-label",
+    `${tracker.label}: ${level} of ${CONDITION_MAX}`
+  );
+
+  for (let index = 1; index <= CONDITION_MAX; index += 1) {
+    const light = document.createElement("span");
+
+    light.className =
+      `litm-sw-condition-light ${index <= level ? "active" : "inactive"}`;
+
+    light.dataset.index = String(index);
+    lights.append(light);
+  }
+
+  const count = document.createElement("span");
+  count.className = "litm-sw-condition-count";
+  count.textContent = `${level}/${CONDITION_MAX}`;
+
+  const increase = document.createElement("button");
+  increase.type = "button";
+  increase.className = "litm-sw-condition-button";
+  increase.textContent = "+";
+  increase.title = `Increase ${tracker.label}`;
+  increase.setAttribute("aria-label", `Increase ${tracker.label}`);
+  increase.disabled = !editable || level >= CONDITION_MAX;
+
+  increase.addEventListener("click", async event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    await setConditionLevel(
+      sheet,
+      key,
+      getConditionLevel(sheet.actor, key) + 1
+    );
+  });
+
+  row.append(
+    label,
+    decrease,
+    lights,
+    count,
+    increase
+  );
+
+  return row;
+}
+
+function enhanceConditionTrackers(sheet) {
+  const root = sheet.element;
+  if (!root) return;
+
+  root.querySelectorAll(".litm-sw-condition-trackers")
+    .forEach(element => element.remove());
+
+  const tabs = root.querySelector(".litm-character-sheet-tabs");
+  if (!tabs) return;
+
+  const panel = document.createElement("div");
+  panel.className = "litm-sw-condition-trackers";
+  panel.setAttribute("aria-label", "Character condition trackers");
+
+  panel.append(
+    createConditionTrackerRow(sheet, "wounded"),
+    createConditionTrackerRow(sheet, "strained")
+  );
+
+  // The full Star Wars sheet has a natural unused area immediately to the
+  // left of MAIN beneath the identity block. Making the tracker the first
+  // element of the tab rail lets CSS dedicate that space to conditions while
+  // leaving the four existing navigation tabs intact.
+  tabs.prepend(panel);
 }
 
 
@@ -2119,6 +2283,7 @@ Hooks.once("init", async () => {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
         enhanceLivingStandardUi(this);
+        enhanceConditionTrackers(this);
         removeLegacyBackgroundControls(this);
         wireProbabilityRollButtons(this);
       }
@@ -2189,6 +2354,7 @@ Hooks.once("init", async () => {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
         enhanceLivingStandardUi(this);
+        enhanceConditionTrackers(this);
         removeLegacyBackgroundControls(this);
         wireProbabilityRollButtons(this);
       }
