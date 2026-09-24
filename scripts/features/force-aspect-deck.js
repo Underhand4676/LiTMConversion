@@ -4,6 +4,9 @@ const DECK_FLAG = "managedForceAspectDeck";
 const HAND_NAME = "Force Aspect Hand";
 const HAND_FLAG = "managedForceAspectHand";
 const CARD_FLAG = "forceAspectKey";
+const SOCKET_NAME = `module.${MODULE_ID}`;
+const SOCKET_EVENT = "force-aspect-cinematic";
+const CINEMATIC_REVEAL_DELAY = 3150;
 
 const BACK_IMAGE = `modules/${MODULE_ID}/cards/force-aspects/force-aspects-back.png`;
 
@@ -135,6 +138,142 @@ const FORCE_ASPECTS = [
     text: "Something that you hold dear or wish to possess is immediately entangled with looming disaster. Swift action is needed to win the day, but such hasty decisions can have lasting consequences for the character as emotion clouds their thoughts."
   }
 ];
+
+let forceAspectCinematicQueue = Promise.resolve();
+let forceAspectDrawInProgress = false;
+
+function wait(ms) {
+  return new Promise(resolve => window.setTimeout(resolve, ms));
+}
+
+function preloadImage(src) {
+  return new Promise(resolve => {
+    const image = new Image();
+    image.onload = () => resolve(true);
+    image.onerror = () => resolve(false);
+    image.src = src;
+  });
+}
+
+function removeExistingCinematic() {
+  document
+    .querySelectorAll(".litm-force-aspect-cinematic")
+    .forEach(element => element.remove());
+}
+
+async function playForceAspectCinematic(packet) {
+  if (!packet?.faceImage || !packet?.backImage) return;
+
+  await Promise.allSettled([
+    preloadImage(packet.faceImage),
+    preloadImage(packet.backImage)
+  ]);
+
+  removeExistingCinematic();
+
+  const overlay = document.createElement("div");
+  overlay.className = [
+    "litm-force-aspect-cinematic",
+    `litm-force-aspect-cinematic-${packet.side ?? "neutral"}`
+  ].join(" ");
+
+  overlay.innerHTML = `
+    <div class="litm-force-aspect-cinematic-backdrop"></div>
+    <div class="litm-force-aspect-cinematic-stage">
+      <div class="litm-force-aspect-shuffle-stack" aria-hidden="true">
+        ${[1, 2, 3, 4, 5]
+          .map(
+            index => `
+              <img
+                class="litm-force-aspect-shuffle-card card-${index}"
+                src="${packet.backImage}"
+                alt=""
+              >
+            `
+          )
+          .join("")}
+      </div>
+
+      <div class="litm-force-aspect-selected-card">
+        <div class="litm-force-aspect-selected-inner">
+          <img
+            class="litm-force-aspect-selected-face back"
+            src="${packet.backImage}"
+            alt="Force Aspect card back"
+          >
+          <img
+            class="litm-force-aspect-selected-face front"
+            src="${packet.faceImage}"
+            alt="${packet.name ?? "Force Aspect"}"
+          >
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.append(overlay);
+
+  const reducedMotion = window.matchMedia?.(
+    "(prefers-reduced-motion: reduce)"
+  )?.matches === true;
+
+  try {
+    requestAnimationFrame(() => overlay.classList.add("is-live"));
+
+    if (reducedMotion) {
+      await wait(350);
+      overlay.classList.add("is-drawing", "is-flipping");
+      await wait(2600);
+      overlay.classList.add("is-leaving");
+      await wait(350);
+      return;
+    }
+
+    // Uneven mechanical shuffle before one card kicks free of the stack.
+    await wait(2250);
+    overlay.classList.add("is-drawing");
+
+    await wait(650);
+    overlay.classList.add("is-flipping");
+
+    // Keep the actual card face on screen long enough to read it.
+    await wait(4450);
+    overlay.classList.add("is-leaving");
+
+    await wait(550);
+  } finally {
+    overlay.remove();
+  }
+}
+
+function queueForceAspectCinematic(packet) {
+  forceAspectCinematicQueue = forceAspectCinematicQueue
+    .catch(() => undefined)
+    .then(() => playForceAspectCinematic(packet));
+
+  return forceAspectCinematicQueue;
+}
+
+function broadcastForceAspectCinematic(card, aspect, requestId) {
+  const packet = {
+    type: SOCKET_EVENT,
+    requestId,
+    senderId: game.user.id,
+    aspectKey: aspect.key,
+    name: aspect.name,
+    side: aspect.side,
+    faceImage:
+      card.faces?.[card.face ?? 0]?.img ??
+      imageForAspect(aspect),
+    backImage: BACK_IMAGE
+  };
+
+  game.socket.emit(SOCKET_NAME, packet);
+
+  // Module socket broadcasts are intended for the other connected clients.
+  // Play the exact same presentation locally as well.
+  return queueForceAspectCinematic(packet);
+}
 
 function imageForAspect(aspect) {
   return `modules/${MODULE_ID}/cards/force-aspects/aspect-of-${aspect.key}.png`;
@@ -269,7 +408,7 @@ async function ensureForceAspectHand() {
     flags: {
       [MODULE_ID]: {
         [HAND_FLAG]: true,
-        handVersion: "0.9.1"
+        handVersion: "0.10.0"
       }
     }
   };
@@ -292,13 +431,19 @@ async function ensureForceAspectHand() {
     displayCount: handData.displayCount,
     ownership: handData.ownership,
     [`flags.${MODULE_ID}.${HAND_FLAG}`]: true,
-    [`flags.${MODULE_ID}.handVersion`]: "0.9.1"
+    [`flags.${MODULE_ID}.handVersion`]: "0.10.0"
   });
 
   return hand;
 }
 
 async function drawForceAspect() {
+  if (forceAspectDrawInProgress) {
+    return ui.notifications.warn(
+      "LiTM Conversion // A Force Aspect reveal is already in progress on this client."
+    );
+  }
+
   let deck = getManagedDeck();
   let hand = getManagedHand();
 
@@ -319,27 +464,93 @@ async function drawForceAspect() {
 
   if (!available) {
     return ui.notifications.warn(
-      "LiTM Conversion // No Force Aspect cards remain in the deck. Reset the hand or deck first."
+      "LiTM Conversion // No Force Aspect cards remain in the deck. Reset any outstanding cards first."
     );
   }
 
+  forceAspectDrawInProgress = true;
+
+  let drawnCard = null;
+  const requestId = foundry.utils.randomID();
+
   try {
+    // Randomize the real Foundry deck before drawing from the top. The visual
+    // shuffle is synchronized separately so every connected player sees it.
+    await deck.shuffle({
+      chatNotification: false
+    });
+
     const cards = await hand.draw(deck, 1, {
-      how: CONST.CARD_DRAW_MODES.RANDOM,
+      how: CONST.CARD_DRAW_MODES.TOP,
       updateData: {
         face: 0
       }
     });
 
-    return cards?.[0] ?? null;
+    drawnCard = cards?.[0] ?? null;
+
+    if (!drawnCard) {
+      throw new Error("Foundry did not return a drawn Force Aspect card.");
+    }
+
+    const aspect = getAspectForCard(drawnCard);
+
+    if (!aspect) {
+      throw new Error(
+        `Drawn Force Aspect card ${drawnCard.name} has no managed Aspect data.`
+      );
+    }
+
+    const animation = broadcastForceAspectCinematic(
+      drawnCard,
+      aspect,
+      requestId
+    );
+
+    // Chat lands as the face flips, preserving a permanent result after the
+    // cinematic card is dismissed and recalled to the source deck.
+    await wait(CINEMATIC_REVEAL_DELAY);
+    await postForceAspectReveal(drawnCard);
+
+    await animation;
+
+    return drawnCard;
   } catch (error) {
-    console.error(`${MODULE_ID} | Force Aspect draw failed`, error);
+    console.error(`${MODULE_ID} | Force Aspect cinematic draw failed`, error);
 
     ui.notifications.error(
-      "LiTM Conversion // Force Aspect draw failed. Check permissions or the browser console."
+      "LiTM Conversion // Force Aspect reveal failed. Check permissions or the browser console."
     );
 
     return null;
+  } finally {
+    if (
+      drawnCard &&
+      drawnCard.parent?.documentName === "Cards" &&
+      drawnCard.parent?.getFlag(MODULE_ID, HAND_FLAG) === true
+    ) {
+      try {
+        // Card#recall returns this exact drawn card to its original deck. It
+        // does not reset or disturb any other cards which may be elsewhere.
+        await drawnCard.recall({
+          chatNotification: false,
+          updateData: {
+            face: null
+          }
+        });
+      } catch (recallError) {
+        console.error(
+          `${MODULE_ID} | Force Aspect card could not be recalled`,
+          recallError
+        );
+
+        ui.notifications.warn(
+          "LiTM Conversion // The revealed Force Aspect stayed in the hand because it could not be returned automatically."
+        );
+      }
+    }
+
+    forceAspectDrawInProgress = false;
   }
 }
 
@@ -366,7 +577,7 @@ async function ensureForceAspectDeck() {
     flags: {
       [MODULE_ID]: {
         [DECK_FLAG]: true,
-        deckVersion: "0.9.1"
+        deckVersion: "0.10.0"
       }
     }
   };
@@ -395,7 +606,7 @@ async function ensureForceAspectDeck() {
     displayCount: deckData.displayCount,
     ownership: deckData.ownership,
     [`flags.${MODULE_ID}.${DECK_FLAG}`]: true,
-    [`flags.${MODULE_ID}.deckVersion`]: "0.9.1"
+    [`flags.${MODULE_ID}.deckVersion`]: "0.10.0"
   });
 
   const managedByKey = new Map(
@@ -459,6 +670,10 @@ Hooks.on("createCard", async (card, options, userId) => {
 
   if (!getAspectForCard(card)) return;
 
+  // Cinematic macro draws reveal on the synchronized flip instead of the
+  // instant the Card document is created in the hand.
+  if (forceAspectDrawInProgress) return;
+
   try {
     await postForceAspectReveal(card);
   } catch (error) {
@@ -469,11 +684,21 @@ Hooks.on("createCard", async (card, options, userId) => {
 Hooks.once("ready", async () => {
   const module = game.modules.get(MODULE_ID);
 
+  game.socket.on(SOCKET_NAME, packet => {
+    if (packet?.type !== SOCKET_EVENT) return;
+
+    // The sender already started its local animation directly.
+    if (packet.senderId === game.user.id) return;
+
+    queueForceAspectCinematic(packet);
+  });
+
   module.api ??= {};
   module.api.forceAspectDeck = {
     restoreDeck: ensureForceAspectDeck,
     restoreHand: ensureForceAspectHand,
     draw: drawForceAspect,
+    drawCinematic: drawForceAspect,
     getDeck: getManagedDeck,
     getHand: getManagedHand
   };

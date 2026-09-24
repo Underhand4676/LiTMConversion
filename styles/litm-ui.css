@@ -1046,3 +1046,271 @@
   border: 0;
   box-shadow: 0 3px 12px rgba(0, 0, 0, .42);
 }
+
+
+/* =========================================================
+   FORCE ASPECT CINEMATIC DRAW // v0.10.0
+   ========================================================= */
+
+.litm-force-aspect-cinematic {
+  --litm-aspect-cinematic-accent: #b48a4e;
+
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+
+  display: grid;
+  place-items: center;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 220ms ease;
+}
+
+.litm-force-aspect-cinematic.is-live {
+  opacity: 1;
+}
+
+.litm-force-aspect-cinematic-light {
+  --litm-aspect-cinematic-accent: #5a93a8;
+}
+
+.litm-force-aspect-cinematic-neutral {
+  --litm-aspect-cinematic-accent: #b48a4e;
+}
+
+.litm-force-aspect-cinematic-dark {
+  --litm-aspect-cinematic-accent: #9f4d48;
+}
+
+.litm-force-aspect-cinematic-backdrop {
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at 50% 48%,
+      rgba(20, 29, 31, .20) 0%,
+      rgba(5, 9, 12, .68) 52%,
+      rgba(2, 5, 7, .82) 100%
+    );
+
+  backdrop-filter: blur(1.5px);
+}
+
+.litm-force-aspect-cinematic-stage {
+  position: relative;
+  width: min(760px, 92vw);
+  height: min(760px, 88vh);
+
+  display: grid;
+  place-items: center;
+
+  perspective: 1450px;
+  transform-style: preserve-3d;
+}
+
+.litm-force-aspect-shuffle-stack {
+  position: absolute;
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+
+  transition:
+    opacity 260ms linear,
+    transform 340ms cubic-bezier(.3,.9,.2,1);
+}
+
+.litm-force-aspect-shuffle-card {
+  position: absolute;
+  width: min(190px, 28vw);
+  max-height: 40vh;
+  object-fit: contain;
+
+  border-radius: 12px;
+
+  filter:
+    drop-shadow(0 9px 16px rgba(0, 0, 0, .42))
+    drop-shadow(0 0 7px rgba(178, 133, 69, .14));
+
+  will-change: transform;
+}
+
+.litm-force-aspect-cinematic.is-live
+  .litm-force-aspect-shuffle-card.card-1 {
+  animation: litm-force-shuffle-a .93s cubic-bezier(.55,.02,.32,.98) infinite;
+}
+
+.litm-force-aspect-cinematic.is-live
+  .litm-force-aspect-shuffle-card.card-2 {
+  animation: litm-force-shuffle-b .78s cubic-bezier(.55,.02,.32,.98) -.21s infinite;
+}
+
+.litm-force-aspect-cinematic.is-live
+  .litm-force-aspect-shuffle-card.card-3 {
+  animation: litm-force-shuffle-c 1.08s cubic-bezier(.55,.02,.32,.98) -.46s infinite;
+}
+
+.litm-force-aspect-cinematic.is-live
+  .litm-force-aspect-shuffle-card.card-4 {
+  animation: litm-force-shuffle-d .84s cubic-bezier(.55,.02,.32,.98) -.13s infinite;
+}
+
+.litm-force-aspect-cinematic.is-live
+  .litm-force-aspect-shuffle-card.card-5 {
+  animation: litm-force-shuffle-e 1.01s cubic-bezier(.55,.02,.32,.98) -.62s infinite;
+}
+
+.litm-force-aspect-cinematic.is-drawing
+  .litm-force-aspect-shuffle-stack {
+  opacity: .12;
+  transform: scale(.78);
+}
+
+.litm-force-aspect-cinematic.is-drawing
+  .litm-force-aspect-shuffle-card {
+  animation-play-state: paused !important;
+}
+
+@keyframes litm-force-shuffle-a {
+  0%, 100% { transform: translate(-18px, 4px) rotate(-4deg); }
+  24%      { transform: translate(92px, -10px) rotate(6deg); }
+  46%      { transform: translate(-66px, 14px) rotate(-8deg); }
+  71%      { transform: translate(42px, 1px) rotate(3deg); }
+}
+
+@keyframes litm-force-shuffle-b {
+  0%, 100% { transform: translate(22px, -4px) rotate(3deg); }
+  31%      { transform: translate(-105px, 9px) rotate(-7deg); }
+  55%      { transform: translate(72px, 13px) rotate(7deg); }
+  82%      { transform: translate(-34px, -8px) rotate(-2deg); }
+}
+
+@keyframes litm-force-shuffle-c {
+  0%, 100% { transform: translate(-7px, 8px) rotate(1deg); }
+  19%      { transform: translate(61px, 16px) rotate(5deg); }
+  43%      { transform: translate(-88px, -12px) rotate(-6deg); }
+  77%      { transform: translate(104px, -3px) rotate(8deg); }
+}
+
+@keyframes litm-force-shuffle-d {
+  0%, 100% { transform: translate(8px, -8px) rotate(-1deg); }
+  27%      { transform: translate(-74px, -17px) rotate(-6deg); }
+  58%      { transform: translate(111px, 8px) rotate(8deg); }
+  76%      { transform: translate(-42px, 11px) rotate(-3deg); }
+}
+
+@keyframes litm-force-shuffle-e {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  22%      { transform: translate(104px, 17px) rotate(8deg); }
+  49%      { transform: translate(-112px, 4px) rotate(-9deg); }
+  73%      { transform: translate(53px, -16px) rotate(4deg); }
+}
+
+.litm-force-aspect-selected-card {
+  position: absolute;
+  width: min(270px, 52vw);
+  max-height: 68vh;
+  aspect-ratio: 0.70;
+
+  opacity: 0;
+  transform:
+    translate3d(78px, 12px, 90px)
+    rotate(-5deg)
+    scale(.84);
+
+  transition:
+    opacity 240ms linear,
+    transform 610ms cubic-bezier(.16,.9,.22,1.05);
+
+  transform-style: preserve-3d;
+}
+
+.litm-force-aspect-cinematic.is-drawing
+  .litm-force-aspect-selected-card {
+  opacity: 1;
+  transform:
+    translate3d(0, 0, 110px)
+    rotate(0deg)
+    scale(1);
+}
+
+.litm-force-aspect-selected-inner {
+  position: absolute;
+  inset: 0;
+
+  transform-style: preserve-3d;
+
+  transition:
+    transform 760ms cubic-bezier(.18,.74,.25,1),
+    filter 360ms ease;
+
+  filter:
+    drop-shadow(0 18px 22px rgba(0, 0, 0, .52))
+    drop-shadow(0 0 12px color-mix(in srgb, var(--litm-aspect-cinematic-accent) 28%, transparent));
+}
+
+.litm-force-aspect-cinematic.is-flipping
+  .litm-force-aspect-selected-inner {
+  transform: rotateY(180deg) scale(1.17);
+}
+
+.litm-force-aspect-selected-face {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  border-radius: 13px;
+}
+
+.litm-force-aspect-selected-face.front {
+  transform: rotateY(180deg);
+}
+
+.litm-force-aspect-cinematic.is-leaving {
+  opacity: 0;
+  transition-duration: 520ms;
+}
+
+.litm-force-aspect-cinematic.is-leaving
+  .litm-force-aspect-selected-card {
+  transform:
+    translate3d(0, -10px, 80px)
+    rotate(0deg)
+    scale(.96);
+}
+
+@media (max-width: 700px) {
+  .litm-force-aspect-shuffle-card {
+    width: min(150px, 38vw);
+  }
+
+  .litm-force-aspect-selected-card {
+    width: min(250px, 72vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .litm-force-aspect-shuffle-card {
+    animation: none !important;
+  }
+
+  .litm-force-aspect-shuffle-stack {
+    opacity: .18;
+  }
+
+  .litm-force-aspect-selected-card,
+  .litm-force-aspect-selected-inner,
+  .litm-force-aspect-cinematic {
+    transition-duration: 180ms !important;
+  }
+}

@@ -41,8 +41,11 @@ LiTM Conversion is a Star Wars conversion layer for **Legend in the Mist / Mist 
   - Uses the approved worn Sabacc-inspired card faces and matching back
   - The GM copy is restored automatically if the managed deck is missing
   - Creates a shared Force Aspect Hand for native Foundry card draws
-  - Includes a Draw Force Aspect macro that draws one random card face-up to the hand
-  - Every Force Aspect drawn to the managed hand is revealed publicly in chat
+  - Includes a Draw Force Aspect macro with a synchronized Sabacc-style shuffle and card-flip reveal
+  - The cinematic reveal is broadcast to every connected player
+  - The result is posted publicly in chat for permanent reference
+  - The exact drawn card is automatically returned to the source deck after the reveal
+  - Manual draws to the managed hand still reveal publicly in chat
 
 - **Star Wars interface treatment**
   - Republic-styled chat
