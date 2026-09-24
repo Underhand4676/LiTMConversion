@@ -109,7 +109,6 @@
 }
 
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .roll-button,
-.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .themekit-button,
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .empty-message button,
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .change-custom-background-btn {
   position: relative;
@@ -130,7 +129,6 @@
 }
 
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .roll-button:hover:not(:disabled),
-.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .themekit-button:hover:not(:disabled),
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .empty-message button:hover:not(:disabled),
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet .change-custom-background-btn:hover:not(:disabled) {
   background: rgba(35, 63, 72, 0.86) !important;
@@ -4577,4 +4575,32 @@
     .themebooks-container.edit-mode.grid-themebook-container {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
+}
+
+
+/* =========================================================
+   THEMEBOOK-ONLY CHARACTER CONSTRUCTION // v0.8.3
+   ========================================================= */
+
+/*
+ * This conversion intentionally does not use Theme Kits.
+ * Hide any Theme Kit selector/link UI emitted by Mist Engine's native
+ * Themebook partial. The actual Themebook, tags, weaknesses, improvements,
+ * and quest data remain untouched.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themekit-button,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  [data-action*="themekit" i],
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  [data-action*="theme-kit" i],
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  [data-item-type="themekit" i],
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  [data-document-type="themekit" i],
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  [data-type="themekit" i],
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  [class*="themekit" i] {
+  display: none !important;
 }

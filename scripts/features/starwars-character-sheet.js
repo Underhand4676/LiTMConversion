@@ -2903,6 +2903,71 @@ async function handleStarWarsSacrificeRoll(event, target) {
 }
 
 
+
+function removeThemeKitControls(sheet) {
+  const root = sheet.element;
+  if (!root) return;
+
+  const removeCleanly = element => {
+    if (!(element instanceof HTMLElement)) return;
+
+    const parent = element.parentElement;
+    element.remove();
+
+    if (
+      parent &&
+      parent !== root &&
+      parent.children.length === 0 &&
+      String(parent.textContent ?? "").trim() === ""
+    ) {
+      parent.remove();
+    }
+  };
+
+  /*
+   * Theme Kits are intentionally not part of the Star Wars conversion.
+   * Mist Engine's native themebook partial can still render Theme Kit
+   * selectors/link controls, so remove those controls after every render
+   * without touching the underlying Themebook or its tags.
+   */
+  const selectors = [
+    ".themekit-button",
+    "[data-action*='themekit' i]",
+    "[data-action*='theme-kit' i]",
+    "[data-item-type='themekit' i]",
+    "[data-document-type='themekit' i]",
+    "[data-type='themekit' i]",
+    "[class*='themekit' i]"
+  ];
+
+  for (const selector of selectors) {
+    root.querySelectorAll(selector).forEach(removeCleanly);
+  }
+
+  /*
+   * Catch native controls whose markup does not expose a predictable class.
+   * Only remove interactive elements whose own label explicitly says
+   * "Theme Kit"; never remove a whole theme card or any tag data.
+   */
+  for (const element of root.querySelectorAll(
+    "button, a, [role='button'], label"
+  )) {
+    const text = String(
+      element.getAttribute("aria-label") ??
+      element.getAttribute("title") ??
+      element.textContent ??
+      ""
+    )
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (/theme\s*kit/i.test(text)) {
+      removeCleanly(element);
+    }
+  }
+}
+
+
 function removeLegacyBackgroundControls(sheet) {
   const root = sheet.element;
   if (!root) return;
@@ -3051,6 +3116,7 @@ Hooks.once("init", async () => {
         enhanceLivingStandardUi(this);
         enhanceConditionTrackers(this);
         enhanceForcePolarityUi(this);
+        removeThemeKitControls(this);
         removeLegacyBackgroundControls(this);
         wireProbabilityRollButtons(this);
       }
@@ -3124,6 +3190,7 @@ Hooks.once("init", async () => {
         enhanceLivingStandardUi(this);
         enhanceConditionTrackers(this);
         enhanceForcePolarityUi(this);
+        removeThemeKitControls(this);
         removeLegacyBackgroundControls(this);
         wireProbabilityRollButtons(this);
       }

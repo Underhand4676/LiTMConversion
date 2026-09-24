@@ -13,6 +13,7 @@ LiTM Conversion is a Star Wars conversion layer for **Legend in the Mist / Mist 
   - Portrait dossier support
   - Adjudication notes for tags and equipment
   - Crew presentation in place of Fellowship terminology
+  - Themebook-only character construction, with Theme Kit selectors removed from the conversion sheets
 
 - **d6 dice pool resolution**
   - The main conversion sheet uses a pool of d6s instead of the default LiTM roll flow
@@ -38,7 +39,6 @@ LiTM Conversion is a Star Wars conversion layer for **Legend in the Mist / Mist 
   - Republic-styled chat
   - Republic pause overlay
   - Reskinned Themebooks
-  - Reskinned Theme Kits
   - Crew Theme Cards
   - Dark dossier styling in place of the default parchment presentation where the conversion applies
 
