@@ -6,7 +6,7 @@ const HAND_FLAG = "managedForceAspectHand";
 const CARD_FLAG = "forceAspectKey";
 const SOCKET_NAME = `module.${MODULE_ID}`;
 const SOCKET_EVENT = "force-aspect-cinematic";
-const CINEMATIC_REVEAL_DELAY = 3150;
+const CINEMATIC_REVEAL_DELAY = 3350;
 
 const BACK_IMAGE = `modules/${MODULE_ID}/cards/force-aspects/force-aspects-back.png`;
 
@@ -197,14 +197,9 @@ async function playForceAspectCinematic(packet) {
       <div class="litm-force-aspect-selected-card">
         <div class="litm-force-aspect-selected-inner">
           <img
-            class="litm-force-aspect-selected-face back"
+            class="litm-force-aspect-selected-face"
             src="${packet.backImage}"
             alt="Force Aspect card back"
-          >
-          <img
-            class="litm-force-aspect-selected-face front"
-            src="${packet.faceImage}"
-            alt="${packet.name ?? "Force Aspect"}"
           >
         </div>
       </div>
@@ -220,9 +215,21 @@ async function playForceAspectCinematic(packet) {
   try {
     requestAnimationFrame(() => overlay.classList.add("is-live"));
 
+    const selectedFace = overlay.querySelector(
+      ".litm-force-aspect-selected-face"
+    );
+
     if (reducedMotion) {
       await wait(350);
-      overlay.classList.add("is-drawing", "is-flipping");
+      overlay.classList.add("is-drawing");
+      await wait(250);
+
+      if (selectedFace) {
+        selectedFace.src = packet.faceImage;
+        selectedFace.alt = packet.name ?? "Force Aspect";
+      }
+
+      overlay.classList.add("is-face");
       await wait(2600);
       overlay.classList.add("is-leaving");
       await wait(350);
@@ -234,7 +241,23 @@ async function playForceAspectCinematic(packet) {
     overlay.classList.add("is-drawing");
 
     await wait(650);
-    overlay.classList.add("is-flipping");
+
+    /*
+     * Flip in two explicit halves. At the midpoint the card is edge-on, so
+     * swap the image from the physical back to the actual Aspect face. This
+     * avoids browser/WebView backface compositing quirks which could leave the
+     * back visible even though the 3D rotation completed.
+     */
+    overlay.classList.add("is-flip-out");
+    await wait(360);
+
+    if (selectedFace) {
+      selectedFace.src = packet.faceImage;
+      selectedFace.alt = packet.name ?? "Force Aspect";
+    }
+
+    overlay.classList.add("is-face");
+    overlay.classList.remove("is-flip-out");
 
     // Keep the actual card face on screen long enough to read it.
     await wait(4450);
@@ -577,7 +600,7 @@ async function ensureForceAspectDeck() {
     flags: {
       [MODULE_ID]: {
         [DECK_FLAG]: true,
-        deckVersion: "0.10.0"
+        deckVersion: "0.10.1"
       }
     }
   };
@@ -606,7 +629,7 @@ async function ensureForceAspectDeck() {
     displayCount: deckData.displayCount,
     ownership: deckData.ownership,
     [`flags.${MODULE_ID}.${DECK_FLAG}`]: true,
-    [`flags.${MODULE_ID}.deckVersion`]: "0.10.0"
+    [`flags.${MODULE_ID}.deckVersion`]: "0.10.1"
   });
 
   const managedByKey = new Map(

@@ -1314,3 +1314,50 @@
     transition-duration: 180ms !important;
   }
 }
+
+
+/* =========================================================
+   FORCE ASPECT RELIABLE CARD FLIP // v0.10.1
+   ========================================================= */
+
+/*
+ * Use one physical card image and swap its source while the card is edge-on.
+ * This keeps the nice 3D motion while avoiding backface-visibility bugs in
+ * Chromium/WebView builds where the back could remain composited on top.
+ */
+.litm-force-aspect-selected-inner {
+  transform: rotateY(0deg) scale(1);
+  transition:
+    transform 360ms cubic-bezier(.42,.02,.72,.62),
+    filter 360ms ease !important;
+}
+
+.litm-force-aspect-cinematic.is-flip-out
+  .litm-force-aspect-selected-inner {
+  transform: rotateY(90deg) scale(1.08) !important;
+}
+
+.litm-force-aspect-cinematic.is-face
+  .litm-force-aspect-selected-inner {
+  transform: rotateY(0deg) scale(1.17) !important;
+  transition-timing-function: cubic-bezier(.18,.74,.25,1) !important;
+}
+
+.litm-force-aspect-selected-face {
+  transform: none !important;
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+}
+
+/* Old two-face rules are intentionally neutralized. */
+.litm-force-aspect-selected-face.front,
+.litm-force-aspect-selected-face.back {
+  transform: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .litm-force-aspect-cinematic.is-face
+    .litm-force-aspect-selected-inner {
+    transform: none !important;
+  }
+}
