@@ -2144,3 +2144,184 @@
     border-bottom: 1px solid rgba(86,125,133,.34);
   }
 }
+
+
+/* =========================================================
+   CONDITION TRACKER POSITION FIX + LED FLICKER // v0.6.1
+   ========================================================= */
+
+/*
+ * Mist Engine's locked layout offsets the tab rail to the right because the
+ * stock parchment sheet reserves a left artwork gutter. v0.6.0 placed the
+ * condition tracker inside that already-offset rail, which put it beside MAIN
+ * instead of in the empty space under the identity block.
+ *
+ * Stretch the rail back across the full sheet width. The first grid column is
+ * then the condition console, while MAIN / PORTRAIT / BIOGRAPHY / NOTES stay
+ * in the four columns to its right.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-character-sheet-tabs {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  left: auto !important;
+  right: auto !important;
+  box-sizing: border-box !important;
+
+  grid-template-columns: minmax(280px, 300px) repeat(4, minmax(0, 1fr)) !important;
+}
+
+/* Keep the condition console visually attached to the identity side of the
+   dossier rather than making it look like a fifth navigation tab. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-trackers {
+  align-self: stretch;
+  border-left: 0 !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+}
+
+/* ---------------------------------------------------------
+   SUBTLE INDEPENDENT LED FLICKER
+   --------------------------------------------------------- */
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active {
+  animation-name: litm-condition-led-flicker;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: opacity, filter;
+}
+
+/* Give each of the six LEDs a different cycle and phase so they do not pulse
+   together. The values are intentionally slow and close together; this should
+   read as tiny electronics instability, not a flashing warning light. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(1) {
+  animation-duration: 2.73s;
+  animation-delay: -0.41s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(2) {
+  animation-duration: 3.17s;
+  animation-delay: -1.84s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(3) {
+  animation-duration: 2.39s;
+  animation-delay: -0.96s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(4) {
+  animation-duration: 3.61s;
+  animation-delay: -2.37s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(5) {
+  animation-duration: 2.91s;
+  animation-delay: -1.26s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(6) {
+  animation-duration: 3.43s;
+  animation-delay: -2.78s;
+}
+
+/* Offset STRAINED from WOUNDED as well, so matching pip numbers across the
+   two rows still do not breathe in sync. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(1) {
+  animation-duration: 3.31s;
+  animation-delay: -2.11s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(2) {
+  animation-duration: 2.57s;
+  animation-delay: -0.77s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(3) {
+  animation-duration: 3.83s;
+  animation-delay: -3.02s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(4) {
+  animation-duration: 2.81s;
+  animation-delay: -1.49s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(5) {
+  animation-duration: 3.53s;
+  animation-delay: -0.28s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(6) {
+  animation-duration: 2.47s;
+  animation-delay: -1.93s;
+}
+
+@keyframes litm-condition-led-flicker {
+  0%, 100% {
+    opacity: .97;
+    filter: brightness(.99);
+  }
+
+  13% {
+    opacity: 1;
+    filter: brightness(1.025);
+  }
+
+  31% {
+    opacity: .95;
+    filter: brightness(.975);
+  }
+
+  47% {
+    opacity: .985;
+    filter: brightness(1.01);
+  }
+
+  68% {
+    opacity: .94;
+    filter: brightness(.965);
+  }
+
+  82% {
+    opacity: .99;
+    filter: brightness(1.015);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .litm-sw-condition-light.active {
+    animation: none !important;
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/* Compact/narrow layouts intentionally keep the v0.6.0 stacked arrangement. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet.litm-conversion-starwars-compact
+  .litm-character-sheet-tabs {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 900px) {
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .litm-character-sheet-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
