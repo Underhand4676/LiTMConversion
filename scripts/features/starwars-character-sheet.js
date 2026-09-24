@@ -1519,13 +1519,37 @@ async function moveForcePolarity(sheet, direction) {
   sheet.render({ force: true });
 }
 
-function createForcePolarityLight(index, active) {
+function createForcePolarityLight(index, active, side) {
   const light = document.createElement("span");
 
   light.className =
     `litm-sw-force-light litm-sw-condition-light ${active ? "active" : "inactive"}`;
 
   light.dataset.index = String(index);
+
+  /*
+   * Set the emitter color directly on each pip. This avoids any possibility
+   * that inherited Wounded/Strained or Fallen styling overrides the intended
+   * Force polarity color.
+   *
+   * Light / Return to Light = blue.
+   * Dark / Lost to Dark = red.
+   */
+  if (side === "dark") {
+    light.style.setProperty("--condition-active", "#bd5b59", "important");
+    light.style.setProperty(
+      "--condition-glow",
+      "rgba(189,91,89,.30)",
+      "important"
+    );
+  } else if (side === "light") {
+    light.style.setProperty("--condition-active", "#6fcae8", "important");
+    light.style.setProperty(
+      "--condition-glow",
+      "rgba(111,202,232,.28)",
+      "important"
+    );
+  }
 
   return light;
 }
@@ -1631,7 +1655,7 @@ function createForcePolarityTracker(sheet) {
 
   for (let index = 1; index <= FORCE_POLARITY_MAX; index += 1) {
     lights.append(
-      createForcePolarityLight(index, index <= tier)
+      createForcePolarityLight(index, index <= tier, display.side)
     );
   }
 

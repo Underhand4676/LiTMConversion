@@ -4349,3 +4349,29 @@
   --condition-active: #bd5b59;
   --condition-glow: rgba(189,91,89,.30);
 }
+
+
+/* =========================================================
+   FORCE POLARITY COLOR ROUTING PATCH // v0.7.3
+   ========================================================= */
+
+/*
+ * Force pip color is now also assigned directly per LED in JS. These selectors
+ * remain as semantic fallbacks, but the inline custom properties guarantee:
+ *
+ *   LIGHT SIDE / RETURN TO LIGHT  = BLUE
+ *   DARK SIDE / LOST TO DARK      = RED
+ *
+ * Normal polarity remains steady. Fallen polarity keeps the existing flicker.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-side-light .litm-sw-force-light {
+  --condition-active: #6fcae8;
+  --condition-glow: rgba(111,202,232,.28);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-side-dark .litm-sw-force-light {
+  --condition-active: #bd5b59;
+  --condition-glow: rgba(189,91,89,.30);
+}
