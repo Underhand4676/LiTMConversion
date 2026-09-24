@@ -1663,13 +1663,105 @@ function createForcePolarityEnableButton(sheet) {
   return button;
 }
 
+
+function createForcePolarityEditControl(sheet) {
+  const enabled = getForcePolarityEnabled(sheet.actor);
+  const state = getForcePolarityState(sheet.actor);
+  const value = getForcePolarityValue(sheet.actor);
+  const display = forcePolarityDisplay(state, value);
+
+  const control = document.createElement("div");
+  control.className = "litm-sw-force-config";
+
+  const label = document.createElement("span");
+  label.className = "litm-sw-force-config-label";
+  label.textContent = "FORCE POLARITY";
+
+  const status = document.createElement("span");
+  status.className = [
+    "litm-sw-force-config-status",
+    enabled ? "enabled" : "disabled"
+  ].join(" ");
+
+  status.textContent = enabled
+    ? display.status
+    : "DISABLED";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = [
+    "litm-sw-force-config-button",
+    enabled ? "disable" : "enable"
+  ].join(" ");
+
+  button.textContent = enabled
+    ? "DISABLE"
+    : "ENABLE";
+
+  button.title = enabled
+    ? "Disable Force Polarity tracker"
+    : "Enable Force Polarity tracker";
+
+  button.addEventListener("click", async event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    await setForcePolarityData(sheet, {
+      enabled: !enabled
+    });
+  });
+
+  control.append(label, status, button);
+
+  return control;
+}
+
 function enhanceForcePolarityUi(sheet) {
   const root = sheet.element;
   if (!root) return;
 
   root.querySelectorAll(
-    ".litm-sw-force-polarity, .litm-sw-force-enable"
+    ".litm-sw-force-polarity, .litm-sw-force-enable, .litm-sw-force-config"
   ).forEach(element => element.remove());
+
+  const enabled = getForcePolarityEnabled(sheet.actor);
+
+  /*
+   * Mist Engine removes the Tags & Statuses box entirely while the character
+   * sheet is unlocked. v0.7.0 tried to put the ENABLE control inside that
+   * nonexistent edit-mode container, so existing actors had no way to turn
+   * the feature on.
+   *
+   * Edit mode now gets a proper FORCE POLARITY setup row in the identity
+   * dossier beside the other character configuration fields. The actual
+   * tracker still lives exactly where intended in locked mode: at the bottom
+   * of Tags & Statuses.
+   */
+  if (
+    sheet.actor.system.editMode &&
+    canModifyForcePolarity(sheet.actor)
+  ) {
+    const header = root.querySelector(".sheet-header");
+
+    const identity =
+      header?.querySelector(".col-character-name.edit-mode") ??
+      header?.querySelector(".col-compact-identity.edit-mode");
+
+    if (identity) {
+      const livingStandard =
+        identity.querySelector(".litm-sw-living-standard-edit");
+
+      const config = createForcePolarityEditControl(sheet);
+
+      if (livingStandard) {
+        livingStandard.insertAdjacentElement("afterend", config);
+      } else {
+        identity.append(config);
+      }
+    }
+
+    return;
+  }
 
   const statusPanel =
     root.querySelector(".floating-status-container-character") ??
@@ -1685,18 +1777,10 @@ function enhanceForcePolarityUi(sheet) {
     "litm-sw-force-enable-ready"
   );
 
-  const enabled = getForcePolarityEnabled(sheet.actor);
+  if (!enabled) return;
 
-  if (enabled) {
-    statusPanel.classList.add("litm-sw-force-enabled");
-    statusPanel.append(createForcePolarityTracker(sheet));
-    return;
-  }
-
-  if (sheet.actor.system.editMode && canModifyForcePolarity(sheet.actor)) {
-    statusPanel.classList.add("litm-sw-force-enable-ready");
-    statusPanel.append(createForcePolarityEnableButton(sheet));
-  }
+  statusPanel.classList.add("litm-sw-force-enabled");
+  statusPanel.append(createForcePolarityTracker(sheet));
 }
 
 

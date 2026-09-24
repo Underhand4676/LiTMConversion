@@ -4118,3 +4118,96 @@
     font-size: 6px !important;
   }
 }
+
+
+/* =========================================================
+   FORCE POLARITY EDIT-MODE SETUP // v0.7.1
+   ========================================================= */
+
+/*
+ * Unlocked Mist Engine characters do not render Tags & Statuses.
+ * Put the setup switch in the identity/configuration area instead.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-config {
+  width: 100%;
+  box-sizing: border-box;
+
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+
+  margin-top: 6px;
+  padding: 6px 8px;
+
+  background: rgba(7, 17, 21, .68);
+  border: 1px solid rgba(78, 116, 124, .32);
+  border-left: 2px solid rgba(111, 202, 232, .58);
+
+  box-shadow:
+    inset 0 0 10px rgba(0,0,0,.24);
+
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-config-label {
+  color: #89a8ad;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .09em;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-config-status {
+  min-width: 0;
+
+  color: #657d81;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .055em;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-config-status.enabled {
+  color: #a9c7cb;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-config-button {
+  width: auto !important;
+  min-width: 66px !important;
+  height: 23px !important;
+  min-height: 23px !important;
+
+  margin: 0 !important;
+  padding: 0 8px !important;
+
+  background: rgba(13, 30, 35, .88) !important;
+  border: 1px solid rgba(78, 126, 136, .46) !important;
+  border-radius: 0 !important;
+  box-shadow: inset 2px 0 0 rgba(111, 202, 232, .64) !important;
+
+  color: #a8cbd0 !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 7px !important;
+  font-weight: 800 !important;
+  letter-spacing: .08em !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-config-button.disable {
+  border-color: rgba(136, 92, 75, .46) !important;
+  box-shadow: inset 2px 0 0 rgba(190, 113, 82, .68) !important;
+  color: #c9a38f !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-config-button:hover {
+  filter: brightness(1.12);
+}
