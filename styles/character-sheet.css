@@ -4375,3 +4375,104 @@
   --condition-active: #bd5b59;
   --condition-glow: rgba(189,91,89,.30);
 }
+
+
+/* =========================================================
+   STATUS TIER DISCOVERABILITY // v0.7.4
+   ========================================================= */
+
+/*
+ * Mist Engine already provides working numbered tier controls beneath each
+ * status. Give those existing controls a clear "SET TIER" identity rather
+ * than replacing or reimplementing any status mechanics.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-status-tier-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  min-height: 22px;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-status-tier-row::before {
+  content: "SET TIER";
+  flex: 0 0 auto;
+
+  margin-right: 2px;
+  padding: 2px 4px;
+
+  color: #7ca49c;
+  background: rgba(79, 125, 115, .11);
+  border: 1px solid rgba(100, 157, 143, .28);
+
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 6px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .08em;
+  white-space: nowrap;
+
+  pointer-events: none;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-status-tier-control {
+  min-width: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  background: rgba(13, 28, 30, .96) !important;
+  border: 1px solid rgba(105, 159, 147, .50) !important;
+  border-radius: 50% !important;
+
+  box-shadow:
+    inset 0 0 5px rgba(0,0,0,.62),
+    0 0 0 1px rgba(5,12,14,.38) !important;
+
+  color: #bdd5d0 !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+
+  cursor: pointer !important;
+  transition:
+    border-color 90ms linear,
+    background-color 90ms linear,
+    box-shadow 90ms linear,
+    color 90ms linear,
+    transform 90ms linear;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-status-tier-control:hover {
+  color: #edf8f5 !important;
+  background: rgba(51, 96, 86, .52) !important;
+  border-color: rgba(135, 205, 188, .82) !important;
+
+  box-shadow:
+    inset 0 0 5px rgba(0,0,0,.42),
+    0 0 5px rgba(100, 174, 157, .24) !important;
+
+  transform: translateY(-1px);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .fts-input-name.status {
+  cursor: help;
+}
+
+/* Small native tooltip cue on the status bar itself. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .fts-input-name.status:hover {
+  border-color: rgba(126, 192, 176, .62) !important;
+}

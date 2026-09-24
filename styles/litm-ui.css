@@ -118,6 +118,8 @@
 
 .chat-message.litm-chat-message {
   --litm-user-accent: #7fd3dc;
+  --litm-user-accent-muted:
+    color-mix(in srgb, var(--litm-user-accent) 85%, #071014 15%);
 
   position: relative;
   overflow: hidden;
@@ -152,8 +154,8 @@
   left: 12px;
   width: 68px;
   height: 3px;
-  background: var(--litm-user-accent);
-  box-shadow: 0 0 8px var(--litm-user-accent);
+  background: var(--litm-user-accent-muted);
+  box-shadow: 0 0 6px var(--litm-user-accent-muted);
   opacity: 0.9;
   pointer-events: none;
 }
@@ -167,13 +169,13 @@
 }
 
 .chat-message.litm-chat-message .message-sender {
-  color: var(--litm-user-accent);
+  color: var(--litm-user-accent-muted);
   font-family: monospace;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-shadow: 0 0 7px var(--litm-user-accent);
+  text-shadow: 0 0 5px var(--litm-user-accent-muted);
 }
 
 .chat-message.litm-chat-message .message-metadata,
@@ -194,7 +196,7 @@
   border: 1px solid rgba(58, 89, 96, 0.55);
   border-left: 0;
   box-shadow:
-    inset 3px 0 0 var(--litm-user-accent),
+    inset 3px 0 0 var(--litm-user-accent-muted),
     inset 0 0 12px rgba(0, 0, 0, 0.34);
   color: #d9eef0;
   font-family: monospace;

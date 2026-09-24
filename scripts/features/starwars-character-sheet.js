@@ -923,6 +923,133 @@ function enhanceBurnControls(root) {
   }
 }
 
+
+function enhanceStatusTierAffordances(sheet) {
+  const root = sheet.element;
+  if (!root || sheet.actor.system.editMode) return;
+
+  const statusPanel =
+    root.querySelector(".floating-status-container-character") ??
+    root.querySelector(
+      ".container-card-with-border.floating-tags-and-status-container"
+    );
+
+  if (!statusPanel) return;
+
+  // Remove only our presentation classes. Native status controls/handlers stay
+  // completely untouched.
+  statusPanel
+    .querySelectorAll(".litm-sw-status-tier-control")
+    .forEach(control => {
+      control.classList.remove("litm-sw-status-tier-control");
+      control.removeAttribute("data-litm-status-tier");
+    });
+
+  statusPanel
+    .querySelectorAll(".litm-sw-status-tier-row")
+    .forEach(row => {
+      row.classList.remove("litm-sw-status-tier-row");
+      row.removeAttribute("data-litm-status-name");
+    });
+
+  const statusNames = [
+    ...statusPanel.querySelectorAll(".fts-input-name.status")
+  ];
+
+  for (const statusName of statusNames) {
+    const readableName =
+      String(
+        statusName.value ??
+        statusName.textContent ??
+        "Status"
+      ).trim() || "Status";
+
+    /*
+     * Mist Engine already renders the tier controls. The problem is purely
+     * discoverability: the small numbered controls do not visually advertise
+     * that they are interactive.
+     *
+     * Find the smallest nearby status group that contains this one status and
+     * the native 1-6 tier controls, then decorate those existing controls.
+     */
+    let group = statusName.parentElement;
+    let tierControls = [];
+
+    for (let depth = 0; depth < 5 && group && group !== statusPanel; depth += 1) {
+      const statusesInGroup =
+        group.querySelectorAll(".fts-input-name.status").length;
+
+      const candidates = [
+        ...group.querySelectorAll(
+          "button, a, [role='button'], [data-action], [data-value]"
+        )
+      ].filter(element => {
+        if (element.closest(".litm-sw-force-polarity")) return false;
+
+        const text = String(element.textContent ?? "").trim();
+        return /^[1-6]$/.test(text);
+      });
+
+      if (statusesInGroup === 1 && candidates.length) {
+        tierControls = candidates;
+        break;
+      }
+
+      group = group.parentElement;
+    }
+
+    if (!tierControls.length) continue;
+
+    // Keep only one control for each visible tier in case the native markup
+    // contains nested clickable elements.
+    const uniqueControls = [];
+    const seenTiers = new Set();
+
+    for (const control of tierControls) {
+      const tier = String(control.textContent ?? "").trim();
+      if (seenTiers.has(tier)) continue;
+
+      seenTiers.add(tier);
+      uniqueControls.push(control);
+    }
+
+    for (const control of uniqueControls) {
+      const tier = String(control.textContent ?? "").trim();
+
+      control.classList.add("litm-sw-status-tier-control");
+      control.dataset.litmStatusTier = tier;
+
+      if (!control.getAttribute("title")) {
+        control.setAttribute(
+          "title",
+          `Set ${readableName} to status tier ${tier}`
+        );
+      }
+
+      control.setAttribute(
+        "aria-label",
+        `Set ${readableName} to status tier ${tier}`
+      );
+    }
+
+    /*
+     * Add the instruction to the native tier row instead of adding another
+     * button. The numbers remain the actual controls the player clicks.
+     */
+    const firstControl = uniqueControls[0];
+    let tierRow = firstControl?.parentElement ?? null;
+
+    if (
+      tierRow &&
+      uniqueControls.every(control => tierRow.contains(control))
+    ) {
+      tierRow.classList.add("litm-sw-status-tier-row");
+      tierRow.dataset.litmStatusName = readableName;
+    }
+  }
+}
+
+
 function enhanceTagUsageUi(sheet) {
   const root = sheet.element;
   if (!root) return;
@@ -2920,6 +3047,7 @@ Hooks.once("init", async () => {
       _onRender(context, options) {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
+        enhanceStatusTierAffordances(this);
         enhanceLivingStandardUi(this);
         enhanceConditionTrackers(this);
         enhanceForcePolarityUi(this);
@@ -2992,6 +3120,7 @@ Hooks.once("init", async () => {
       _onRender(context, options) {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
+        enhanceStatusTierAffordances(this);
         enhanceLivingStandardUi(this);
         enhanceConditionTrackers(this);
         enhanceForcePolarityUi(this);
