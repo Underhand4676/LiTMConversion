@@ -35,6 +35,12 @@ LiTM Conversion is a Star Wars conversion layer for **Legend in the Mist / Mist 
   - Date-based roll history and statistics
   - Automatic recovery of the Probability Processor launcher macro
 
+- **Force Aspects deck**
+  - Adds the Force Aspects as a native Foundry Cards deck
+  - Includes 18 Light, Neutral, and Dark Aspect cards
+  - Uses the approved worn Sabacc-inspired card faces and matching back
+  - The GM copy is restored automatically if the managed deck is missing
+
 - **Star Wars interface treatment**
   - Republic-styled chat
   - Republic pause overlay

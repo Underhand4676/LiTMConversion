@@ -1,0 +1,309 @@
+const MODULE_ID = "litm-conversion";
+const DECK_NAME = "Force Aspects";
+const DECK_FLAG = "managedForceAspectDeck";
+const CARD_FLAG = "forceAspectKey";
+
+const BACK_IMAGE = `modules/${MODULE_ID}/cards/force-aspects/force-aspects-back.png`;
+
+const FORCE_ASPECTS = [
+  {
+    key: "compassion",
+    side: "light",
+    name: "Aspect of Compassion",
+    keywords: "Kindness, Generosity, Boon.",
+    text: "Plans set in motion are destined to bear fruit and even elements that are unaccounted for will twist in your favor. You may be on the receiving end of beneficial arrangements and have a higher chance of safely navigating dangerous situations."
+  },
+  {
+    key: "courage",
+    side: "light",
+    name: "Aspect of Courage",
+    keywords: "Determination, Decisiveness, Tenacity.",
+    text: "You will find the strength required to hold to your convictions and move forward with your plans. You rise to face any struggles with speed and resolve."
+  },
+  {
+    key: "harmony",
+    side: "light",
+    name: "Aspect of Harmony",
+    keywords: "Fulfillment, Balance, Acceptance.",
+    text: "You are overcome with a profound sense of peace and purpose as you find yourself totally in tune with the Force for an instant. As the influence of the Dark Side recedes, your actions gain greater benefits."
+  },
+  {
+    key: "insight",
+    side: "light",
+    name: "Aspect of Insight",
+    keywords: "Guidance, Wisdom, Direction.",
+    text: "You may find information or clarity on details you may have missed, or never realized you needed. Secrets and alternate paths to a goal could reveal themselves."
+  },
+  {
+    key: "resilience",
+    side: "light",
+    name: "Aspect of Resilience",
+    keywords: "Focus, Protection, Willpower.",
+    text: "Tasks requiring great concentration are much easier to complete. Your mind and body are honed against anything that would otherwise sway or harm you."
+  },
+  {
+    key: "serenity",
+    side: "light",
+    name: "Aspect of Serenity",
+    keywords: "Renewal, Tranquility, Foundations.",
+    text: "You find reprieve from your struggles, whether in verbal arguments or in combat, and damaged relationships have a higher chance of being repaired. You may be rejuvenated and any unbalancing mental influences or emotions might dissipate."
+  },
+  {
+    key: "change",
+    side: "neutral",
+    name: "Aspect of Change",
+    keywords: "Reversal, Upheaval, Transformation.",
+    text: "If your actions or situation is going well, they will immediately take a turn for the worse, and vice-versa. The change may be drastic or come suddenly, but a canny character may find the strength and will to adapt to their new circumstances."
+  },
+  {
+    key: "destiny",
+    side: "neutral",
+    name: "Aspect of Destiny",
+    keywords: "Drama, Suspense, Fate.",
+    text: "Everything is about to become a bit unbelievable. The people and world around you will seem like players on a stage and may even fold you into the show. Whatever happens will have a lasting impact on your path forward."
+  },
+  {
+    key: "finality",
+    side: "neutral",
+    name: "Aspect of Finality",
+    keywords: "Inevitability, Consequence, Certainty.",
+    text: "Your actions or the situation at large spirals towards its likely conclusion. Here, there are no second chances. Either steps are taken to assure your victory, or a new complication arises that places you in greater peril than before."
+  },
+  {
+    key: "potential",
+    side: "neutral",
+    name: "Aspect of Potential",
+    keywords: "Responsibility, Beginnings, Promise.",
+    text: "You find yourself in need of assistance as the task you face calls for knowledge or skill beyond your capability. The task might also come with great responsibility. Regardless, there is real worth beyond the difficulties you face."
+  },
+  {
+    key: "trial",
+    side: "neutral",
+    name: "Aspect of Trial",
+    keywords: "Temptation, Reflection, Challenge.",
+    text: "The stakes of your action rise dramatically, both by increasing the challenge presented and the potential reward. The test set by this Aspect should always be clearly daunting, but the reward should be enough to call a character to face it."
+  },
+  {
+    key: "vision",
+    side: "neutral",
+    name: "Aspect of Vision",
+    keywords: "Premonition, Illusion, Memory.",
+    text: "You gain crucial insight from past experiences or events, or glimpse the future in a way that is immediately relevant should you be Force-Sensitive. In either case, some things are best undiscovered, and you may suffer backlash from their revelations."
+  },
+  {
+    key: "deception",
+    side: "dark",
+    name: "Aspect of Deception",
+    keywords: "Guile, Betrayal, Obfuscation.",
+    text: "Whether you realize it or not, your actions are being used as an instrument of a higher power. Something greater than your character seeks to deceive them in order to maintain control. Only mistrust pervades this web of lies."
+  },
+  {
+    key: "domination",
+    side: "dark",
+    name: "Aspect of Domination",
+    keywords: "Subjugation, Selfishness, Control.",
+    text: "Your actions take on a blunt, heavy-handed quality in an attempt to control the situation. While the power provided may be enough to tip the scales in your character's favor for a moment, collateral damage always occurs. Your actions may cause unintended damage or come at the expense of a companion's well-being."
+  },
+  {
+    key: "fear",
+    side: "dark",
+    name: "Aspect of Fear",
+    keywords: "Hesitation, Dread, Doubt.",
+    text: "Your current situation becomes uncertain. Something about it sparks great trepidation, or the situation twists so as to invoke great fear or anxiety. The character's judgement may become clouded by the worst thoughts the galaxy can conjure."
+  },
+  {
+    key: "hatred",
+    side: "dark",
+    name: "Aspect of Hatred",
+    keywords: "Violence, Destruction, Misfortune.",
+    text: "If your situation could descend into violence or all-encompassing peril, it will. Flaring tempers and rash actions overcome more rational or diplomatic approaches."
+  },
+  {
+    key: "loss",
+    side: "dark",
+    name: "Aspect of Loss",
+    keywords: "Sacrifice, Scarcity, Desperation.",
+    text: "Something vital immediately leaves you; this absence may be temporary, but there is no telling how long it will last. Your character will be in great need, and they may be forced to do unthinkable things to achieve victory or survive another day."
+  },
+  {
+    key: "passion",
+    side: "dark",
+    name: "Aspect of Passion",
+    keywords: "Desire, Longing, Recklessness.",
+    text: "Something that you hold dear or wish to possess is immediately entangled with looming disaster. Swift action is needed to win the day, but such hasty decisions can have lasting consequences for the character as emotion clouds their thoughts."
+  }
+];
+
+function imageForAspect(aspect) {
+  return `modules/${MODULE_ID}/cards/force-aspects/aspect-of-${aspect.key}.png`;
+}
+
+function cardDescription(aspect) {
+  return `<p><strong>${aspect.keywords}</strong> ${aspect.text}</p>`;
+}
+
+function cardData(aspect, sort) {
+  const img = imageForAspect(aspect);
+  const description = cardDescription(aspect);
+
+  return {
+    name: aspect.name,
+    type: "base",
+    suit: aspect.side,
+    value: sort + 1,
+    description,
+    back: {
+      name: "Force Aspects Back",
+      img: BACK_IMAGE,
+      text: ""
+    },
+    faces: [
+      {
+        name: aspect.name,
+        img,
+        text: description
+      }
+    ],
+    face: null,
+    drawn: false,
+    sort: sort * 100000,
+    flags: {
+      [MODULE_ID]: {
+        [CARD_FLAG]: aspect.key,
+        forceAspectSide: aspect.side
+      }
+    }
+  };
+}
+
+function getManagedDeck() {
+  return game.cards?.find(
+    deck => deck.getFlag(MODULE_ID, DECK_FLAG) === true
+  ) ?? null;
+}
+
+async function ensureForceAspectDeck() {
+  if (!game.user.isGM) return null;
+
+  const CardsClass = CONFIG.Cards?.documentClass;
+
+  if (!CardsClass) {
+    throw new Error("Foundry Cards document class is unavailable.");
+  }
+
+  let deck = getManagedDeck();
+
+  const deckData = {
+    name: DECK_NAME,
+    type: "deck",
+    description:
+      "A managed Force Aspect deck supplied by LiTM Conversion. " +
+      "Each card face contains the full text of one Force Aspect.",
+    img: BACK_IMAGE,
+    displayCount: true,
+    ownership: {
+      default: CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER,
+      [game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+    },
+    flags: {
+      [MODULE_ID]: {
+        [DECK_FLAG]: true,
+        deckVersion: "0.9.0"
+      }
+    }
+  };
+
+  if (!deck) {
+    deck = await CardsClass.create(deckData);
+
+    if (!deck) {
+      throw new Error("Foundry did not return a created Force Aspects deck.");
+    }
+
+    await deck.createEmbeddedDocuments(
+      "Card",
+      FORCE_ASPECTS.map(cardData)
+    );
+
+    console.log(`${MODULE_ID} | Provisioned ${DECK_NAME} deck`);
+    return deck;
+  }
+
+  // Keep our managed deck's presentation current without disturbing drawn state.
+  await deck.update({
+    name: deckData.name,
+    description: deckData.description,
+    img: deckData.img,
+    displayCount: deckData.displayCount,
+    [`flags.${MODULE_ID}.${DECK_FLAG}`]: true,
+    [`flags.${MODULE_ID}.deckVersion`]: "0.9.0"
+  });
+
+  const managedByKey = new Map(
+    deck.cards
+      .filter(card => card.getFlag(MODULE_ID, CARD_FLAG))
+      .map(card => [card.getFlag(MODULE_ID, CARD_FLAG), card])
+  );
+
+  const creates = [];
+  const updates = [];
+
+  FORCE_ASPECTS.forEach((aspect, index) => {
+    const desired = cardData(aspect, index);
+    const existing = managedByKey.get(aspect.key);
+
+    if (!existing) {
+      creates.push(desired);
+      return;
+    }
+
+    updates.push({
+      _id: existing.id,
+      name: desired.name,
+      type: desired.type,
+      suit: desired.suit,
+      value: desired.value,
+      description: desired.description,
+      back: desired.back,
+      faces: desired.faces,
+      sort: desired.sort,
+      [`flags.${MODULE_ID}.${CARD_FLAG}`]: aspect.key,
+      [`flags.${MODULE_ID}.forceAspectSide`]: aspect.side
+    });
+  });
+
+  if (updates.length) {
+    await deck.updateEmbeddedDocuments("Card", updates);
+  }
+
+  if (creates.length) {
+    await deck.createEmbeddedDocuments("Card", creates);
+  }
+
+  return deck;
+}
+
+Hooks.once("ready", async () => {
+  const module = game.modules.get(MODULE_ID);
+
+  module.api ??= {};
+  module.api.forceAspectDeck = {
+    restoreDeck: ensureForceAspectDeck
+  };
+
+  if (!game.user.isGM) return;
+
+  try {
+    await ensureForceAspectDeck();
+  } catch (error) {
+    console.error(
+      `${MODULE_ID} | Failed to provision ${DECK_NAME} deck`,
+      error
+    );
+
+    ui.notifications.error(
+      "LiTM Conversion // Force Aspects deck could not be provisioned. " +
+      "Check the browser console for details."
+    );
+  }
+});
