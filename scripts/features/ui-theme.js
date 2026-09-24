@@ -539,20 +539,71 @@ function classifyThemeKitTabs(root) {
     "description"
   ]);
 
-  for (const element of root.querySelectorAll(
-    "nav a, nav button, .tabs a, .tabs button, [data-tab]"
-  )) {
+  // Clear our previous classification first. Theme Kit sheets can rerender
+  // individual pieces while staying open.
+  root
+    .querySelectorAll(
+      ".litm-sw-themekit-tab, .litm-sw-themekit-tabs"
+    )
+    .forEach(element => {
+      element.classList.remove(
+        "litm-sw-themekit-tab",
+        "litm-sw-themekit-description-tab",
+        "litm-sw-themekit-tabs"
+      );
+    });
+
+  /*
+   * Theme Kit content panels and navigation controls both use data-tab.
+   * The reliable difference is that the actual selector controls render only
+   * the tab label itself. Content panels contain their real controls/content.
+   *
+   * Match exact visible labels, then classify only interactive/data-tab nodes.
+   */
+  const controls = [
+    ...root.querySelectorAll(
+      "a, button, [role='tab'], [data-tab]"
+    )
+  ].filter(element => {
     const text = String(element.textContent ?? "")
       .replace(/\s+/g, " ")
       .trim()
       .toLowerCase();
 
-    if (!labels.has(text)) continue;
+    return labels.has(text);
+  });
 
+  for (const element of controls) {
     element.classList.add("litm-sw-themekit-tab");
 
-    if (text === "description") {
+    if (
+      String(element.textContent ?? "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase() === "description"
+    ) {
       element.classList.add("litm-sw-themekit-description-tab");
+    }
+  }
+
+  /*
+   * Mark the smallest shared parent of the selector controls. We style this
+   * rail directly instead of guessing whether Mist Engine called it .tabs,
+   * nav, flexrow, etc.
+   */
+  if (controls.length >= 2) {
+    let rail = controls[0].parentElement;
+
+    while (
+      rail &&
+      rail !== root &&
+      !controls.every(control => rail.contains(control))
+    ) {
+      rail = rail.parentElement;
+    }
+
+    if (rail && rail !== root) {
+      rail.classList.add("litm-sw-themekit-tabs");
     }
   }
 }
@@ -599,83 +650,66 @@ function classifyThemeKitActions(root) {
 function markThemeKitPanels(root) {
   if (!(root instanceof HTMLElement)) return;
 
-  /*
-   * Theme Kit tab buttons and tab CONTENT panels both use data-tab.
-   * v0.8.0 treated every [data-tab] element as a content panel, which put
-   * the 410px panel min-height on the tab buttons themselves.
-   *
-   * First strip panel classes from anything that is clearly a tab control,
-   * then only mark genuine content containers.
-   */
-  for (const control of root.querySelectorAll(
-    "nav [data-tab], " +
-    "nav a, " +
-    "nav button, " +
-    ".tabs > [data-tab], " +
-    ".tabs > a, " +
-    ".tabs > button, " +
-    '[role="tab"]'
-  )) {
-    control.classList.remove(
-      "litm-sw-themekit-panel",
-      "litm-sw-themekit-description-panel"
-    );
-  }
+  root
+    .querySelectorAll(
+      ".litm-sw-themekit-panel, " +
+      ".litm-sw-themekit-description-panel, " +
+      ".litm-sw-themekit-description-shell"
+    )
+    .forEach(element => {
+      element.classList.remove(
+        "litm-sw-themekit-panel",
+        "litm-sw-themekit-description-panel",
+        "litm-sw-themekit-description-shell"
+      );
+    });
 
-  for (const panel of root.querySelectorAll(
-    ".tab, .sheet-body, .sheet-content, [data-tab]"
-  )) {
+  /*
+   * Only actual content panels receive panel sizing. The selector controls
+   * were classified first and are explicitly excluded.
+   */
+  for (const panel of root.querySelectorAll(".tab, [data-tab]")) {
     if (!(panel instanceof HTMLElement)) continue;
 
     if (
-      panel.matches("a, button, [role='tab']") ||
-      panel.closest("nav")
+      panel.classList.contains("litm-sw-themekit-tab") ||
+      panel.closest(".litm-sw-themekit-tabs") ||
+      panel.matches("a, button, [role='tab']")
     ) {
       continue;
     }
-
-    /*
-     * A direct child of a .tabs navigation rail is also a tab selector even
-     * if the system uses a div/span instead of a link or button.
-     */
-    if (panel.parentElement?.classList?.contains("tabs")) continue;
 
     panel.classList.add("litm-sw-themekit-panel");
-  }
 
-  for (const panel of root.querySelectorAll(
-    '.tab.description, ' +
-    '.description.tab, ' +
-    '[data-tab="description"], ' +
-    '[data-tab*="description" i]'
-  )) {
-    if (!(panel instanceof HTMLElement)) continue;
+    const tabName = String(panel.dataset.tab ?? "").toLowerCase();
 
-    if (
-      panel.matches("a, button, [role='tab']") ||
-      panel.closest("nav") ||
-      panel.parentElement?.classList?.contains("tabs")
-    ) {
-      continue;
+    if (tabName.includes("description")) {
+      panel.classList.add("litm-sw-themekit-description-panel");
+
+      const shell =
+        panel.parentElement ??
+        panel.closest(".sheet-body, .sheet-content");
+
+      shell?.classList?.add("litm-sw-themekit-description-shell");
     }
-
-    panel.classList.add("litm-sw-themekit-description-panel");
   }
 }
 
 function enhanceThemeKitSheetUi(root) {
   if (!(root instanceof HTMLElement)) return;
 
+  /*
+   * Order matters: identify the tab selector controls first, then mark the
+   * remaining data-tab nodes as content panels.
+   */
+  classifyThemeKitTabs(root);
   markThemeKitPanels(root);
 
-  // Theme Kits use the same native tag storage and several of the same field
-  // structures as Themebooks, so reuse the safe presentation helpers while
-  // leaving Mist Engine's actual controls and data attributes untouched.
-  markThemebookDescriptionPanel(root);
+  // Reuse the safe Themebook tag-row and icon helpers, but not its Description
+  // classifier because Theme Kit navigation uses data-tab on the selector.
   enhanceThemebookTagRows(root);
   enhanceThemebookIcons(root);
 
-  classifyThemeKitTabs(root);
   classifyThemeKitActions(root);
 }
 

@@ -1284,3 +1284,267 @@
   border: 0 !important;
   box-shadow: none !important;
 }
+
+
+/* =========================================================
+   THEME KIT TAB / DESCRIPTION REBUILD // v0.8.2
+   ========================================================= */
+
+/*
+ * Do not style every generic .tabs element. The Theme Kit enhancer now marks
+ * the exact selector rail after rendering.
+ */
+.litm-starwars-themekit-sheet .litm-sw-themekit-tabs {
+  width: 100% !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+
+  margin: 5px 0 8px !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  gap: 0 !important;
+
+  overflow: hidden !important;
+
+  background: rgba(6, 14, 18, .72) !important;
+  background-image: none !important;
+
+  border-top: 1px solid rgba(74, 113, 122, .38) !important;
+  border-bottom: 1px solid rgba(74, 113, 122, .52) !important;
+
+  box-shadow: none !important;
+}
+
+/*
+ * Selector buttons are always one compact row. These rules intentionally
+ * override the older Themebook [data-tab="description"] dossier selector too.
+ */
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-tabs
+  .litm-sw-themekit-tab,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-tabs
+  [data-tab="description"],
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-tabs
+  [data-tab*="description" i] {
+  flex: 1 1 0 !important;
+
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+
+  height: 33px !important;
+  min-height: 33px !important;
+  max-height: 33px !important;
+
+  margin: 0 !important;
+  padding: 0 8px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  overflow: hidden !important;
+
+  background: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  border-right: 1px solid rgba(61, 92, 99, .28) !important;
+  border-radius: 0 !important;
+
+  box-shadow: none !important;
+
+  color: #8ca6ab !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  letter-spacing: .065em !important;
+  text-transform: uppercase !important;
+  text-shadow: none !important;
+  white-space: nowrap !important;
+}
+
+/* Explicitly clear any panel classes accidentally left on selector controls. */
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-tabs
+  .litm-sw-themekit-panel,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-tabs
+  .litm-sw-themekit-description-panel,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-tabs
+  .litm-sw-themebook-description-panel {
+  height: 33px !important;
+  min-height: 33px !important;
+  max-height: 33px !important;
+
+  padding: 0 8px !important;
+
+  background: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  border-right: 1px solid rgba(61, 92, 99, .28) !important;
+
+  box-shadow: none !important;
+}
+
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-tabs
+  .litm-sw-themekit-tab.active,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-tabs
+  .litm-sw-themekit-tab[aria-selected="true"],
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-tabs
+  .litm-sw-themekit-tab[data-active="true"] {
+  color: #e7f6f8 !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(57, 112, 124, .19),
+      rgba(18, 36, 42, .10)
+    ) !important;
+
+  box-shadow:
+    inset 0 -2px 0 var(--litm-kit-cyan),
+    inset 0 0 12px rgba(77, 157, 174, .08) !important;
+}
+
+/*
+ * Content panels are the only elements allowed to carry the large content
+ * height. This prevents any future tab-button selector collision.
+ */
+.litm-starwars-themekit-sheet .litm-sw-themekit-panel:not(.litm-sw-themekit-tab) {
+  width: 100% !important;
+  min-height: 410px !important;
+  height: auto !important;
+  max-height: none !important;
+
+  padding: 8px 3px 3px !important;
+
+  background-image: none !important;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10,21,26,.52),
+      rgba(7,15,19,.22)
+    ) !important;
+
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   THEME KIT DESCRIPTION // PARCHMENT ELIMINATION
+   ========================================================= */
+
+/*
+ * Remove parchment from both the real Description content panel and the shell
+ * surrounding it. The shell rule catches the thin parchment edge that remains
+ * visible around the editor after the inner surface has been replaced.
+ */
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-shell,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel {
+  background-image: none !important;
+  background-color: #081014 !important;
+}
+
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-shell {
+  box-shadow: none !important;
+}
+
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel {
+  min-height: 430px !important;
+  height: auto !important;
+
+  padding: 8px !important;
+
+  background:
+    linear-gradient(rgba(136,217,225,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(136,217,225,.015) 1px, transparent 1px),
+    linear-gradient(155deg, #0a1217, #081014 78%) !important;
+  background-size: 26px 26px, 26px 26px, auto !important;
+
+  border: 1px solid rgba(72,112,121,.40) !important;
+
+  box-shadow:
+    inset 3px 0 0 rgba(199,164,92,.62),
+    inset 0 0 30px rgba(0,0,0,.32) !important;
+}
+
+/* Strip inherited parchment from the real editor stack. */
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel .editor,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel .editor-content,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel .prosemirror,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel .ProseMirror,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel prose-mirror,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel .editor-container,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel .editor-menu,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel [contenteditable="true"] {
+  background-image: none !important;
+}
+
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel
+  .editor,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel
+  .editor-content,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel
+  .prosemirror,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel
+  .ProseMirror,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel
+  prose-mirror,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel
+  [contenteditable="true"] {
+  min-height: 390px !important;
+
+  background: rgba(7,15,19,.86) !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  box-shadow: none !important;
+
+  color: #dce9eb !important;
+}
+
+/* Some Mist Engine parchment framing is drawn on wrapper pseudo-elements. */
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel::before,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel::after,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-shell::before,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-shell::after,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel
+  .editor::before,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel
+  .editor::after,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel
+  prose-mirror::before,
+.litm-starwars-themekit-sheet
+  .litm-sw-themekit-description-panel
+  prose-mirror::after {
+  background-image: none !important;
+  background-color: transparent !important;
+}
