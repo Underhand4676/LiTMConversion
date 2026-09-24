@@ -1,6 +1,8 @@
 const MODULE_ID = "litm-conversion";
 const DECK_NAME = "Force Aspects";
 const DECK_FLAG = "managedForceAspectDeck";
+const HAND_NAME = "Force Aspect Hand";
+const HAND_FLAG = "managedForceAspectHand";
 const CARD_FLAG = "forceAspectKey";
 
 const BACK_IMAGE = `modules/${MODULE_ID}/cards/force-aspects/force-aspects-back.png`;
@@ -182,6 +184,165 @@ function getManagedDeck() {
   ) ?? null;
 }
 
+
+function getManagedHand() {
+  return game.cards?.find(
+    hand => hand.getFlag(MODULE_ID, HAND_FLAG) === true
+  ) ?? null;
+}
+
+function sharedOwnership() {
+  const ownership = {
+    default: CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER
+  };
+
+  for (const user of game.users ?? []) {
+    ownership[user.id] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER;
+  }
+
+  return ownership;
+}
+
+function getAspectForCard(card) {
+  const key = card?.getFlag?.(MODULE_ID, CARD_FLAG);
+
+  return (
+    FORCE_ASPECTS.find(aspect => aspect.key === key) ??
+    FORCE_ASPECTS.find(aspect => aspect.name === card?.name) ??
+    null
+  );
+}
+
+async function postForceAspectReveal(card) {
+  const aspect = getAspectForCard(card);
+  if (!aspect) return;
+
+  const image =
+    card.faces?.[card.face ?? 0]?.img ??
+    imageForAspect(aspect);
+
+  const content = `
+    <div class="litm-force-aspect-reveal ${aspect.side}">
+      <div class="litm-force-aspect-reveal-kicker">FORCE ASPECT // DRAW CONFIRMED</div>
+      <div class="litm-force-aspect-reveal-name">${aspect.name}</div>
+      <img
+        class="litm-force-aspect-reveal-image"
+        src="${image}"
+        alt="${aspect.name}"
+      >
+    </div>
+  `;
+
+  await ChatMessage.create({
+    user: game.user.id,
+    speaker: ChatMessage.getSpeaker({ user: game.user }),
+    content,
+    flags: {
+      [MODULE_ID]: {
+        forceAspectReveal: true,
+        forceAspectKey: aspect.key
+      }
+    }
+  });
+}
+
+async function ensureForceAspectHand() {
+  if (!game.user.isGM) return getManagedHand();
+
+  const CardsClass = CONFIG.Cards?.documentClass;
+
+  if (!CardsClass) {
+    throw new Error("Foundry Cards document class is unavailable.");
+  }
+
+  let hand = getManagedHand();
+
+  const handData = {
+    name: HAND_NAME,
+    type: "hand",
+    description:
+      "Shared Force Aspect hand supplied by LiTM Conversion. " +
+      "Cards drawn here are revealed publicly in chat.",
+    img: BACK_IMAGE,
+    displayCount: true,
+    ownership: sharedOwnership(),
+    flags: {
+      [MODULE_ID]: {
+        [HAND_FLAG]: true,
+        handVersion: "0.9.1"
+      }
+    }
+  };
+
+  if (!hand) {
+    hand = await CardsClass.create(handData);
+
+    if (!hand) {
+      throw new Error("Foundry did not return a created Force Aspect hand.");
+    }
+
+    console.log(`${MODULE_ID} | Provisioned ${HAND_NAME}`);
+    return hand;
+  }
+
+  await hand.update({
+    name: handData.name,
+    description: handData.description,
+    img: handData.img,
+    displayCount: handData.displayCount,
+    ownership: handData.ownership,
+    [`flags.${MODULE_ID}.${HAND_FLAG}`]: true,
+    [`flags.${MODULE_ID}.handVersion`]: "0.9.1"
+  });
+
+  return hand;
+}
+
+async function drawForceAspect() {
+  let deck = getManagedDeck();
+  let hand = getManagedHand();
+
+  if ((!deck || !hand) && game.user.isGM) {
+    deck = deck ?? await ensureForceAspectDeck();
+    hand = hand ?? await ensureForceAspectHand();
+  }
+
+  if (!deck || !hand) {
+    return ui.notifications.error(
+      "LiTM Conversion // Force Aspect deck or hand is unavailable. Ask the GM to reload the world."
+    );
+  }
+
+  const available =
+    deck.availableCards?.length ??
+    deck.cards.filter(card => !card.drawn).length;
+
+  if (!available) {
+    return ui.notifications.warn(
+      "LiTM Conversion // No Force Aspect cards remain in the deck. Reset the hand or deck first."
+    );
+  }
+
+  try {
+    const cards = await hand.draw(deck, 1, {
+      how: CONST.CARD_DRAW_MODES.RANDOM,
+      updateData: {
+        face: 0
+      }
+    });
+
+    return cards?.[0] ?? null;
+  } catch (error) {
+    console.error(`${MODULE_ID} | Force Aspect draw failed`, error);
+
+    ui.notifications.error(
+      "LiTM Conversion // Force Aspect draw failed. Check permissions or the browser console."
+    );
+
+    return null;
+  }
+}
+
 async function ensureForceAspectDeck() {
   if (!game.user.isGM) return null;
 
@@ -201,14 +362,11 @@ async function ensureForceAspectDeck() {
       "Each card face contains the full text of one Force Aspect.",
     img: BACK_IMAGE,
     displayCount: true,
-    ownership: {
-      default: CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER,
-      [game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
-    },
+    ownership: sharedOwnership(),
     flags: {
       [MODULE_ID]: {
         [DECK_FLAG]: true,
-        deckVersion: "0.9.0"
+        deckVersion: "0.9.1"
       }
     }
   };
@@ -235,8 +393,9 @@ async function ensureForceAspectDeck() {
     description: deckData.description,
     img: deckData.img,
     displayCount: deckData.displayCount,
+    ownership: deckData.ownership,
     [`flags.${MODULE_ID}.${DECK_FLAG}`]: true,
-    [`flags.${MODULE_ID}.deckVersion`]: "0.9.0"
+    [`flags.${MODULE_ID}.deckVersion`]: "0.9.1"
   });
 
   const managedByKey = new Map(
@@ -283,26 +442,55 @@ async function ensureForceAspectDeck() {
   return deck;
 }
 
+Hooks.on("createCard", async (card, options, userId) => {
+  // Database hooks fire on every connected client. Only the client that
+  // initiated the draw should create the public reveal message.
+  if (userId !== game.user.id) return;
+
+  const hand = card.parent;
+
+  if (
+    !hand ||
+    hand.documentName !== "Cards" ||
+    hand.getFlag(MODULE_ID, HAND_FLAG) !== true
+  ) {
+    return;
+  }
+
+  if (!getAspectForCard(card)) return;
+
+  try {
+    await postForceAspectReveal(card);
+  } catch (error) {
+    console.error(`${MODULE_ID} | Failed to reveal Force Aspect draw`, error);
+  }
+});
+
 Hooks.once("ready", async () => {
   const module = game.modules.get(MODULE_ID);
 
   module.api ??= {};
   module.api.forceAspectDeck = {
-    restoreDeck: ensureForceAspectDeck
+    restoreDeck: ensureForceAspectDeck,
+    restoreHand: ensureForceAspectHand,
+    draw: drawForceAspect,
+    getDeck: getManagedDeck,
+    getHand: getManagedHand
   };
 
   if (!game.user.isGM) return;
 
   try {
     await ensureForceAspectDeck();
+    await ensureForceAspectHand();
   } catch (error) {
     console.error(
-      `${MODULE_ID} | Failed to provision ${DECK_NAME} deck`,
+      `${MODULE_ID} | Failed to provision Force Aspect card resources`,
       error
     );
 
     ui.notifications.error(
-      "LiTM Conversion // Force Aspects deck could not be provisioned. " +
+      "LiTM Conversion // Force Aspect deck or hand could not be provisioned. " +
       "Check the browser console for details."
     );
   }

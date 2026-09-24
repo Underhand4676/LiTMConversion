@@ -40,6 +40,9 @@ LiTM Conversion is a Star Wars conversion layer for **Legend in the Mist / Mist 
   - Includes 18 Light, Neutral, and Dark Aspect cards
   - Uses the approved worn Sabacc-inspired card faces and matching back
   - The GM copy is restored automatically if the managed deck is missing
+  - Creates a shared Force Aspect Hand for native Foundry card draws
+  - Includes a Draw Force Aspect macro that draws one random card face-up to the hand
+  - Every Force Aspect drawn to the managed hand is revealed publicly in chat
 
 - **Star Wars interface treatment**
   - Republic-styled chat

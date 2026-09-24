@@ -992,3 +992,57 @@
   text-transform: uppercase !important;
   text-shadow: none !important;
 }
+
+
+/* =========================================================
+   FORCE ASPECT PUBLIC DRAW // v0.9.1
+   ========================================================= */
+.chat-message .litm-force-aspect-reveal {
+  --litm-aspect-accent: #c49a58;
+
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--litm-aspect-accent) 55%, #25383d 45%);
+  border-left: 3px solid var(--litm-aspect-accent);
+  background: rgba(5, 13, 17, .84);
+  box-shadow: inset 0 0 16px rgba(0, 0, 0, .28);
+}
+
+.chat-message .litm-force-aspect-reveal.light {
+  --litm-aspect-accent: #4d91b4;
+}
+
+.chat-message .litm-force-aspect-reveal.neutral {
+  --litm-aspect-accent: #b18b4f;
+}
+
+.chat-message .litm-force-aspect-reveal.dark {
+  --litm-aspect-accent: #a64f4d;
+}
+
+.chat-message .litm-force-aspect-reveal-kicker {
+  margin-bottom: 3px;
+  color: color-mix(in srgb, var(--litm-aspect-accent) 78%, white 22%);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .09em;
+}
+
+.chat-message .litm-force-aspect-reveal-name {
+  margin-bottom: 7px;
+  color: #e5eeee;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .025em;
+}
+
+.chat-message .litm-force-aspect-reveal-image {
+  display: block;
+  width: auto;
+  max-width: min(100%, 280px);
+  max-height: 430px;
+  margin: 0 auto;
+  object-fit: contain;
+  border: 0;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .42);
+}
