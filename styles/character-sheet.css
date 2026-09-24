@@ -3170,3 +3170,291 @@
     filter: brightness(1.02) saturate(1.05) contrast(1.02) !important;
   }
 }
+
+
+/* =========================================================
+   CONDITION LED INTERNAL-EMITTER FLICKER // v0.6.5
+   ========================================================= */
+
+/*
+ * The lamp housing and glass now stay physically present at all times.
+ * Only the luminous emitter inside the LED flickers. This makes the effect
+ * read like failing electronics instead of the whole indicator vanishing.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active {
+  position: relative;
+  overflow: hidden;
+
+  /* Static tinted lens/housing. */
+  background:
+    radial-gradient(
+      ellipse at 31% 26%,
+      rgba(255,255,255,.34) 0 7%,
+      rgba(255,255,255,.12) 8% 16%,
+      transparent 17%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      color-mix(in srgb, var(--condition-active) 42%, #ffffff 12%) 0 42%,
+      color-mix(in srgb, var(--condition-active) 54%, #293639 46%) 43% 72%,
+      #263438 73% 100%
+    ) !important;
+
+  border: 1px solid #5d7073 !important;
+
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.34),
+    inset 0 -2px 3px rgba(0,0,0,.56),
+    0 0 0 1px rgba(21,31,34,.72) !important;
+
+  opacity: 1 !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+/* The emitter is the only part which actually loses output. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 2px;
+  border-radius: 50%;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle at 47% 46%,
+      color-mix(in srgb, var(--condition-active) 58%, white 42%) 0 16%,
+      color-mix(in srgb, var(--condition-active) 83%, white 17%) 17% 48%,
+      var(--condition-active) 49% 72%,
+      color-mix(in srgb, var(--condition-active) 76%, black 24%) 73% 100%
+    );
+
+  box-shadow:
+    0 0 2px color-mix(in srgb, var(--condition-active) 62%, white 38%),
+    0 0 4px var(--condition-active),
+    0 0 7px var(--condition-glow);
+
+  opacity: .94;
+  filter: brightness(1.02) saturate(1.06);
+
+  animation-timing-function: steps(1, end);
+  animation-iteration-count: infinite;
+  will-change: opacity, filter, box-shadow;
+}
+
+/* Static glass reflection stays visible even while the emitter sputters. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  left: 20%;
+  top: 16%;
+  width: 35%;
+  height: 23%;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255,255,255,.42) 0%,
+      rgba(255,255,255,.18) 48%,
+      rgba(255,255,255,0) 78%
+    );
+  transform: rotate(-23deg);
+  opacity: .68;
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------
+   SPARSE ELECTRICAL FAULT PATTERNS
+   --------------------------------------------------------- */
+
+/* 1/6: one very occasional weak sputter. */
+@keyframes litm-emitter-fault-1 {
+  0%, 51%, 55%, 100% {
+    opacity: .94;
+    filter: brightness(1.02) saturate(1.06);
+  }
+  52%, 53%, 54% {
+    opacity: .58;
+    filter: brightness(.67) saturate(.88);
+    box-shadow:
+      0 0 1px var(--condition-active),
+      0 0 2px var(--condition-glow);
+  }
+}
+
+/* 2/6: still rare; roughly one noticeable fault every 15-20 seconds. */
+@keyframes litm-emitter-fault-2 {
+  0%, 37%, 41%, 100% {
+    opacity: .94;
+    filter: brightness(1.02) saturate(1.06);
+  }
+  38%, 39%, 40% {
+    opacity: .54;
+    filter: brightness(.62) saturate(.84);
+    box-shadow:
+      0 0 1px var(--condition-active),
+      0 0 2px var(--condition-glow);
+  }
+}
+
+/* 3/6: infrequent single electrical dropout. */
+@keyframes litm-emitter-fault-3 {
+  0%, 63%, 67%, 100% {
+    opacity: .94;
+    filter: brightness(1.02) saturate(1.06);
+  }
+  64%, 65%, 66% {
+    opacity: .50;
+    filter: brightness(.58) saturate(.82);
+    box-shadow:
+      0 0 1px var(--condition-active),
+      0 0 2px var(--condition-glow);
+  }
+}
+
+/* 4/6: occasional short double-stutter. */
+@keyframes litm-emitter-fault-4 {
+  0%, 30%, 33%, 35%, 38%, 78%, 82%, 100% {
+    opacity: .94;
+    filter: brightness(1.02) saturate(1.06);
+  }
+  31%, 32%, 36%, 37%, 79%, 80%, 81% {
+    opacity: .47;
+    filter: brightness(.54) saturate(.78);
+    box-shadow:
+      0 0 1px var(--condition-active),
+      0 0 2px var(--condition-glow);
+  }
+}
+
+/* 5/6: clearly unreliable, but faults are still separated by normal light. */
+@keyframes litm-emitter-fault-5 {
+  0%, 20%, 23%, 52%, 55%, 74%, 77%, 100% {
+    opacity: .94;
+    filter: brightness(1.03) saturate(1.07);
+  }
+  21%, 22%, 53%, 54%, 75%, 76% {
+    opacity: .43;
+    filter: brightness(.50) saturate(.75);
+    box-shadow:
+      0 0 1px var(--condition-active),
+      0 0 2px var(--condition-glow);
+  }
+}
+
+/* 6/6: about the frequency v0.6.4 had around 2/6, but only the emitter dims. */
+@keyframes litm-emitter-fault-6 {
+  0%, 13%, 16%, 32%, 35%, 52%, 55%, 71%, 74%, 89%, 92%, 100% {
+    opacity: .94;
+    filter: brightness(1.04) saturate(1.08);
+  }
+  14%, 15%, 33%, 34%, 53%, 54%, 72%, 73%, 90%, 91% {
+    opacity: .39;
+    filter: brightness(.46) saturate(.72);
+    box-shadow:
+      0 0 1px var(--condition-active),
+      0 0 2px var(--condition-glow);
+  }
+}
+
+/* Severity controls both fault density and overall cycle length. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-1 .litm-sw-condition-light.active::before {
+  animation-name: litm-emitter-fault-1;
+  animation-duration: 25s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-2 .litm-sw-condition-light.active::before {
+  animation-name: litm-emitter-fault-2;
+  animation-duration: 18s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-3 .litm-sw-condition-light.active::before {
+  animation-name: litm-emitter-fault-3;
+  animation-duration: 14s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-4 .litm-sw-condition-light.active::before {
+  animation-name: litm-emitter-fault-4;
+  animation-duration: 12s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-5 .litm-sw-condition-light.active::before {
+  animation-name: litm-emitter-fault-5;
+  animation-duration: 9.5s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-level-6 .litm-sw-condition-light.active::before {
+  animation-name: litm-emitter-fault-6;
+  animation-duration: 7.5s;
+}
+
+/* Independent phases keep neighboring lamps from failing in sync. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(1)::before {
+  animation-delay: -1.7s;
+}
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(2)::before {
+  animation-delay: -6.3s;
+}
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(3)::before {
+  animation-delay: -10.9s;
+}
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(4)::before {
+  animation-delay: -3.8s;
+}
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(5)::before {
+  animation-delay: -13.4s;
+}
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-light.active:nth-child(6)::before {
+  animation-delay: -8.1s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(1)::before {
+  animation-delay: -9.4s;
+}
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(2)::before {
+  animation-delay: -2.6s;
+}
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(3)::before {
+  animation-delay: -14.8s;
+}
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(4)::before {
+  animation-delay: -5.1s;
+}
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(5)::before {
+  animation-delay: -11.7s;
+}
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-condition-strained .litm-sw-condition-light.active:nth-child(6)::before {
+  animation-delay: -7.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .litm-sw-condition-light.active::before {
+    animation: none !important;
+    opacity: .94 !important;
+    filter: brightness(1.02) saturate(1.06) !important;
+  }
+}
