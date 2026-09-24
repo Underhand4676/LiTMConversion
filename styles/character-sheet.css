@@ -3999,7 +3999,7 @@
 }
 
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
-  .litm-sw-force-dark .litm-sw-force-light {
+  .litm-sw-force-side-dark .litm-sw-force-light {
   --condition-active: #bd5b59;
   --condition-glow: rgba(189,91,89,.30);
 }
@@ -4038,7 +4038,7 @@
 }
 
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
-  .litm-sw-force-fallen.litm-sw-force-dark .litm-sw-force-light {
+  .litm-sw-force-fallen.litm-sw-force-side-dark .litm-sw-force-light {
   --condition-active: #bd5b59;
   --condition-glow: rgba(189,91,89,.30);
 }
@@ -4210,4 +4210,142 @@
 .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
   .litm-sw-force-config-button:hover {
   filter: brightness(1.12);
+}
+
+
+/* =========================================================
+   FORCE POLARITY PANEL + FALLEN FLICKER PATCH // v0.7.2
+   ========================================================= */
+
+/*
+ * v0.7.1 used "litm-sw-force-light" both for the LIGHT-side panel state
+ * and for each individual LED. That class collision caused the entire panel
+ * to inherit the 12px LED dimensions whenever polarity was on the Light Side.
+ *
+ * Side state now uses litm-sw-force-side-light / -dark / -neutral, so the
+ * panel and the LEDs can never collide again.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-side-light,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-side-dark,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-side-neutral {
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  aspect-ratio: auto !important;
+}
+
+/* Light-side emitter color. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-side-light .litm-sw-force-light {
+  --condition-active: #6fcae8;
+  --condition-glow: rgba(111,202,232,.28);
+}
+
+/* Dark-side emitter color. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-side-dark .litm-sw-force-light {
+  --condition-active: #bd5b59;
+  --condition-glow: rgba(189,91,89,.30);
+}
+
+/*
+ * NORMAL polarity never flickers, regardless of Light or Dark alignment.
+ * These rules are intentionally very explicit so future condition-animation
+ * changes cannot leak onto the regular Force tracker.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-normal .litm-sw-force-light.active,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-normal .litm-sw-force-light.active::before {
+  animation: none !important;
+}
+
+/*
+ * FALLEN polarity uses exactly the Wounded/Strained sputter patterns and
+ * brightness behavior, but runs them about 30% more often.
+ *
+ * "30% more often" = period / 1.30 ≈ 0.769x the Wounded duration.
+ * We scale both the severity cycle and each per-pip timing offset so the
+ * whole irregular pattern speeds up uniformly without changing intensity.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen.litm-sw-condition-level-1 {
+  --litm-force-fallen-cycle: 44.62s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen.litm-sw-condition-level-2 {
+  --litm-force-fallen-cycle: 34.62s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen.litm-sw-condition-level-3 {
+  --litm-force-fallen-cycle: 29.23s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen.litm-sw-condition-level-4 {
+  --litm-force-fallen-cycle: 24.62s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen.litm-sw-condition-level-5 {
+  --litm-force-fallen-cycle: 20.77s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen.litm-sw-condition-level-6 {
+  --litm-force-fallen-cycle: 17.69s;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen .litm-sw-force-light.active:nth-child(1)::before {
+  animation-name: litm-led-sputter-a !important;
+  animation-duration: calc(var(--litm-force-fallen-cycle) + 2.15s) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen .litm-sw-force-light.active:nth-child(2)::before {
+  animation-name: litm-led-sputter-c !important;
+  animation-duration: calc(var(--litm-force-fallen-cycle) - 1.46s) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen .litm-sw-force-light.active:nth-child(3)::before {
+  animation-name: litm-led-sputter-b !important;
+  animation-duration: calc(var(--litm-force-fallen-cycle) + 3.92s) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen .litm-sw-force-light.active:nth-child(4)::before {
+  animation-name: litm-led-sputter-d !important;
+  animation-duration: calc(var(--litm-force-fallen-cycle) + .46s) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen .litm-sw-force-light.active:nth-child(5)::before {
+  animation-name: litm-led-sputter-a !important;
+  animation-duration: calc(var(--litm-force-fallen-cycle) + 5.69s) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen .litm-sw-force-light.active:nth-child(6)::before {
+  animation-name: litm-led-sputter-b !important;
+  animation-duration: calc(var(--litm-force-fallen-cycle) + 2.54s) !important;
+}
+
+/* Fallen Light remains blue; Fallen Dark remains red. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen.litm-sw-force-side-light .litm-sw-force-light {
+  --condition-active: #6fcae8;
+  --condition-glow: rgba(111,202,232,.28);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen.litm-sw-force-side-dark .litm-sw-force-light {
+  --condition-active: #bd5b59;
+  --condition-glow: rgba(189,91,89,.30);
 }

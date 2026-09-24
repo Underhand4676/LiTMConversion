@@ -1542,7 +1542,7 @@ function createForcePolarityTracker(sheet) {
   panel.className = [
     "litm-sw-force-polarity",
     "litm-sw-force-panel",
-    `litm-sw-force-${display.side}`,
+    `litm-sw-force-side-${display.side}`,
     `litm-sw-condition-level-${tier}`,
     state === FORCE_POLARITY_STATES.FALLEN
       ? "litm-sw-force-fallen"
