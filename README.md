@@ -1,34 +1,54 @@
 # LiTM Conversion
 
-A Foundry VTT v14 conversion layer for **Legend in the Mist / Mist Engine**, built around a Star Wars campaign presentation and an alternate d6 dice-pool resolution system.
+LiTM Conversion is a Star Wars conversion layer for **Legend in the Mist / Mist Engine** on Foundry VTT v14. It keeps the tag-driven structure of Mist Engine, but changes the presentation and several core resolution tools to fit this campaign.
 
-The module is designed to preserve the underlying Mist Engine character data and narrative tag structure while changing how the game is presented and, on the optional conversion sheet, how several rolls are resolved.
+## What the Module Adds
 
-## At a Glance
+- **Star Wars character sheets**
+  - Full and compact Republic Intelligence dossier layouts
+  - Wounded and Strained trackers
+  - Force Polarity, including Fallen, Lost to the Dark, and Return to the Light
+  - Living Standard and Current Credits
+  - Fixed backpack and consumable slots
+  - Portrait dossier support
+  - Adjudication notes for tags and equipment
+  - Crew presentation in place of Fellowship terminology
 
-- **Optional Star Wars character sheets** — Republic Intelligence dossier styling for full and compact LiTM character sheets without replacing the default system sheet.
-- **d6 Probability Processor** — converts the custom sheet's primary roll flow into a dice pool. `Cut` removes the highest dice first and the highest surviving d6 determines the result.
-- **Quick, Detailed, Reaction, and Sacrifice rolls** — purpose-built roll modes for the conversion rules, including native tag selection/burning where appropriate.
-- **Wounded & Strained trackers** — persistent six-tier condition displays with compact controls and unstable indicator-light styling at higher tiers.
-- **Force Polarity tracker** — optional Light/Dark polarity with Fallen, Lost to the Dark, and Return to the Light states.
-- **Probability Telemetry** — records individual d6 results by player and date, with distribution and summary statistics.
-- **Republic UI treatment** — themed chat messages, pause overlay, Themebook sheets, Crew Theme Cards, and related interface cleanup.
-- **Character-sheet utilities** — Living Standard, Current Credits, fixed backpack/loadout slots, portrait dossier support, and adjudication notes for tags/items.
-- **Macro recovery** — provisions the Probability Processor launcher macro into the world automatically.
+- **d6 dice pool resolution**
+  - The main conversion sheet uses a pool of d6s instead of the default LiTM roll flow
+  - Power Tags add dice
+  - Burned Power Tags contribute additional dice
+  - Weakness Tags become Cut where the roll mode uses Cut
+  - Cut removes the highest dice first
+  - The highest surviving die determines the result
 
-## Notable Departures from Default LiTM
+- **Converted roll modes**
+  - Quick Roll
+  - Detailed Roll with Power Yield
+  - Reaction Roll with a 6d6 cap
+  - Sacrifice using 3d6 and the highest individual die plus its modifier
 
-The optional conversion sheet intentionally changes several pieces of the default play flow:
+- **Probability tools**
+  - Probability Processor
+  - Per-player d6 telemetry
+  - Date-based roll history and statistics
+  - Automatic recovery of the Probability Processor launcher macro
 
-- **Core checks use a d6 pool instead of the default LiTM roller.** Selected Power Tags add dice; queued burns contribute additional dice; selected Weakness Tags become Cut on the applicable roll modes.
-- **Detailed rolls count surviving 4–6 results as Power** after Cut is applied.
-- **Reaction rolls ignore Weakness Tags and cap the pool at 6d6.**
-- **Sacrifice rolls use 3d6, taking the highest individual die plus the chosen modifier.**
-- **Fellowship is presented as Crew** in the Star Wars sheet/UI.
-- The conversion sheet adds campaign-specific systems such as **Wounded, Strained, Force Polarity, Living Standard, and Current Credits**.
-- Some default presentation elements are hidden or repurposed on the Star Wars sheet, including the portrait/background treatment and selected fellowship/quintessence UI.
+- **Star Wars interface treatment**
+  - Republic-styled chat
+  - Republic pause overlay
+  - Reskinned Themebooks
+  - Reskinned Theme Kits
+  - Crew Theme Cards
+  - Dark dossier styling in place of the default parchment presentation where the conversion applies
 
-The original Mist Engine sheets remain available and are not made default by this module.
+## Main Differences from Default LiTM
+
+The biggest rules change is the dice system. Core checks on the Star Wars character sheet use a **d6 dice pool** rather than the standard LiTM roller.
+
+Detailed Rolls count surviving results of 4, 5, or 6 as Power after Cut is resolved. Reaction Rolls ignore Weakness Tags and cannot exceed 6d6. Sacrifice rolls 3d6 and resolves from the highest individual die plus the chosen modifier.
+
+The character sheet also adds campaign-specific systems such as Wounded, Strained, Force Polarity, Living Standard, Current Credits, and the fixed loadout structure.
 
 ## Install / Update Manifest
 

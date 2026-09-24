@@ -992,3 +992,255 @@
   text-transform: uppercase !important;
   text-shadow: none !important;
 }
+
+
+/* =========================================================
+   THEME KIT // REPUBLIC CONFIGURATION DOSSIER // v0.8.0
+   ========================================================= */
+
+.litm-starwars-themekit-sheet {
+  --litm-kit-bg: #081115;
+  --litm-kit-bg-2: #0b151a;
+  --litm-kit-panel: rgba(12, 23, 28, .92);
+  --litm-kit-line: #35555d;
+  --litm-kit-line-soft: rgba(82, 123, 132, .32);
+  --litm-kit-cyan: #88d9e1;
+  --litm-kit-cyan-dim: #6f9fa6;
+  --litm-kit-amber: #c7a45c;
+  --litm-kit-text: #dbe9eb;
+  --litm-kit-muted: #7f969b;
+}
+
+/*
+ * Theme Kit sheets inherit parchment from several nested Mist Engine surfaces.
+ * Strip it at each structural layer instead of depending on one outer override.
+ */
+.application.litm-starwars-themekit-sheet,
+.litm-starwars-themekit-sheet.window-app,
+.litm-starwars-themekit-sheet,
+.litm-starwars-themekit-sheet .window-content,
+.litm-starwars-themekit-sheet-content,
+.litm-starwars-themekit-sheet form,
+.litm-starwars-themekit-sheet .sheet-body,
+.litm-starwars-themekit-sheet .sheet-content,
+.litm-starwars-themekit-sheet main {
+  background-image: none !important;
+  color: var(--litm-kit-text) !important;
+}
+
+.litm-starwars-themekit-sheet .window-content,
+.litm-starwars-themekit-sheet-content {
+  background:
+    linear-gradient(rgba(136,217,225,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(136,217,225,.018) 1px, transparent 1px),
+    linear-gradient(150deg, #0a1419, #071014 76%) !important;
+  background-size: 28px 28px, 28px 28px, auto !important;
+  box-shadow: inset 0 0 36px rgba(0,0,0,.34) !important;
+}
+
+.litm-starwars-themekit-sheet .sheet-header,
+.litm-starwars-themekit-sheet .sheet-body,
+.litm-starwars-themekit-sheet .sheet-content,
+.litm-starwars-themekit-sheet .litm-sw-themekit-panel,
+.litm-starwars-themekit-sheet section,
+.litm-starwars-themekit-sheet article {
+  background-image: none !important;
+  background-color: transparent !important;
+  color: var(--litm-kit-text) !important;
+}
+
+/* Header image and identification fields. */
+.litm-starwars-themekit-sheet .sheet-header {
+  padding-bottom: 8px !important;
+  border-bottom: 1px solid rgba(79, 119, 128, .36) !important;
+}
+
+.litm-starwars-themekit-sheet .sheet-header img,
+.litm-starwars-themekit-sheet .profile-img,
+.litm-starwars-themekit-sheet .item-image {
+  background:
+    linear-gradient(145deg, rgba(17,31,37,.98), rgba(9,18,22,.98)) !important;
+  border: 1px solid var(--litm-kit-line) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(199,164,92,.74),
+    inset 0 0 16px rgba(0,0,0,.36) !important;
+}
+
+.litm-starwars-themekit-sheet .sheet-header input,
+.litm-starwars-themekit-sheet .sheet-header select {
+  min-height: 32px;
+}
+
+/* Top-level tab rail. */
+.litm-starwars-themekit-sheet nav.tabs,
+.litm-starwars-themekit-sheet .tabs {
+  gap: 0 !important;
+  margin: 5px 0 8px !important;
+  padding: 0 !important;
+
+  background: rgba(6, 14, 18, .72) !important;
+  border-top: 1px solid rgba(74, 113, 122, .38) !important;
+  border-bottom: 1px solid rgba(74, 113, 122, .52) !important;
+}
+
+.litm-starwars-themekit-sheet .litm-sw-themekit-tab {
+  min-height: 31px;
+  padding: 8px 10px !important;
+
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent !important;
+  border: 0 !important;
+  border-right: 1px solid rgba(61, 92, 99, .28) !important;
+
+  color: #8ca6ab !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: .07em !important;
+  text-transform: uppercase !important;
+  text-shadow: none !important;
+}
+
+.litm-starwars-themekit-sheet .litm-sw-themekit-tab:hover {
+  color: #c9e4e7 !important;
+  background: rgba(75, 124, 134, .10) !important;
+}
+
+.litm-starwars-themekit-sheet .litm-sw-themekit-tab.active,
+.litm-starwars-themekit-sheet .litm-sw-themekit-tab[aria-selected="true"],
+.litm-starwars-themekit-sheet .litm-sw-themekit-tab[data-active="true"] {
+  color: #e7f6f8 !important;
+  background:
+    linear-gradient(180deg, rgba(57, 112, 124, .19), rgba(18, 36, 42, .10)) !important;
+  box-shadow:
+    inset 0 -2px 0 var(--litm-kit-cyan),
+    inset 0 0 12px rgba(77, 157, 174, .08) !important;
+}
+
+/* Native add/import bars, restyled without replacing their mechanics. */
+.litm-starwars-themekit-sheet .litm-sw-themekit-action {
+  min-height: 29px !important;
+  border-radius: 0 !important;
+
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: .065em !important;
+  text-transform: uppercase !important;
+  text-shadow: none !important;
+
+  transition:
+    filter 90ms linear,
+    border-color 90ms linear;
+}
+
+.litm-starwars-themekit-sheet .litm-sw-themekit-action-primary {
+  background:
+    linear-gradient(180deg, rgba(87,57,26,.94), rgba(59,40,20,.94)) !important;
+  border: 1px solid rgba(195,139,80,.58) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(210,155,95,.84),
+    inset 0 1px 0 rgba(255,255,255,.04) !important;
+  color: #eadac0 !important;
+}
+
+.litm-starwars-themekit-sheet .litm-sw-themekit-action-secondary {
+  background:
+    linear-gradient(180deg, rgba(28,52,59,.92), rgba(17,35,41,.92)) !important;
+  border: 1px solid rgba(83,134,145,.52) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(111,185,200,.60),
+    inset 0 1px 0 rgba(255,255,255,.03) !important;
+  color: #c7dde0 !important;
+}
+
+.litm-starwars-themekit-sheet .litm-sw-themekit-action:hover {
+  filter: brightness(1.09);
+}
+
+/* Tab content surface. */
+.litm-starwars-themekit-sheet .litm-sw-themekit-panel {
+  min-height: 410px;
+  padding: 8px 3px 3px !important;
+
+  background-image: none !important;
+  background:
+    linear-gradient(180deg, rgba(10,21,26,.52), rgba(7,15,19,.22)) !important;
+
+  border: 0 !important;
+  color: var(--litm-kit-text) !important;
+}
+
+/* Keep common native list/table containers readable against the console. */
+.litm-starwars-themekit-sheet table,
+.litm-starwars-themekit-sheet tbody,
+.litm-starwars-themekit-sheet tr,
+.litm-starwars-themekit-sheet td,
+.litm-starwars-themekit-sheet li,
+.litm-starwars-themekit-sheet .form-group {
+  background-image: none !important;
+  border-color: var(--litm-kit-line-soft) !important;
+  color: var(--litm-kit-text) !important;
+}
+
+/* =========================================================
+   THEME KIT DESCRIPTION // SEPARATE PARCHMENT OVERRIDE
+   ========================================================= */
+
+/*
+ * Description uses its own editor surface in Mist Engine and can keep the
+ * parchment even after the rest of the sheet has been reskinned. Treat it as
+ * a separate dossier panel just like the Themebook Description fix.
+ */
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel,
+.litm-starwars-themekit-sheet [data-tab="description"],
+.litm-starwars-themekit-sheet .tab.description,
+.litm-starwars-themekit-sheet .description.tab {
+  min-height: 430px;
+
+  background-image: none !important;
+  background:
+    linear-gradient(rgba(136,217,225,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(136,217,225,.015) 1px, transparent 1px),
+    linear-gradient(155deg, #0a1217, #081014 78%) !important;
+  background-size: 26px 26px, 26px 26px, auto !important;
+
+  border: 1px solid rgba(72,112,121,.40) !important;
+  color: #dbe9eb !important;
+
+  box-shadow:
+    inset 3px 0 0 rgba(199,164,92,.62),
+    inset 0 0 30px rgba(0,0,0,.32) !important;
+}
+
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel *,
+.litm-starwars-themekit-sheet [data-tab="description"] * {
+  background-image: none !important;
+}
+
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel .editor,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel .editor-content,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel .prosemirror,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel .ProseMirror,
+.litm-starwars-themekit-sheet .litm-sw-themekit-description-panel [contenteditable="true"],
+.litm-starwars-themekit-sheet [data-tab="description"] .editor,
+.litm-starwars-themekit-sheet [data-tab="description"] .editor-content,
+.litm-starwars-themekit-sheet [data-tab="description"] .prosemirror,
+.litm-starwars-themekit-sheet [data-tab="description"] .ProseMirror,
+.litm-starwars-themekit-sheet [data-tab="description"] [contenteditable="true"] {
+  min-height: 390px;
+
+  padding: 12px !important;
+  background: rgba(7,15,19,.80) !important;
+  border: 0 !important;
+
+  color: #dce9eb !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  line-height: 1.55 !important;
+
+  box-shadow: none !important;
+}
+

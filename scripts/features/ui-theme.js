@@ -485,6 +485,198 @@ function styleThemebookSheet(app, html) {
 }
 
 
+
+// ---------------------------------------------------------------------------
+// THEME KIT SHEET THEME
+// ---------------------------------------------------------------------------
+
+function isThemeKitSheet(app) {
+  const document =
+    app?.document ??
+    app?.item ??
+    app?.object ??
+    null;
+
+  const type = String(document?.type ?? "").toLowerCase();
+  const normalizedType = type.replace(/[\s_-]+/g, "");
+
+  if (
+    normalizedType === "themekit" ||
+    normalizedType === "litmthemekit" ||
+    (normalizedType.includes("theme") && normalizedType.includes("kit"))
+  ) {
+    return true;
+  }
+
+  const title = String(app?.title ?? "").toLowerCase();
+
+  if (
+    title.startsWith("theme kit:") ||
+    title === "theme kit" ||
+    title.includes("theme kit")
+  ) {
+    return true;
+  }
+
+  const classes = [
+    ...(app?.options?.classes ?? []),
+    ...(app?.constructor?.DEFAULT_OPTIONS?.classes ?? [])
+  ]
+    .map(value => String(value).toLowerCase())
+    .join(" ");
+
+  return /theme[\s_-]*kit|themekit/.test(classes);
+}
+
+function classifyThemeKitTabs(root) {
+  if (!(root instanceof HTMLElement)) return;
+
+  const labels = new Set([
+    "power tags",
+    "weakness tags",
+    "special improvements",
+    "quest",
+    "description"
+  ]);
+
+  for (const element of root.querySelectorAll(
+    "nav a, nav button, .tabs a, .tabs button, [data-tab]"
+  )) {
+    const text = String(element.textContent ?? "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+    if (!labels.has(text)) continue;
+
+    element.classList.add("litm-sw-themekit-tab");
+
+    if (text === "description") {
+      element.classList.add("litm-sw-themekit-description-tab");
+    }
+  }
+}
+
+function classifyThemeKitActions(root) {
+  if (!(root instanceof HTMLElement)) return;
+
+  for (const element of root.querySelectorAll(
+    "button, a, [role='button'], .clickable"
+  )) {
+    const text = String(element.textContent ?? "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
+    if (!text) continue;
+
+    if (
+      /ADD\s+POWER\s*TAG/.test(text) ||
+      /ADD\s+POWERTAG/.test(text) ||
+      /ADD\s+WEAKNESS\s*TAG/.test(text) ||
+      /ADD\s+SPECIAL\s+IMPROVEMENT/.test(text)
+    ) {
+      element.classList.add(
+        "litm-sw-themekit-action",
+        "litm-sw-themekit-action-primary"
+      );
+      continue;
+    }
+
+    if (
+      text === "IMPORT" ||
+      text.endsWith(" IMPORT") ||
+      text.includes("IMPORT ")
+    ) {
+      element.classList.add(
+        "litm-sw-themekit-action",
+        "litm-sw-themekit-action-secondary"
+      );
+    }
+  }
+}
+
+function markThemeKitPanels(root) {
+  if (!(root instanceof HTMLElement)) return;
+
+  for (const panel of root.querySelectorAll(
+    ".tab, [data-tab], .sheet-body, .sheet-content"
+  )) {
+    panel.classList.add("litm-sw-themekit-panel");
+  }
+
+  for (const panel of root.querySelectorAll(
+    '[data-tab="description"], ' +
+    '.tab.description, ' +
+    '.description.tab, ' +
+    '[data-tab*="description" i]'
+  )) {
+    panel.classList.add("litm-sw-themekit-description-panel");
+  }
+}
+
+function enhanceThemeKitSheetUi(root) {
+  if (!(root instanceof HTMLElement)) return;
+
+  markThemeKitPanels(root);
+
+  // Theme Kits use the same native tag storage and several of the same field
+  // structures as Themebooks, so reuse the safe presentation helpers while
+  // leaving Mist Engine's actual controls and data attributes untouched.
+  markThemebookDescriptionPanel(root);
+  enhanceThemebookTagRows(root);
+  enhanceThemebookIcons(root);
+
+  classifyThemeKitTabs(root);
+  classifyThemeKitActions(root);
+}
+
+function observeThemeKitSheet(root) {
+  if (!(root instanceof HTMLElement)) return;
+  if (root.dataset.litmThemeKitObserver === "true") return;
+
+  root.dataset.litmThemeKitObserver = "true";
+
+  const observer = new MutationObserver(mutations => {
+    if (!mutations.some(mutation => mutation.type === "childList")) return;
+
+    requestAnimationFrame(() => enhanceThemeKitSheetUi(root));
+  });
+
+  observer.observe(root, {
+    childList: true,
+    subtree: true
+  });
+}
+
+function styleThemeKitSheet(app, html) {
+  if (!isThemeKitSheet(app)) return;
+
+  const root = resolveRenderedRoot(app, html);
+  if (!(root instanceof HTMLElement)) return;
+
+  // Reuse the established Themebook dossier language, then layer Theme Kit
+  // specific tabs and panel treatment over it.
+  root.classList.add(
+    "litm-starwars-themebook-sheet",
+    "litm-starwars-themekit-sheet"
+  );
+
+  root.querySelector(".window-content")?.classList?.add(
+    "litm-starwars-themebook-sheet-content",
+    "litm-starwars-themekit-sheet-content"
+  );
+
+  root.querySelector(".window-header")?.classList?.add(
+    "litm-starwars-themebook-sheet-header",
+    "litm-starwars-themekit-sheet-header"
+  );
+
+  enhanceThemeKitSheetUi(root);
+  observeThemeKitSheet(root);
+}
+
+
 function isCrewThemeCardSheet(app) {
   const actor =
     app?.actor ??
@@ -591,6 +783,7 @@ function styleCrewThemeCardSheet(app, html) {
 
 Hooks.on("renderItemSheet", (app, html) => {
   styleThemebookSheet(app, html);
+  styleThemeKitSheet(app, html);
 });
 
 Hooks.on("renderActorSheet", (app, html) => {
@@ -599,5 +792,6 @@ Hooks.on("renderActorSheet", (app, html) => {
 
 Hooks.on("renderApplicationV2", (app, element) => {
   styleThemebookSheet(app, element);
+  styleThemeKitSheet(app, element);
   styleCrewThemeCardSheet(app, element);
 });
