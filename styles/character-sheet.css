@@ -4476,3 +4476,105 @@
   .fts-input-name.status:hover {
   border-color: rgba(126, 192, 176, .62) !important;
 }
+
+
+/* =========================================================
+   STATUS TIER LEGIBILITY + EDIT-MODE 4-COLUMN GRID // v0.7.5
+   ========================================================= */
+
+/* Keep the existing 20px tier buttons, but make the actual tier numbers
+   appreciably easier to read without making the row bulkier. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-status-tier-control {
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  line-height: 20px !important;
+}
+
+/*
+ * The stock Mist Engine edit layout still reserves horizontal space from the
+ * original sheet composition even though our Star Wars MAIN tab has no left
+ * artwork/side column there. Reclaim the full content width in edit mode just
+ * like the locked sheet does.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .character-sheet-divider .right-side.edit-mode {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  flex: 1 1 100% !important;
+}
+
+/* Remove the extra side waste around the editable theme grid. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .right-side.edit-mode .litm-character-themebooks-container {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 10px 0 14px !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+
+/* Match the locked sheet's desktop layout: four editable themes across. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebooks-container.edit-mode.grid-themebook-container {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-auto-flow: row !important;
+  justify-content: stretch !important;
+  align-items: start !important;
+  gap: 12px !important;
+
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Stock edit-mode card sizing can carry fixed/max widths which force a
+   three-column presentation even after the parent grid is widened. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebooks-container.edit-mode.grid-themebook-container > .themebook-container {
+  position: relative !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  rotate: 0deg !important;
+  align-self: start !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebooks-container.edit-mode.grid-themebook-container
+  .container-themebook-with-border,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .themebooks-container.edit-mode.grid-themebook-container
+  .themebook-style {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Preserve a usable responsive fallback on genuinely narrow sheets. */
+@media (max-width: 950px) {
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .themebooks-container.edit-mode.grid-themebook-container {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
