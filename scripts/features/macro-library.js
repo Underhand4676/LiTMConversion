@@ -7,6 +7,21 @@ const PROBABILITY_MACRO_FLAG = "managedProbabilityProcessor";
 const FORCE_ASPECT_MACRO_NAME = "Draw Force Aspect";
 const FORCE_ASPECT_MACRO_FLAG = "managedForceAspectDrawMacro";
 
+
+function ownershipForPlayers(playerLevel) {
+  const ownership = {
+    default: playerLevel
+  };
+
+  for (const user of game.users ?? []) {
+    ownership[user.id] = user.isGM
+      ? CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+      : playerLevel;
+  }
+
+  return ownership;
+}
+
 const PROBABILITY_MACRO_COMMAND = `
 const api = game.modules.get("litm-conversion")?.api?.probabilityProcessor;
 
@@ -46,10 +61,9 @@ async function ensureProbabilityProcessorMacro() {
     candidate => candidate.getFlag(MODULE_ID, PROBABILITY_MACRO_FLAG) === true
   );
 
-  const ownership = {
-    default: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER,
-    [game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
-  };
+  const ownership = ownershipForPlayers(
+    CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER
+  );
 
   const data = {
     name: PROBABILITY_MACRO_NAME,
@@ -120,10 +134,9 @@ async function ensureForceAspectDrawMacro() {
       candidate.getFlag(MODULE_ID, FORCE_ASPECT_MACRO_FLAG) === true
   );
 
-  const ownership = {
-    default: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER,
-    [game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
-  };
+  const ownership = ownershipForPlayers(
+    CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE
+  );
 
   const data = {
     name: FORCE_ASPECT_MACRO_NAME,

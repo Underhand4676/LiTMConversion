@@ -6,7 +6,7 @@ const HAND_FLAG = "managedForceAspectHand";
 const CARD_FLAG = "forceAspectKey";
 const SOCKET_NAME = `module.${MODULE_ID}`;
 const SOCKET_EVENT = "force-aspect-cinematic";
-const CINEMATIC_REVEAL_DELAY = 3350;
+const CINEMATIC_REVEAL_DELAY = 3700;
 
 const BACK_IMAGE = `modules/${MODULE_ID}/cards/force-aspects/force-aspects-back.png`;
 
@@ -215,21 +215,35 @@ async function playForceAspectCinematic(packet) {
   try {
     requestAnimationFrame(() => overlay.classList.add("is-live"));
 
+    const selectedInner = overlay.querySelector(
+      ".litm-force-aspect-selected-inner"
+    );
     const selectedFace = overlay.querySelector(
       ".litm-force-aspect-selected-face"
     );
 
+    // The card which leaves the shuffle stack is always the physical back.
+    // Force the source here as well as in the initial markup so no document
+    // face state or stale browser image can expose the result early.
+    if (selectedFace) {
+      selectedFace.src = packet.backImage;
+      selectedFace.alt = "Force Aspect card back";
+    }
+
     if (reducedMotion) {
       await wait(350);
       overlay.classList.add("is-drawing");
-      await wait(250);
+      await wait(300);
 
       if (selectedFace) {
         selectedFace.src = packet.faceImage;
         selectedFace.alt = packet.name ?? "Force Aspect";
       }
 
-      overlay.classList.add("is-face");
+      if (selectedInner) {
+        selectedInner.style.transition = "none";
+        selectedInner.style.transform = "scale(1.08)";
+      }
       await wait(2600);
       overlay.classList.add("is-leaving");
       await wait(350);
@@ -238,29 +252,77 @@ async function playForceAspectCinematic(packet) {
 
     // Uneven mechanical shuffle before one card kicks free of the stack.
     await wait(2250);
+
+    // Reassert the back immediately before the selected card becomes visible.
+    if (selectedFace) selectedFace.src = packet.backImage;
     overlay.classList.add("is-drawing");
 
     await wait(650);
 
     /*
-     * Flip in two explicit halves. At the midpoint the card is edge-on, so
-     * swap the image from the physical back to the actual Aspect face. This
-     * avoids browser/WebView backface compositing quirks which could leave the
-     * back visible even though the 3D rotation completed.
+     * One flip only. Collapse the visible back to an edge, swap the image at
+     * the invisible midpoint, expand the face, then freeze it in place.
+     * Do not hand the final state back to a CSS transform transition because
+     * Chromium can otherwise animate the same transform a second time.
      */
-    overlay.classList.add("is-flip-out");
-    await wait(360);
+    if (selectedInner?.animate) {
+      const flipOut = selectedInner.animate(
+        [
+          { transform: "scaleX(1) scale(1)" },
+          { transform: "scaleX(0.015) scale(1.08)" }
+        ],
+        {
+          duration: 330,
+          easing: "cubic-bezier(.42,.02,.72,.62)",
+          fill: "forwards"
+        }
+      );
+
+      await flipOut.finished.catch(() => undefined);
+      flipOut.cancel();
+      selectedInner.style.transition = "none";
+      selectedInner.style.transform = "scaleX(0.015) scale(1.08)";
+    } else if (selectedInner) {
+      selectedInner.style.transition =
+        "transform 330ms cubic-bezier(.42,.02,.72,.62)";
+      selectedInner.style.transform = "scaleX(0.015) scale(1.08)";
+      await wait(330);
+      selectedInner.style.transition = "none";
+    }
 
     if (selectedFace) {
       selectedFace.src = packet.faceImage;
       selectedFace.alt = packet.name ?? "Force Aspect";
     }
 
-    overlay.classList.add("is-face");
-    overlay.classList.remove("is-flip-out");
+    if (selectedInner?.animate) {
+      const flipIn = selectedInner.animate(
+        [
+          { transform: "scaleX(0.015) scale(1.08)" },
+          { transform: "scaleX(1) scale(1.17)" }
+        ],
+        {
+          duration: 420,
+          easing: "cubic-bezier(.18,.74,.25,1)",
+          fill: "forwards"
+        }
+      );
 
-    // Keep the actual card face on screen long enough to read it.
-    await wait(4450);
+      await flipIn.finished.catch(() => undefined);
+      flipIn.cancel();
+      selectedInner.style.transition = "none";
+      selectedInner.style.transform = "scaleX(1) scale(1.17)";
+    } else if (selectedInner) {
+      selectedInner.style.transition =
+        "transform 420ms cubic-bezier(.18,.74,.25,1)";
+      selectedInner.style.transform = "scaleX(1) scale(1.17)";
+      await wait(420);
+      selectedInner.style.transition = "none";
+    }
+
+    // The reveal is finished. Hold the face completely still for a few
+    // seconds, then fade the cinematic away. There is no second flip.
+    await wait(3000);
     overlay.classList.add("is-leaving");
 
     await wait(550);
@@ -353,13 +415,15 @@ function getManagedHand() {
   ) ?? null;
 }
 
-function sharedOwnership() {
+function gmOnlyOwnership() {
   const ownership = {
-    default: CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER
+    default: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE
   };
 
   for (const user of game.users ?? []) {
-    ownership[user.id] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER;
+    ownership[user.id] = user.isGM
+      ? CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+      : CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE;
   }
 
   return ownership;
@@ -427,11 +491,11 @@ async function ensureForceAspectHand() {
       "Cards drawn here are revealed publicly in chat.",
     img: BACK_IMAGE,
     displayCount: true,
-    ownership: sharedOwnership(),
+    ownership: gmOnlyOwnership(),
     flags: {
       [MODULE_ID]: {
         [HAND_FLAG]: true,
-        handVersion: "0.10.0"
+        handVersion: "0.10.3"
       }
     }
   };
@@ -454,13 +518,19 @@ async function ensureForceAspectHand() {
     displayCount: handData.displayCount,
     ownership: handData.ownership,
     [`flags.${MODULE_ID}.${HAND_FLAG}`]: true,
-    [`flags.${MODULE_ID}.handVersion`]: "0.10.0"
+    [`flags.${MODULE_ID}.handVersion`]: "0.10.3"
   });
 
   return hand;
 }
 
 async function drawForceAspect() {
+  if (!game.user.isGM) {
+    return ui.notifications.warn(
+      "LiTM Conversion // Only a GM can draw a Force Aspect."
+    );
+  }
+
   if (forceAspectDrawInProgress) {
     return ui.notifications.warn(
       "LiTM Conversion // A Force Aspect reveal is already in progress on this client."
@@ -596,11 +666,11 @@ async function ensureForceAspectDeck() {
       "Each card face contains the full text of one Force Aspect.",
     img: BACK_IMAGE,
     displayCount: true,
-    ownership: sharedOwnership(),
+    ownership: gmOnlyOwnership(),
     flags: {
       [MODULE_ID]: {
         [DECK_FLAG]: true,
-        deckVersion: "0.10.1"
+        deckVersion: "0.10.3"
       }
     }
   };
@@ -629,7 +699,7 @@ async function ensureForceAspectDeck() {
     displayCount: deckData.displayCount,
     ownership: deckData.ownership,
     [`flags.${MODULE_ID}.${DECK_FLAG}`]: true,
-    [`flags.${MODULE_ID}.deckVersion`]: "0.10.1"
+    [`flags.${MODULE_ID}.deckVersion`]: "0.10.3"
   });
 
   const managedByKey = new Map(
