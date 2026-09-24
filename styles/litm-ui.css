@@ -658,13 +658,6 @@
   border-top: 1px solid var(--litm-themebook-line-soft) !important;
 }
 
-/* Trash / icon controls read as utility glyphs, not fantasy props */
-.litm-starwars-themebook-sheet i,
-.litm-starwars-themebook-sheet .fas,
-.litm-starwars-themebook-sheet .fa-solid {
-  color: #d9c089 !important;
-}
-
 /* Scrollbars */
 .litm-starwars-themebook-sheet *::-webkit-scrollbar {
   width: 8px;
@@ -726,4 +719,61 @@
 .litm-starwars-themebook-sheet .litm-sw-themebook-note-field::placeholder {
   color: #86aeb4 !important;
   opacity: 0.90 !important;
+}
+
+
+/* =========================================================
+   THEMEBOOK CONTROL ICON RECOVERY // v0.4.3
+   ========================================================= */
+
+/* Do not depend on the item's inherited font stack for header/delete glyphs.
+   The actual action elements remain untouched; only their visual glyph is SVG. */
+.litm-starwars-themebook-sheet .litm-sw-themebook-svg-icon {
+  display: block;
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  fill: currentColor;
+  color: #e1bf7b;
+  pointer-events: none;
+}
+
+.litm-starwars-themebook-sheet [data-action="deletePowertag"],
+.litm-starwars-themebook-sheet [data-action="deleteWeaknessTag"],
+.litm-starwars-themebook-sheet [data-action="deleteSpecialImprovement"] {
+  color: #d9b770 !important;
+  cursor: pointer !important;
+}
+
+.litm-starwars-themebook-sheet [data-action="deletePowertag"]:hover,
+.litm-starwars-themebook-sheet [data-action="deleteWeaknessTag"]:hover,
+.litm-starwars-themebook-sheet [data-action="deleteSpecialImprovement"]:hover {
+  color: #f0d8a3 !important;
+}
+
+/* Keep the far-right trash controls compact without changing their mechanics. */
+.litm-starwars-themebook-sheet [data-action="deletePowertag"],
+.litm-starwars-themebook-sheet [data-action="deleteWeaknessTag"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-grow: 0.3 !important;
+}
+
+/* The Special Improvement delete action is an anchor containing an icon. */
+.litm-starwars-themebook-sheet [data-action="deleteSpecialImprovement"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Header controls: preserve the application's original buttons and click
+   handlers, but make the new inline SVG read clearly against the console bar. */
+.litm-starwars-themebook-sheet .window-header button .litm-sw-themebook-svg-icon,
+.litm-starwars-themebook-sheet .window-header a .litm-sw-themebook-svg-icon,
+.litm-starwars-themebook-sheet .window-header [role="button"] .litm-sw-themebook-svg-icon {
+  width: 13px;
+  height: 13px;
+  color: #e3c17e;
 }

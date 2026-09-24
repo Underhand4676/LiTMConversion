@@ -285,12 +285,119 @@ function classifyThemebookTextActions(root) {
   }
 }
 
+
+function createThemebookSvgIcon(kind) {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  svg.classList.add("litm-sw-themebook-svg-icon");
+
+  const path = document.createElementNS(ns, "path");
+
+  const paths = {
+    trash:
+      "M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Zm3 2v7h2v-7H9Zm4 0v7h2v-7h-2Z",
+
+    close:
+      "M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12 19 17.6 17.6 19 12 13.4 6.4 19 5 17.6 10.6 12 5 6.4 6.4 5Z",
+
+    minimize:
+      "M5 11h14v2H5v-2Z",
+
+    copy:
+      "M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3Zm-3 5h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Zm0 2v9h10v-9H5Z",
+
+    controls:
+      "M12 5.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5Zm0 8.25A1.75 1.75 0 1 0 12 10a1.75 1.75 0 0 0 0 3.5Zm0 8.25a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5Z",
+
+    popout:
+      "M13 3h8v8h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H13V3ZM5 6h5v2H5v11h11v-5h2v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"
+  };
+
+  path.setAttribute("d", paths[kind] ?? paths.controls);
+  svg.appendChild(path);
+
+  return svg;
+}
+
+function replaceThemebookControlGlyph(control, kind) {
+  if (!(control instanceof HTMLElement)) return;
+  if (control.dataset.litmSvgIcon === kind) return;
+
+  // Preserve useful accessibility text before replacing the visual child.
+  const accessible =
+    control.getAttribute("aria-label") ??
+    control.getAttribute("title") ??
+    control.dataset.tooltip ??
+    "";
+
+  const svg = createThemebookSvgIcon(kind);
+
+  // Tag/Weakness trash icons are themselves the data-action element.
+  // Special Improvement trash uses an anchor with an <i> child.
+  // Replacing children preserves all original data-action/data-index values.
+  control.replaceChildren(svg);
+  control.dataset.litmSvgIcon = kind;
+
+  if (accessible && !control.getAttribute("aria-label")) {
+    control.setAttribute("aria-label", accessible);
+  }
+}
+
+function classifyThemebookHeaderControl(control) {
+  const descriptor = [
+    control.getAttribute("data-action"),
+    control.getAttribute("aria-label"),
+    control.getAttribute("title"),
+    control.getAttribute("data-tooltip"),
+    control.className,
+    control.textContent
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  if (/close|dismiss/.test(descriptor)) return "close";
+  if (/minimi[sz]e|collapse/.test(descriptor)) return "minimize";
+  if (/copy|duplicate|clone/.test(descriptor)) return "copy";
+  if (/pop.?out|separate|new.?window/.test(descriptor)) return "popout";
+  if (/control|menu|ellipsis|more|options/.test(descriptor)) return "controls";
+
+  return null;
+}
+
+function enhanceThemebookIcons(root) {
+  if (!(root instanceof HTMLElement)) return;
+
+  // Exact Mist Engine Themebook controls from the system templates.
+  for (const control of root.querySelectorAll(
+    '[data-action="deletePowertag"], ' +
+    '[data-action="deleteWeaknessTag"], ' +
+    '[data-action="deleteSpecialImprovement"]'
+  )) {
+    replaceThemebookControlGlyph(control, "trash");
+  }
+
+  // ApplicationV2 header controls live in the same application root.
+  // Keep Foundry's actual buttons and handlers; replace only the broken glyph.
+  for (const control of root.querySelectorAll(
+    ".window-header button, .window-header a, .window-header [role='button']"
+  )) {
+    const kind = classifyThemebookHeaderControl(control);
+    if (kind) replaceThemebookControlGlyph(control, kind);
+  }
+}
+
 function enhanceThemebookSheetUi(root) {
   if (!(root instanceof HTMLElement)) return;
 
   styleThemebookColumnHeadings(root);
   enhanceThemebookTagRows(root);
   classifyThemebookTextActions(root);
+  enhanceThemebookIcons(root);
 }
 
 function observeThemebookSheet(root) {
