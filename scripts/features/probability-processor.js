@@ -5,6 +5,9 @@ export async function openProbabilityProcessor({
   initialPool = "",
   initialCut = "",
   detailed = false,
+  cutEnabled = true,
+  maxPool = 100,
+  channel = "standard",
   actor = null,
   onRollCommitted = null
 } = {}) {
@@ -130,10 +133,15 @@ export async function openProbabilityProcessor({
   // PRELOADED CHECK POOL
   // ---------------------------------------------------------
 
+  const normalizedMaxPool =
+    Number.isFinite(Number(maxPool)) && Number(maxPool) >= 1
+      ? Math.floor(Number(maxPool))
+      : 100;
+
   const parsedInitialPool = Math.floor(Number(initialPool));
   const initialPoolValue =
     Number.isFinite(parsedInitialPool) && parsedInitialPool >= 0
-      ? String(parsedInitialPool)
+      ? String(Math.min(parsedInitialPool, normalizedMaxPool))
       : "";
 
   const parsedInitialCut = Math.floor(Number(initialCut));
@@ -210,7 +218,7 @@ export async function openProbabilityProcessor({
         <!-- INPUT GRID -->
         <div style="
           display:grid;
-          grid-template-columns:1fr 1fr;
+          grid-template-columns:${cutEnabled ? "1fr 1fr" : "1fr"};
           gap:12px;
         ">
 
@@ -220,15 +228,33 @@ export async function openProbabilityProcessor({
             background:${COLOR.backgroundDeep};
             border:1px solid ${COLOR.steelDim};
             padding:10px;
+            ${cutEnabled ? "" : "max-width:360px;width:100%;justify-self:center;"}
           ">
 
             <div style="
-              font-size:10px;
-              letter-spacing:2px;
-              color:${COLOR.cyan};
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:12px;
               margin-bottom:5px;
             ">
-              CHECK POOL
+              <span style="
+                font-size:10px;
+                letter-spacing:2px;
+                color:${COLOR.cyan};
+              ">
+                CHECK POOL
+              </span>
+
+              ${!cutEnabled ? `
+                <span style="
+                  color:${COLOR.ivoryDim};
+                  font-size:8px;
+                  letter-spacing:1px;
+                ">
+                  REACTION CAP // ${normalizedMaxPool}D6
+                </span>
+              ` : ""}
             </div>
 
             <input
@@ -259,50 +285,51 @@ export async function openProbabilityProcessor({
           </div>
 
 
-          <!-- CUT -->
-          <div style="
-            background:${COLOR.backgroundDeep};
-            border:1px solid #514733;
-            padding:10px;
-          ">
-
+          ${cutEnabled ? `
+            <!-- CUT -->
             <div style="
-              font-size:10px;
-              letter-spacing:2px;
-              color:${COLOR.amber};
-              margin-bottom:5px;
+              background:${COLOR.backgroundDeep};
+              border:1px solid #514733;
+              padding:10px;
             ">
-              CUT
+
+              <div style="
+                font-size:10px;
+                letter-spacing:2px;
+                color:${COLOR.amber};
+                margin-bottom:5px;
+              ">
+                CUT
+              </div>
+
+              <input
+                name="cut"
+                type="text"
+                inputmode="numeric"
+                value="${initialCutValue}"
+
+                oninput="
+                  this.value = this.value.replace(/[^0-9]/g, '');
+                "
+
+                style="
+                  width:100%;
+                  box-sizing:border-box;
+                  background:${COLOR.panelWarm};
+                  color:#eee2c5;
+                  border:1px solid #665a39;
+                  border-bottom:2px solid ${COLOR.amberDim};
+                  padding:8px;
+                  font-size:18px;
+                  font-family:monospace;
+                  text-align:center;
+                "
+              >
+
             </div>
-
-            <input
-              name="cut"
-              type="text"
-              inputmode="numeric"
-              value="${initialCutValue}"
-
-              oninput="
-                this.value = this.value.replace(/[^0-9]/g, '');
-              "
-
-              style="
-                width:100%;
-                box-sizing:border-box;
-                background:${COLOR.panelWarm};
-                color:#eee2c5;
-                border:1px solid #665a39;
-                border-bottom:2px solid ${COLOR.amberDim};
-                padding:8px;
-                font-size:18px;
-                font-family:monospace;
-                text-align:center;
-              "
-            >
-
-          </div>
+          ` : ""}
 
         </div>
-
 
         <!-- STATUS LINE -->
         <div style="
@@ -313,9 +340,11 @@ export async function openProbabilityProcessor({
           letter-spacing:1px;
           color:${COLOR.ivoryDim};
         ">
-          ${detailed
-            ? "DETAILED TELEMETRY // POWER YIELD ANALYSIS ENABLED"
-            : "CUT DEGRADES HIGHEST RETURNS FIRST"}
+          ${!cutEnabled
+            ? "REACTION CHANNEL // WEAKNESS INPUT FILTERED // SIX-DIE LIMIT"
+            : detailed
+              ? "DETAILED TELEMETRY // POWER YIELD ANALYSIS ENABLED"
+              : "CUT DEGRADES HIGHEST RETURNS FIRST"}
         </div>
 
       </div>
@@ -338,18 +367,22 @@ export async function openProbabilityProcessor({
 
   const diceCount = Math.floor(Number(result.diceCount));
 
-  const cutCount = result.cut === ""
-    ? 0
-    : Math.floor(Number(result.cut));
+  const cutCount = cutEnabled
+    ? (
+        result.cut === ""
+          ? 0
+          : Math.floor(Number(result.cut))
+      )
+    : 0;
 
 
   if (
     !Number.isFinite(diceCount) ||
     diceCount < 1 ||
-    diceCount > 100
+    diceCount > normalizedMaxPool
   ) {
     await showSystemError(
-      "CHECK POOL MUST CONTAIN BETWEEN 1 AND 100 RETURNS.",
+      `CHECK POOL MUST CONTAIN BETWEEN 1 AND ${normalizedMaxPool} RETURNS.`,
       "ERR-POOL-01"
     );
 
@@ -357,26 +390,28 @@ export async function openProbabilityProcessor({
   }
 
 
-  if (
-    !Number.isFinite(cutCount) ||
-    cutCount < 0
-  ) {
-    await showSystemError(
-      "CUT VALUE MUST BE ZERO OR GREATER.",
-      "ERR-CUT-02"
-    );
+  if (cutEnabled) {
+    if (
+      !Number.isFinite(cutCount) ||
+      cutCount < 0
+    ) {
+      await showSystemError(
+        "CUT VALUE MUST BE ZERO OR GREATER.",
+        "ERR-CUT-02"
+      );
 
-    return;
-  }
+      return;
+    }
 
 
-  if (cutCount > diceCount) {
-    await showSystemError(
-      "CUT CANNOT EXCEED THE CHECK POOL.",
-      "ERR-CUT-03"
-    );
+    if (cutCount > diceCount) {
+      await showSystemError(
+        "CUT CANNOT EXCEED THE CHECK POOL.",
+        "ERR-CUT-03"
+      );
 
-    return;
+      return;
+    }
   }
 
 
@@ -586,51 +621,12 @@ export async function openProbabilityProcessor({
   // INTERFERENCE / SIGNAL STATUS
   // ---------------------------------------------------------
 
-  const interferenceDisplay = cutCount > 0
+  const interferenceDisplay = !cutEnabled
     ? `
-        <div style="
-          background:${COLOR.amberDark};
-          border-left:3px solid ${COLOR.amberDim};
-          padding:8px 10px;
-        ">
-
-          <div style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            margin-bottom:5px;
-          ">
-
-            <span style="
-              color:${COLOR.amber};
-              font-size:9px;
-              font-weight:bold;
-              letter-spacing:2px;
-            ">
-              INTERFERENCE // CUT
-            </span>
-
-            <span style="
-              color:#ad9568;
-              font-size:9px;
-            ">
-              SIGNAL DEGRADED
-            </span>
-
-          </div>
-
-          <div>
-            ${cutDisplay}
-          </div>
-
-        </div>
-      `
-
-    : `
         <div style="
           background:${COLOR.greenDark};
           border-left:3px solid ${COLOR.greenDim};
-          padding:6px 10px;
+          padding:7px 10px;
         ">
 
           <div style="
@@ -646,7 +642,7 @@ export async function openProbabilityProcessor({
               font-weight:bold;
               letter-spacing:2px;
             ">
-              SIGNAL INTEGRITY // NOMINAL
+              REACTION SIGNAL // CLEAN
             </span>
 
             <span style="
@@ -654,13 +650,89 @@ export async function openProbabilityProcessor({
               font-size:9px;
               text-align:right;
             ">
-              CHANNEL CLEAR
+              WEAKNESS FILTER ACTIVE
             </span>
 
           </div>
 
         </div>
-      `;
+      `
+
+    : cutCount > 0
+      ? `
+          <div style="
+            background:${COLOR.amberDark};
+            border-left:3px solid ${COLOR.amberDim};
+            padding:8px 10px;
+          ">
+
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              margin-bottom:5px;
+            ">
+
+              <span style="
+                color:${COLOR.amber};
+                font-size:9px;
+                font-weight:bold;
+                letter-spacing:2px;
+              ">
+                INTERFERENCE // CUT
+              </span>
+
+              <span style="
+                color:#ad9568;
+                font-size:9px;
+              ">
+                SIGNAL DEGRADED
+              </span>
+
+            </div>
+
+            <div>
+              ${cutDisplay}
+            </div>
+
+          </div>
+        `
+
+      : `
+          <div style="
+            background:${COLOR.greenDark};
+            border-left:3px solid ${COLOR.greenDim};
+            padding:6px 10px;
+          ">
+
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:12px;
+            ">
+
+              <span style="
+                color:${COLOR.green};
+                font-size:9px;
+                font-weight:bold;
+                letter-spacing:2px;
+              ">
+                SIGNAL INTEGRITY // NOMINAL
+              </span>
+
+              <span style="
+                color:#829a87;
+                font-size:9px;
+                text-align:right;
+              ">
+                CHANNEL CLEAR
+              </span>
+
+            </div>
+
+          </div>
+        `;
 
 
   // ---------------------------------------------------------
@@ -874,14 +946,18 @@ export async function openProbabilityProcessor({
           font-weight:bold;
           letter-spacing:2px;
         ">
-          ◈ ${detailed ? "DETAILED " : ""}PROBABILITY TELEMETRY
+          ◈ ${channel === "reaction"
+            ? "REACTION TELEMETRY"
+            : `${detailed ? "DETAILED " : ""}PROBABILITY TELEMETRY`}
         </span>
 
         <span style="
           color:${COLOR.ivoryDim};
           font-size:9px;
         ">
-          POOL ${diceCount} // CUT ${cutCount}
+          ${cutEnabled
+            ? `POOL ${diceCount} // CUT ${cutCount}`
+            : `POOL ${diceCount} // MAX ${normalizedMaxPool}`}
         </span>
 
       </div>

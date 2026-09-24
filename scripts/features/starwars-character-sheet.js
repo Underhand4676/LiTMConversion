@@ -1277,6 +1277,20 @@ function calculateProbabilityInputs(selectedTags) {
   return { dicePool, cut };
 }
 
+
+function calculateReactionDicePool(selectedTags) {
+  let dicePool = 0;
+
+  for (const tag of Array.from(selectedTags ?? [])) {
+    // Reaction checks completely ignore selected Weakness Tags.
+    if (tag?.weakness) continue;
+
+    dicePool += tag?.toBurn ? 2 : 1;
+  }
+
+  return Math.min(dicePool, 6);
+}
+
 async function launchStarWarsProbabilityRoll(sheet, {
   rollType = "quick",
   detailed = false
@@ -1337,9 +1351,33 @@ async function handleStarWarsDetailedRoll(event, target) {
 async function handleStarWarsReactionRoll(event, target) {
   event.preventDefault();
 
-  await launchStarWarsProbabilityRoll(this, {
-    rollType: "reaction",
-    detailed: false
+  const actor = this.actor;
+  if (!actor) return;
+
+  const DiceRollApp = await getMistDiceRollAppClass();
+
+  const nativeRollApp = DiceRollApp.getInstance({
+    actor,
+    type: "reaction"
+  });
+
+  nativeRollApp.updateTagsAndStatuses(false);
+
+  const dicePool = calculateReactionDicePool(
+    nativeRollApp.selectedTags
+  );
+
+  await openProbabilityProcessor({
+    actor,
+    initialPool: dicePool,
+    cutEnabled: false,
+    maxPool: 6,
+    channel: "reaction",
+
+    onRollCommitted: async () => {
+      nativeRollApp.updateTagsAndStatuses(false);
+      await nativeRollApp.resetTags();
+    }
   });
 }
 
@@ -1351,38 +1389,41 @@ function sacrificeOutcomePresentation({
   if (outcome === "miracle") {
     return {
       code: "MIRACLE",
-      threshold: "10+",
+      threshold: "CHECK 6+",
       color: "#8fc7a0",
       border: "#547660",
       objective: "OBJECTIVE STATUS // ACHIEVED",
-      consequence: `CONSEQUENCE LOAD // REDUCED ONE LEVEL`,
+      consequence: "CONSEQUENCE LOAD // REDUCED ONE LEVEL",
       transition: `${levelLabel} → ${lessenedLabel}`,
-      text: game.i18n.localize("MIST_ENGINE.SACRIFICE.MiracleText")
+      text:
+        "Resolution confirmed. The sacrifice succeeds and consequence severity is reduced by one level."
     };
   }
 
   if (outcome === "fate") {
     return {
       code: "FATE",
-      threshold: "7–9",
+      threshold: "CHECK 4–5",
       color: "#d4aa63",
       border: "#8a7044",
       objective: "OBJECTIVE STATUS // ACHIEVED",
       consequence: "CONSEQUENCE LOAD // FULL",
       transition: levelLabel,
-      text: game.i18n.localize("MIST_ENGINE.SACRIFICE.FateText")
+      text:
+        "Resolution confirmed. The sacrifice succeeds; the selected consequence level is applied in full."
     };
   }
 
   return {
     code: "IN VAIN",
-    threshold: "6−",
+    threshold: "CHECK 3−",
     color: "#c95f63",
     border: "#8e4145",
     objective: "OBJECTIVE STATUS // FAILED",
     consequence: "CONSEQUENCE LOAD // FULL",
     transition: levelLabel,
-    text: game.i18n.localize("MIST_ENGINE.SACRIFICE.InVainText")
+    text:
+      "Resolution failed. Full sacrifice consequences apply; the effort is in vain or the situation deteriorates. Further consequences may be assigned by the GM."
   };
 }
 
@@ -1464,7 +1505,7 @@ async function handleStarWarsSacrificeRoll(event, target) {
         line-height:1.5;
       ">
         COMMIT A SACRIFICE TO FORCE AN IMMEDIATE OUTCOME.
-        CONSEQUENCE EXPOSURE IS DETERMINED BY THE SELECTED COMMITMENT LEVEL.
+        SELECT THE COMMITMENT LEVEL AFTER THE GM DEFINES WHAT THAT LEVEL CAN ACHIEVE.
       </div>
 
 
@@ -1550,7 +1591,7 @@ async function handleStarWarsSacrificeRoll(event, target) {
         font-size:8px;
         letter-spacing:1px;
       ">
-        AUTHORIZATION ROUTE // HIGH-RISK EXECUTION CHANNEL OPEN
+        ROLL PROTOCOL // 3D6 // HIGHEST RETURN + MODIFIER RESOLVES CHECK
       </div>
 
     </div>
@@ -1587,29 +1628,26 @@ async function handleStarWarsSacrificeRoll(event, target) {
 
 
   // ---------------------------------------------------------
-  // ORIGINAL MIST ENGINE SACRIFICE MECHANICS
+  // LiTM SACRIFICE PROTOCOL
+  //
+  // Roll 3d6. The highest die is the check result before the GM's
+  // discretionary modifier. The modifier is applied to that highest return,
+  // then the resolved check is compared against the Sacrifice thresholds.
   // ---------------------------------------------------------
 
-  let formula = "2d6";
+  const roll = await new Roll("3d6", actor.getRollData()).evaluate();
 
-  if (result.modifier > 0) {
-    formula += ` + ${result.modifier}`;
-  }
-
-  else if (result.modifier < 0) {
-    formula += ` - ${Math.abs(result.modifier)}`;
-  }
-
-  const roll = new Roll(formula, actor.getRollData());
-  await roll.evaluate();
+  const sacrificeDice = roll.dice[0].results.map(entry => entry.result);
+  const rawHighest = Math.max(...sacrificeDice);
+  const resolvedCheck = rawHighest + result.modifier;
 
   let outcome = "invain";
 
-  if (roll.total >= 10) {
+  if (resolvedCheck >= 6) {
     outcome = "miracle";
   }
 
-  else if (roll.total >= 7) {
+  else if (resolvedCheck >= 4) {
     outcome = "fate";
   }
 
@@ -1631,7 +1669,39 @@ async function handleStarWarsSacrificeRoll(event, target) {
     lessenedLabel
   });
 
-  const rollHtml = await roll.render();
+  const modifierLabel =
+    result.modifier > 0
+      ? `+${result.modifier}`
+      : String(result.modifier);
+
+  const sacrificeDiceDisplay = sacrificeDice
+    .map(value => {
+      const isHighest = value === rawHighest;
+
+      return `
+        <div style="
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          width:36px;
+          height:36px;
+          margin:3px;
+          background:${isHighest ? "#18211a" : "#151d1e"};
+          border:1px solid ${isHighest ? display.color : "#728487"};
+          border-bottom:2px solid ${isHighest ? display.color : "#77bec4"};
+          box-shadow:
+            inset 0 0 6px #090e10,
+            ${isHighest ? `0 0 7px ${display.color}` : "0 0 3px rgba(0,0,0,.4)"};
+          color:#f3efe2;
+          font-family:monospace;
+          font-size:20px;
+          font-weight:bold;
+        ">
+          ${value}
+        </div>
+      `;
+    })
+    .join("");
 
 
   // ---------------------------------------------------------
@@ -1691,18 +1761,47 @@ async function handleStarWarsSacrificeRoll(event, target) {
           letter-spacing:1px;
           text-align:right;
         ">
-          2D6 ${result.modifier >= 0 ? "+" : "−"} ${Math.abs(result.modifier)}
+          3D6 // MOD ${modifierLabel}
         </div>
       </div>
 
 
       <div style="
         margin-bottom:10px;
-        padding:7px;
+        padding:9px 10px;
         background:#0a1112;
         border-left:3px solid #465b5e;
       ">
-        ${rollHtml}
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:10px;
+          margin-bottom:7px;
+        ">
+          <span style="
+            color:#77bec4;
+            font-size:9px;
+            font-weight:bold;
+            letter-spacing:1.6px;
+          ">
+            SACRIFICE ARRAY // 3D6
+          </span>
+
+          <span style="
+            color:#aaa797;
+            font-size:8px;
+            letter-spacing:1px;
+          ">
+            HIGHEST RETURN RESOLVES
+          </span>
+        </div>
+
+        <div>
+          ${sacrificeDiceDisplay}
+        </div>
+
       </div>
 
 
@@ -1733,8 +1832,72 @@ async function handleStarWarsSacrificeRoll(event, target) {
             font-size:9px;
             font-weight:bold;
           ">
-            ${display.threshold} // TOTAL ${roll.total}
+            ${display.threshold} // RESOLVED ${resolvedCheck}
           </span>
+        </div>
+
+
+        <div style="
+          display:grid;
+          grid-template-columns:repeat(3,1fr);
+          gap:6px;
+          margin-bottom:8px;
+          padding:7px 8px;
+          background:#0d1517;
+          border:1px solid #27383b;
+        ">
+
+          <div>
+            <div style="
+              color:#6f8589;
+              font-size:7px;
+              letter-spacing:1px;
+            ">
+              HIGHEST RETURN
+            </div>
+            <div style="
+              color:#f3efe2;
+              font-size:13px;
+              font-weight:bold;
+            ">
+              ${rawHighest}
+            </div>
+          </div>
+
+          <div>
+            <div style="
+              color:#6f8589;
+              font-size:7px;
+              letter-spacing:1px;
+            ">
+              MODIFIER
+            </div>
+            <div style="
+              color:#d4aa63;
+              font-size:13px;
+              font-weight:bold;
+            ">
+              ${modifierLabel}
+            </div>
+          </div>
+
+          <div>
+            <div style="
+              color:#6f8589;
+              font-size:7px;
+              letter-spacing:1px;
+            ">
+              RESOLVED CHECK
+            </div>
+            <div style="
+              color:${display.color};
+              font-size:13px;
+              font-weight:bold;
+            ">
+              ${resolvedCheck}
+            </div>
+          </div>
+
         </div>
 
 
