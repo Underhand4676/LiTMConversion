@@ -1049,7 +1049,7 @@
 
 
 /* =========================================================
-   FORCE ASPECT CINEMATIC DRAW // v0.10.0
+   FORCE ASPECT CINEMATIC DRAW
    ========================================================= */
 
 .litm-force-aspect-cinematic {
@@ -1252,11 +1252,6 @@
     drop-shadow(0 0 12px color-mix(in srgb, var(--litm-aspect-cinematic-accent) 28%, transparent));
 }
 
-.litm-force-aspect-cinematic.is-flipping
-  .litm-force-aspect-selected-inner {
-  transform: rotateY(180deg) scale(1.17);
-}
-
 .litm-force-aspect-selected-face {
   position: absolute;
   inset: 0;
@@ -1270,10 +1265,6 @@
   -webkit-backface-visibility: hidden;
 
   border-radius: 13px;
-}
-
-.litm-force-aspect-selected-face.front {
-  transform: rotateY(180deg);
 }
 
 .litm-force-aspect-cinematic.is-leaving {
@@ -1313,68 +1304,4 @@
   .litm-force-aspect-cinematic {
     transition-duration: 180ms !important;
   }
-}
-
-
-/* =========================================================
-   FORCE ASPECT RELIABLE CARD FLIP // v0.10.2
-   ========================================================= */
-
-/*
- * The reveal uses one physical image. It remains the card back while the card
- * leaves the shuffle, collapses edge-on, swaps to the face at the midpoint,
- * then expands again. Avoiding a 180-degree Y rotation prevents mirrored text
- * in Chromium/WebView while preserving the visual read of a card flip.
- */
-.litm-force-aspect-selected-inner {
-  transform: scaleX(1) scale(1);
-  transition:
-    transform 330ms cubic-bezier(.42,.02,.72,.62),
-    filter 360ms ease !important;
-}
-
-.litm-force-aspect-cinematic.is-flip-out
-  .litm-force-aspect-selected-inner {
-  transform: scaleX(.015) scale(1.08) !important;
-}
-
-.litm-force-aspect-cinematic.is-face
-  .litm-force-aspect-selected-inner {
-  transform: scaleX(1) scale(1.17) !important;
-  transition-duration: 420ms !important;
-  transition-timing-function: cubic-bezier(.18,.74,.25,1) !important;
-}
-
-.litm-force-aspect-selected-face {
-  transform: none !important;
-  backface-visibility: visible !important;
-  -webkit-backface-visibility: visible !important;
-}
-
-/* Old two-face rules are intentionally neutralized. */
-.litm-force-aspect-selected-face.front,
-.litm-force-aspect-selected-face.back {
-  transform: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .litm-force-aspect-cinematic.is-face
-    .litm-force-aspect-selected-inner {
-    transform: none !important;
-  }
-}
-
-
-/* =========================================================
-   FORCE ASPECT SINGLE REVEAL HOLD // v0.10.3
-   ========================================================= */
-
-/*
- * v0.10.3 keeps the final face state entirely under the cinematic script.
- * These older state classes are neutralized so adding/removing a class can
- * never trigger a second transform after the real reveal has completed.
- */
-.litm-force-aspect-cinematic.is-flip-out .litm-force-aspect-selected-inner,
-.litm-force-aspect-cinematic.is-face .litm-force-aspect-selected-inner {
-  transition: none !important;
 }

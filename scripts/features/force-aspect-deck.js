@@ -260,34 +260,25 @@ async function playForceAspectCinematic(packet) {
     await wait(650);
 
     /*
-     * One flip only. Collapse the visible back to an edge, swap the image at
-     * the invisible midpoint, expand the face, then freeze it in place.
-     * Do not hand the final state back to a CSS transform transition because
-     * Chromium can otherwise animate the same transform a second time.
+     * One flip only. Use ordinary CSS transitions instead of the Web
+     * Animations API. Cancelling a finished Web Animation can briefly restore
+     * the element's underlying transform for one frame, which looked like a
+     * second face reveal in Chromium. Here the card collapses once, swaps the
+     * image while edge-on, expands once, and then remains completely static.
      */
-    if (selectedInner?.animate) {
-      const flipOut = selectedInner.animate(
-        [
-          { transform: "scaleX(1) scale(1)" },
-          { transform: "scaleX(0.015) scale(1.08)" }
-        ],
-        {
-          duration: 330,
-          easing: "cubic-bezier(.42,.02,.72,.62)",
-          fill: "forwards"
-        }
-      );
-
-      await flipOut.finished.catch(() => undefined);
-      flipOut.cancel();
+    if (selectedInner) {
       selectedInner.style.transition = "none";
-      selectedInner.style.transform = "scaleX(0.015) scale(1.08)";
-    } else if (selectedInner) {
+      selectedInner.style.transform = "scaleX(1) scale(1)";
+      void selectedInner.offsetWidth;
+
       selectedInner.style.transition =
         "transform 330ms cubic-bezier(.42,.02,.72,.62)";
       selectedInner.style.transform = "scaleX(0.015) scale(1.08)";
-      await wait(330);
+      await wait(350);
+
       selectedInner.style.transition = "none";
+      selectedInner.style.transform = "scaleX(0.015) scale(1.08)";
+      void selectedInner.offsetWidth;
     }
 
     if (selectedFace) {
@@ -295,33 +286,21 @@ async function playForceAspectCinematic(packet) {
       selectedFace.alt = packet.name ?? "Force Aspect";
     }
 
-    if (selectedInner?.animate) {
-      const flipIn = selectedInner.animate(
-        [
-          { transform: "scaleX(0.015) scale(1.08)" },
-          { transform: "scaleX(1) scale(1.17)" }
-        ],
-        {
-          duration: 420,
-          easing: "cubic-bezier(.18,.74,.25,1)",
-          fill: "forwards"
-        }
-      );
-
-      await flipIn.finished.catch(() => undefined);
-      flipIn.cancel();
-      selectedInner.style.transition = "none";
-      selectedInner.style.transform = "scaleX(1) scale(1.17)";
-    } else if (selectedInner) {
+    if (selectedInner) {
+      // Force a layout flush after the image swap so the browser has a clean
+      // edge-on starting state for the single reveal expansion.
+      void selectedInner.offsetWidth;
       selectedInner.style.transition =
         "transform 420ms cubic-bezier(.18,.74,.25,1)";
       selectedInner.style.transform = "scaleX(1) scale(1.17)";
-      await wait(420);
+      await wait(440);
+
+      // Freeze the revealed face. No animation is cancelled and no transform
+      // is changed again until the entire overlay fades away.
       selectedInner.style.transition = "none";
+      selectedInner.style.transform = "scaleX(1) scale(1.17)";
     }
 
-    // The reveal is finished. Hold the face completely still for a few
-    // seconds, then fade the cinematic away. There is no second flip.
     await wait(3000);
     overlay.classList.add("is-leaving");
 
@@ -670,7 +649,7 @@ async function ensureForceAspectDeck() {
     flags: {
       [MODULE_ID]: {
         [DECK_FLAG]: true,
-        deckVersion: "0.10.3"
+        deckVersion: "0.10.4"
       }
     }
   };
@@ -699,7 +678,7 @@ async function ensureForceAspectDeck() {
     displayCount: deckData.displayCount,
     ownership: deckData.ownership,
     [`flags.${MODULE_ID}.${DECK_FLAG}`]: true,
-    [`flags.${MODULE_ID}.deckVersion`]: "0.10.3"
+    [`flags.${MODULE_ID}.deckVersion`]: "0.10.4"
   });
 
   const managedByKey = new Map(
