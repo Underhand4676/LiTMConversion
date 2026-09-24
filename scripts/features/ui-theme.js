@@ -72,6 +72,16 @@ Hooks.on("pauseGame", (paused) => {
 
 Hooks.once("ready", () => {
   syncAfterCore(game.paused);
+
+  if (
+    CONFIG.Actor?.typeLabels &&
+    Object.prototype.hasOwnProperty.call(
+      CONFIG.Actor.typeLabels,
+      "litm-fellowship-themecard"
+    )
+  ) {
+    CONFIG.Actor.typeLabels["litm-fellowship-themecard"] = "Crew Theme Card";
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -162,7 +172,14 @@ function findTagPair(questionInput, root) {
       if (input === questionInput) return false;
 
       const text = String(input.getAttribute("placeholder") ?? "");
-      return /answer\s*\/?\s*the\s*tag/i.test(text);
+
+      return (
+        /answer\s*\/?\s*the\s*tag/i.test(text) ||
+        /new\s*power\s*tag/i.test(text) ||
+        /new\s*weakness\s*tag/i.test(text) ||
+        /newpowertag/i.test(text) ||
+        /newweaknesstag/i.test(text)
+      );
     });
 
     if (tagInput instanceof HTMLElement) {
@@ -240,6 +257,20 @@ function enhanceThemebookTagRows(root) {
   for (const questionInput of questionInputs) {
     const pair = findTagPair(questionInput, root);
     if (pair) reorderThemebookTagPair(pair);
+  }
+}
+
+
+function markThemebookDescriptionPanel(root) {
+  if (!(root instanceof HTMLElement)) return;
+
+  for (const panel of root.querySelectorAll(
+    '[data-tab="description"], ' +
+    '.tab.description, ' +
+    '.description.tab, ' +
+    '[data-tab*="description" i]'
+  )) {
+    panel.classList.add("litm-sw-themebook-description-panel");
   }
 }
 
@@ -413,6 +444,7 @@ function enhanceThemebookIcons(root) {
 function enhanceThemebookSheetUi(root) {
   if (!(root instanceof HTMLElement)) return;
 
+  markThemebookDescriptionPanel(root);
   styleThemebookColumnHeadings(root);
   enhanceThemebookTagRows(root);
   classifyThemebookTextActions(root);
@@ -452,10 +484,120 @@ function styleThemebookSheet(app, html) {
   observeThemebookSheet(root);
 }
 
+
+function isCrewThemeCardSheet(app) {
+  const actor =
+    app?.actor ??
+    app?.document ??
+    app?.object ??
+    null;
+
+  const type = String(actor?.type ?? "").toLowerCase();
+
+  if (type === "litm-fellowship-themecard") return true;
+
+  const title = String(app?.title ?? "").toLowerCase();
+  return title.includes("fellowship theme card");
+}
+
+function replaceCrewThemeCardCopy(root) {
+  if (!(root instanceof HTMLElement)) return;
+
+  const title = root.querySelector(".window-title");
+
+  if (title) {
+    title.textContent = String(title.textContent ?? "")
+      .replace(/Fellowship Theme Card/gi, "Crew Theme Card");
+  }
+
+  for (const element of root.querySelectorAll("p, div, span, strong, label, th")) {
+    const text = String(element.textContent ?? "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (
+      text.startsWith("A Fellowship Theme Card is a shared resource") &&
+      element.children.length === 0
+    ) {
+      element.textContent =
+        "CREW DOSSIER // SHARED FIELD PROFILE. This record defines the tags and special improvements available to assigned personnel. Operational tag entries remain linked to the individual member dossiers.";
+      element.classList.add("litm-sw-crew-dossier-copy");
+      continue;
+    }
+
+    if (text === "Themebook" && element.children.length === 0) {
+      element.textContent = "Crew Dossier";
+      element.classList.add("litm-sw-crew-column-heading");
+    }
+
+    if (text === "Special Improvements" && element.children.length === 0) {
+      element.classList.add("litm-sw-crew-column-heading");
+    }
+  }
+}
+
+function enhanceCrewThemeCardSheetUi(root) {
+  if (!(root instanceof HTMLElement)) return;
+
+  replaceCrewThemeCardCopy(root);
+  enhanceThemebookTagRows(root);
+  classifyThemebookTextActions(root);
+}
+
+function observeCrewThemeCardSheet(root) {
+  if (!(root instanceof HTMLElement)) return;
+  if (root.dataset.litmCrewThemeObserver === "true") return;
+
+  root.dataset.litmCrewThemeObserver = "true";
+
+  const observer = new MutationObserver(mutations => {
+    if (!mutations.some(mutation => mutation.type === "childList")) return;
+
+    requestAnimationFrame(() => enhanceCrewThemeCardSheetUi(root));
+  });
+
+  observer.observe(root, {
+    childList: true,
+    subtree: true
+  });
+}
+
+function styleCrewThemeCardSheet(app, html) {
+  if (!isCrewThemeCardSheet(app)) return;
+
+  const root = resolveRenderedRoot(app, html);
+  if (!(root instanceof HTMLElement)) return;
+
+  // Reuse the successful Themebook sci-fi surface language, then layer on
+  // Crew-specific dossier treatment below.
+  root.classList.add(
+    "litm-starwars-themebook-sheet",
+    "litm-starwars-crew-theme-sheet"
+  );
+
+  root.querySelector(".window-content")?.classList?.add(
+    "litm-starwars-themebook-sheet-content",
+    "litm-starwars-crew-theme-sheet-content"
+  );
+
+  root.querySelector(".window-header")?.classList?.add(
+    "litm-starwars-themebook-sheet-header",
+    "litm-starwars-crew-theme-sheet-header"
+  );
+
+  enhanceCrewThemeCardSheetUi(root);
+  observeCrewThemeCardSheet(root);
+}
+
 Hooks.on("renderItemSheet", (app, html) => {
   styleThemebookSheet(app, html);
 });
 
+Hooks.on("renderActorSheet", (app, html) => {
+  styleCrewThemeCardSheet(app, html);
+});
+
 Hooks.on("renderApplicationV2", (app, element) => {
   styleThemebookSheet(app, element);
+  styleCrewThemeCardSheet(app, element);
 });

@@ -792,3 +792,201 @@
 .litm-starwars-themebook-sheet [data-litm-svg-icon] {
   background-image: none !important;
 }
+
+
+/* =========================================================
+   THEMEBOOK DESCRIPTION DOSSIER // v0.4.5
+   ========================================================= */
+
+/* The system's Description tab carries a large parchment background from the
+   base Mist Engine editor. Remove the image at the tab level and at the usual
+   editor wrappers, then supply the same dark console surface as the Data tab. */
+.litm-starwars-themebook-sheet .litm-sw-themebook-description-panel,
+.litm-starwars-themebook-sheet [data-tab="description"],
+.litm-starwars-themebook-sheet .tab.description,
+.litm-starwars-themebook-sheet .description.tab {
+  background-image: none !important;
+  background:
+    linear-gradient(rgba(136,217,225,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(136,217,225,.018) 1px, transparent 1px),
+    linear-gradient(155deg, #0a1217, #081014 78%) !important;
+  background-size: 26px 26px, 26px 26px, auto !important;
+  border: 1px solid rgba(72, 112, 121, .42) !important;
+  color: #dbe9eb !important;
+  box-shadow: inset 0 0 30px rgba(0,0,0,.34) !important;
+}
+
+.litm-starwars-themebook-sheet .litm-sw-themebook-description-panel *,
+.litm-starwars-themebook-sheet [data-tab="description"] * {
+  background-image: none !important;
+}
+
+.litm-starwars-themebook-sheet .litm-sw-themebook-description-panel .editor,
+.litm-starwars-themebook-sheet .litm-sw-themebook-description-panel .editor-content,
+.litm-starwars-themebook-sheet .litm-sw-themebook-description-panel .prosemirror,
+.litm-starwars-themebook-sheet .litm-sw-themebook-description-panel .ProseMirror,
+.litm-starwars-themebook-sheet .litm-sw-themebook-description-panel [contenteditable="true"],
+.litm-starwars-themebook-sheet [data-tab="description"] .editor,
+.litm-starwars-themebook-sheet [data-tab="description"] .editor-content,
+.litm-starwars-themebook-sheet [data-tab="description"] .prosemirror,
+.litm-starwars-themebook-sheet [data-tab="description"] .ProseMirror,
+.litm-starwars-themebook-sheet [data-tab="description"] [contenteditable="true"] {
+  min-height: 420px;
+  padding: 12px !important;
+  background: rgba(7, 15, 19, .76) !important;
+  border: 0 !important;
+  color: #dce9eb !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  line-height: 1.55 !important;
+  box-shadow: inset 3px 0 0 rgba(199,164,92,.66) !important;
+}
+
+
+/* =========================================================
+   CREW THEME CARD // SHARED DOSSIER // v0.4.5
+   ========================================================= */
+
+.litm-starwars-crew-theme-sheet {
+  --litm-crew-bg: #081115;
+  --litm-crew-panel: #0d181d;
+  --litm-crew-line: #35565e;
+  --litm-crew-cyan: #88d9e1;
+  --litm-crew-amber: #c7a45c;
+  --litm-crew-text: #dbe9eb;
+  --litm-crew-muted: #7f999e;
+}
+
+.application.litm-starwars-crew-theme-sheet,
+.litm-starwars-crew-theme-sheet.window-app,
+.litm-starwars-crew-theme-sheet,
+.litm-starwars-crew-theme-sheet .window-content,
+.litm-starwars-crew-theme-sheet-content {
+  background-image: none !important;
+  background:
+    linear-gradient(rgba(136,217,225,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(136,217,225,.018) 1px, transparent 1px),
+    linear-gradient(150deg, #0a1419, #071014 76%) !important;
+  background-size: 28px 28px, 28px 28px, auto !important;
+  color: var(--litm-crew-text) !important;
+}
+
+/* Strip the inherited parchment off the actor-sheet internals while retaining
+   the actual form controls and document mechanics. */
+.litm-starwars-crew-theme-sheet .sheet-body,
+.litm-starwars-crew-theme-sheet .sheet-content,
+.litm-starwars-crew-theme-sheet form,
+.litm-starwars-crew-theme-sheet main,
+.litm-starwars-crew-theme-sheet section,
+.litm-starwars-crew-theme-sheet article {
+  background-image: none !important;
+  color: var(--litm-crew-text) !important;
+}
+
+.litm-starwars-crew-theme-sheet .sheet-header,
+.litm-starwars-crew-theme-sheet .sheet-header > *,
+.litm-starwars-crew-theme-sheet .header-fields {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+.litm-starwars-crew-theme-sheet .sheet-header img,
+.litm-starwars-crew-theme-sheet .profile-img,
+.litm-starwars-crew-theme-sheet .actor-image {
+  background: rgba(8, 17, 21, .92) !important;
+  border: 1px solid var(--litm-crew-line) !important;
+  border-left: 3px solid rgba(199,164,92,.78) !important;
+  box-shadow: inset 0 0 18px rgba(0,0,0,.42) !important;
+}
+
+.litm-starwars-crew-theme-sheet input:not([type="checkbox"]):not([type="radio"]),
+.litm-starwars-crew-theme-sheet textarea,
+.litm-starwars-crew-theme-sheet select {
+  background: rgba(7, 15, 19, .94) !important;
+  border: 1px solid #365961 !important;
+  border-left: 3px solid rgba(199,164,92,.82) !important;
+  border-radius: 0 !important;
+  color: #e7f2f3 !important;
+  box-shadow: inset 0 0 8px rgba(0,0,0,.42) !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+}
+
+.litm-starwars-crew-theme-sheet input:focus,
+.litm-starwars-crew-theme-sheet textarea:focus,
+.litm-starwars-crew-theme-sheet select:focus {
+  outline: 1px solid var(--litm-crew-cyan) !important;
+  border-color: var(--litm-crew-cyan) !important;
+}
+
+.litm-starwars-crew-theme-sheet h1,
+.litm-starwars-crew-theme-sheet h2,
+.litm-starwars-crew-theme-sheet h3 {
+  color: #e8d5aa !important;
+  text-shadow: none !important;
+}
+
+/* Static shared-resource explanation becomes an intelligence dossier note. */
+.litm-starwars-crew-theme-sheet .litm-sw-crew-dossier-copy {
+  margin: 10px 0 12px !important;
+  padding: 9px 11px !important;
+  background: rgba(7, 15, 19, .78) !important;
+  border: 1px solid rgba(74, 112, 120, .32) !important;
+  border-left: 3px solid rgba(136,217,225,.62) !important;
+  color: #a9bdc1 !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 9px !important;
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  letter-spacing: .055em !important;
+  text-transform: uppercase !important;
+}
+
+.litm-starwars-crew-theme-sheet .litm-sw-crew-column-heading {
+  color: #9ed5db !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .10em !important;
+  text-transform: uppercase !important;
+  text-shadow: none !important;
+}
+
+/* Reuse the corrected Themebook tag language and hierarchy. */
+.litm-starwars-crew-theme-sheet .litm-sw-themebook-tag-field {
+  color: #eef8f9 !important;
+  border-left-color: #c7a45c !important;
+  font-weight: 700 !important;
+}
+
+.litm-starwars-crew-theme-sheet .litm-sw-themebook-note-field {
+  color: #b9cacc !important;
+  border-left-color: #527980 !important;
+  font-size: 11px !important;
+}
+
+.litm-starwars-crew-theme-sheet .litm-sw-themebook-tag-field::placeholder {
+  color: #e0c486 !important;
+  opacity: .92 !important;
+}
+
+.litm-starwars-crew-theme-sheet .litm-sw-themebook-note-field::placeholder {
+  color: #86aeb4 !important;
+  opacity: .90 !important;
+}
+
+/* Only the two add-tag bars receive the amber action treatment. Native header
+   controls and trash icons remain owned by Mist Engine / Foundry. */
+.litm-starwars-crew-theme-sheet .litm-sw-themebook-action-bar,
+.litm-starwars-crew-theme-sheet .themebook-section-header {
+  background: linear-gradient(180deg, rgba(58,42,19,.88), rgba(104,66,31,.92)) !important;
+  border: 1px solid rgba(193,135,78,.62) !important;
+  border-radius: 0 !important;
+  color: #f2e8d6 !important;
+  box-shadow:
+    inset 3px 0 0 rgba(209,150,93,.88),
+    inset 0 1px 0 rgba(255,255,255,.06) !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+  text-shadow: none !important;
+}
