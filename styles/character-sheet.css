@@ -3787,3 +3787,334 @@
     filter: brightness(1.02) saturate(1.06) !important;
   }
 }
+
+
+/* =========================================================
+   FORCE POLARITY // BIPOLAR STATUS CONTROL // v0.7.0
+   ========================================================= */
+
+/* Reserve a slim strip at the bottom of Tags & Statuses without changing the
+   existing tag/status mechanics. The tracker itself is positioned there. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .floating-status-container-character.litm-sw-force-enabled,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .container-card-with-border.floating-tags-and-status-container.litm-sw-force-enabled {
+  position: relative !important;
+  padding-bottom: 58px !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .floating-status-container-character.litm-sw-force-enable-ready,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .container-card-with-border.floating-tags-and-status-container.litm-sw-force-enable-ready {
+  position: relative !important;
+  padding-bottom: 31px !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-polarity {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 7px;
+  z-index: 4;
+
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 8px;
+
+  padding: 5px;
+  box-sizing: border-box;
+
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(127,203,211,.014) 0px,
+      rgba(127,203,211,.014) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    rgba(5, 14, 18, .88);
+
+  border: 1px solid rgba(78, 116, 124, .42);
+  border-left: 2px solid rgba(127,203,211,.48);
+
+  box-shadow:
+    inset 0 0 14px rgba(0,0,0,.36),
+    0 1px 4px rgba(0,0,0,.22);
+
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+/* Two directional buttons stacked exactly as the requested control. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-controls {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 3px;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-direction {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 18px !important;
+
+  margin: 0 !important;
+  padding: 0 5px !important;
+
+  border-radius: 0 !important;
+  box-shadow: inset 2px 0 0 currentColor !important;
+
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 7px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  letter-spacing: .055em !important;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-direction-light {
+  background: rgba(46, 104, 126, .20) !important;
+  border: 1px solid rgba(91, 171, 204, .48) !important;
+  color: #8ed8ef !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-direction-dark {
+  background: rgba(119, 49, 50, .20) !important;
+  border: 1px solid rgba(184, 82, 82, .48) !important;
+  color: #e58b89 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-direction:hover:not(:disabled) {
+  filter: brightness(1.14);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-direction:disabled {
+  opacity: .30;
+  cursor: default;
+}
+
+/* Tracker half. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-display {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-items: center;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-header {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  line-height: 1;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-title {
+  flex: 0 0 auto;
+  color: #7f9da2;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .10em;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-status {
+  min-width: 0;
+  color: #b7c9cc;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .045em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-disable {
+  width: auto !important;
+  min-width: 0 !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  margin: 0 0 0 auto !important;
+  padding: 0 4px !important;
+
+  background: transparent !important;
+  border: 1px solid rgba(92, 116, 120, .35) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+
+  color: #667f83 !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 6px !important;
+  font-weight: 700 !important;
+  letter-spacing: .07em !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-lights {
+  display: grid;
+  grid-template-columns: repeat(6, 13px);
+  justify-content: start;
+  align-items: center;
+  gap: 5px;
+  min-height: 19px;
+}
+
+/* Reuse the same physical pip geometry established for Wounded/Strained. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-light {
+  width: 12px !important;
+  max-width: 12px !important;
+  height: 12px;
+  aspect-ratio: 1 / 1;
+}
+
+/* Inactive Force lamps stay neutral steel regardless of side. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-light.inactive {
+  background: #142429 !important;
+  border: 1px solid #425d63 !important;
+  box-shadow: inset 0 0 4px rgba(0,0,0,.58) !important;
+}
+
+/* Light and Dark use the same lamp implementation with different emitter color. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-light {
+  --condition-active: #6fcae8;
+  --condition-glow: rgba(111,202,232,.28);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-dark .litm-sw-force-light {
+  --condition-active: #bd5b59;
+  --condition-glow: rgba(189,91,89,.30);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-light .inactive {
+  animation: none !important;
+}
+
+/* Normal polarity is stable. The LEDs are deliberately steady and clean. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-normal .litm-sw-force-light.active::before {
+  animation: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-normal .litm-sw-force-light.active {
+  animation: none !important;
+}
+
+/*
+ * FALLEN reuses the Wounded/Strained lamp animation exactly:
+ * - the force panel already carries litm-sw-condition-level-X
+ * - the pips use litm-sw-condition-light
+ * - therefore the current Wounded irregular sputter keyframes, severity and
+ *   independent nth-child phases apply automatically.
+ *
+ * Only color is overridden here.
+ */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen.litm-sw-force-light,
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen .litm-sw-force-light {
+  --condition-active: #6fcae8;
+  --condition-glow: rgba(111,202,232,.28);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen.litm-sw-force-dark .litm-sw-force-light {
+  --condition-active: #bd5b59;
+  --condition-glow: rgba(189,91,89,.30);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen {
+  border-left-color: rgba(188, 91, 89, .72);
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(189,91,89,.014) 0px,
+      rgba(189,91,89,.014) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    rgba(9, 13, 16, .90);
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-fallen .litm-sw-force-title {
+  color: #bb7977;
+}
+
+/* Tiny edit-mode activation control when the tracker is not enabled. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-enable {
+  position: absolute;
+  left: 8px;
+  bottom: 6px;
+  z-index: 4;
+
+  width: auto !important;
+  min-width: 0 !important;
+  height: 20px !important;
+  min-height: 20px !important;
+
+  margin: 0 !important;
+  padding: 0 8px !important;
+
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+
+  background: rgba(11, 27, 32, .88) !important;
+  border: 1px solid rgba(81, 128, 138, .42) !important;
+  border-radius: 0 !important;
+  box-shadow: inset 2px 0 0 rgba(111,202,232,.60) !important;
+
+  color: #92b6bb !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 7px !important;
+  font-weight: 800 !important;
+  letter-spacing: .07em !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-force-enable-plus {
+  color: #7ecce1;
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* Compact/narrow layouts remain usable rather than squeezing the controls. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet.litm-conversion-starwars-compact
+  .litm-sw-force-polarity {
+  grid-template-columns: 90px minmax(0, 1fr);
+}
+
+@media (max-width: 850px) {
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .litm-sw-force-polarity {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  .application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+    .litm-sw-force-direction {
+    font-size: 6px !important;
+  }
+}

@@ -38,6 +38,17 @@ const CONDITION_TRACKERS = {
 };
 
 
+const FORCE_POLARITY_MAX = 6;
+const FORCE_POLARITY_ENABLED_FLAG = "forcePolarityEnabled";
+const FORCE_POLARITY_STATE_FLAG = "forcePolarityState";
+const FORCE_POLARITY_VALUE_FLAG = "forcePolarityValue";
+
+const FORCE_POLARITY_STATES = {
+  NORMAL: "normal",
+  FALLEN: "fallen"
+};
+
+
 function getCurrentCredits(actor) {
   const raw = Number(actor?.getFlag(MODULE_ID, CURRENT_CREDITS_FLAG) ?? 0);
 
@@ -1170,6 +1181,525 @@ function enhanceConditionTrackers(sheet) {
 }
 
 
+
+function getForcePolarityEnabled(actor) {
+  return actor?.getFlag(MODULE_ID, FORCE_POLARITY_ENABLED_FLAG) === true;
+}
+
+function getForcePolarityState(actor) {
+  const state = String(
+    actor?.getFlag(MODULE_ID, FORCE_POLARITY_STATE_FLAG) ??
+    FORCE_POLARITY_STATES.NORMAL
+  );
+
+  return state === FORCE_POLARITY_STATES.FALLEN
+    ? FORCE_POLARITY_STATES.FALLEN
+    : FORCE_POLARITY_STATES.NORMAL;
+}
+
+function getForcePolarityValue(actor) {
+  const raw = Number(
+    actor?.getFlag(MODULE_ID, FORCE_POLARITY_VALUE_FLAG) ?? 0
+  );
+
+  if (!Number.isFinite(raw)) return 0;
+
+  return Math.max(
+    -FORCE_POLARITY_MAX,
+    Math.min(FORCE_POLARITY_MAX, Math.trunc(raw))
+  );
+}
+
+function canModifyForcePolarity(actor) {
+  return Boolean(game.user.isGM || actor?.isOwner);
+}
+
+async function setForcePolarityData(
+  sheet,
+  {
+    enabled = getForcePolarityEnabled(sheet.actor),
+    state = getForcePolarityState(sheet.actor),
+    value = getForcePolarityValue(sheet.actor)
+  } = {}
+) {
+  if (!canModifyForcePolarity(sheet.actor)) return;
+
+  const normalizedState =
+    state === FORCE_POLARITY_STATES.FALLEN
+      ? FORCE_POLARITY_STATES.FALLEN
+      : FORCE_POLARITY_STATES.NORMAL;
+
+  const normalizedValue = Math.max(
+    -FORCE_POLARITY_MAX,
+    Math.min(FORCE_POLARITY_MAX, Math.trunc(Number(value) || 0))
+  );
+
+  await sheet.actor.update({
+    [`flags.${MODULE_ID}.${FORCE_POLARITY_ENABLED_FLAG}`]: Boolean(enabled),
+    [`flags.${MODULE_ID}.${FORCE_POLARITY_STATE_FLAG}`]: normalizedState,
+    [`flags.${MODULE_ID}.${FORCE_POLARITY_VALUE_FLAG}`]: normalizedValue
+  });
+
+  sheet.render({ force: true });
+}
+
+function forcePolarityDisplay(state, value) {
+  const tier = Math.abs(value);
+
+  if (state === FORCE_POLARITY_STATES.FALLEN) {
+    if (value > 0) {
+      return {
+        side: "light",
+        status: `RETURN TO LIGHT // ${tier}`,
+        topButton: "RETURN TO LIGHT",
+        bottomButton: "LOST TO DARK"
+      };
+    }
+
+    if (value < 0) {
+      return {
+        side: "dark",
+        status:
+          value === -FORCE_POLARITY_MAX
+            ? "LOST TO DARK // 6 // SACRIFICE REQUIRED"
+            : `LOST TO DARK // ${tier}`,
+        topButton: "RETURN TO LIGHT",
+        bottomButton: "LOST TO DARK"
+      };
+    }
+
+    return {
+      side: "neutral",
+      status: "FALLEN // NEUTRAL",
+      topButton: "RETURN TO LIGHT",
+      bottomButton: "LOST TO DARK"
+    };
+  }
+
+  if (value > 0) {
+    return {
+      side: "light",
+      status: `LIGHT SIDE // ${tier}`,
+      topButton: "LIGHT SIDE",
+      bottomButton: "DARK SIDE"
+    };
+  }
+
+  if (value < 0) {
+    return {
+      side: "dark",
+      status: `DARK SIDE // ${tier}`,
+      topButton: "LIGHT SIDE",
+      bottomButton: "DARK SIDE"
+    };
+  }
+
+  return {
+    side: "neutral",
+    status: "NEUTRAL",
+    topButton: "LIGHT SIDE",
+    bottomButton: "DARK SIDE"
+  };
+}
+
+async function confirmForcePolarityTransition({
+  title,
+  heading,
+  message,
+  yesLabel
+}) {
+  return foundry.applications.api.DialogV2.confirm({
+    window: {
+      title
+    },
+
+    content: `
+      <div style="
+        padding:16px;
+        background:
+          repeating-linear-gradient(
+            0deg,
+            rgba(126,198,207,.018) 0px,
+            rgba(126,198,207,.018) 1px,
+            transparent 1px,
+            transparent 4px
+          ),
+          linear-gradient(145deg,#0b1417,#111b1e);
+        border:1px solid #49686e;
+        box-shadow:inset 0 0 20px rgba(0,0,0,.55);
+        color:#dbe8e8;
+        font-family:monospace;
+      ">
+        <div style="
+          color:#d4aa63;
+          font-size:11px;
+          font-weight:700;
+          letter-spacing:1.7px;
+          padding-bottom:8px;
+          margin-bottom:10px;
+          border-bottom:1px solid #30484d;
+        ">
+          ${heading}
+        </div>
+
+        <div style="
+          color:#b8c8ca;
+          font-size:10px;
+          line-height:1.55;
+          letter-spacing:.35px;
+        ">
+          ${message}
+        </div>
+
+        <div style="
+          margin-top:11px;
+          padding-top:7px;
+          border-top:1px solid #263b40;
+          color:#5f777b;
+          font-size:8px;
+          letter-spacing:1px;
+        ">
+          FORCE POLARITY // STATE TRANSITION AUTHORIZATION
+        </div>
+      </div>
+    `,
+
+    yes: {
+      label: yesLabel,
+      icon: "fa-solid fa-check"
+    },
+
+    no: {
+      label: "HOLD POSITION",
+      icon: "fa-solid fa-xmark"
+    },
+
+    rejectClose: false,
+    modal: true
+  });
+}
+
+async function acknowledgeForceCollapse() {
+  await foundry.applications.api.DialogV2.prompt({
+    window: {
+      title: "FORCE POLARITY // CRITICAL"
+    },
+
+    content: `
+      <div style="
+        padding:16px;
+        background:linear-gradient(145deg,#171010,#211313);
+        border:1px solid #84494a;
+        color:#ead9d6;
+        font-family:monospace;
+        box-shadow:inset 0 0 20px rgba(0,0,0,.58);
+      ">
+        <div style="
+          color:#d36a68;
+          font-size:11px;
+          font-weight:700;
+          letter-spacing:1.7px;
+          padding-bottom:8px;
+          margin-bottom:10px;
+          border-bottom:1px solid #5b3435;
+        ">
+          POLARITY COLLAPSE // LOST TO DARK 6
+        </div>
+
+        <div style="
+          color:#d7b7b2;
+          font-size:10px;
+          line-height:1.55;
+        ">
+          Only an Impossible Sacrifice can return this character from the threshold.
+        </div>
+      </div>
+    `,
+
+    ok: {
+      label: "ACKNOWLEDGE",
+      icon: "fa-solid fa-check"
+    },
+
+    modal: true
+  });
+}
+
+async function moveForcePolarity(sheet, direction) {
+  if (!canModifyForcePolarity(sheet.actor)) return;
+
+  const state = getForcePolarityState(sheet.actor);
+  const current = getForcePolarityValue(sheet.actor);
+  const delta = direction === "light" ? 1 : -1;
+
+  const next = Math.max(
+    -FORCE_POLARITY_MAX,
+    Math.min(FORCE_POLARITY_MAX, current + delta)
+  );
+
+  if (next === current) return;
+
+  // Normal polarity reaches Dark Side 6: confirm the Fall and start the
+  // Fallen polarity at Lost to the Dark 2.
+  if (
+    state === FORCE_POLARITY_STATES.NORMAL &&
+    next === -FORCE_POLARITY_MAX
+  ) {
+    await sheet.actor.setFlag(
+      MODULE_ID,
+      FORCE_POLARITY_VALUE_FLAG,
+      next
+    );
+
+    const fall = await confirmForcePolarityTransition({
+      title: "FORCE POLARITY // FALL THRESHOLD",
+      heading: "DARK SIDE // TIER 6",
+      message:
+        "The character has reached the Fall threshold. Convert the polarity track to RETURN TO LIGHT / LOST TO DARK and begin at LOST TO DARK 2?",
+      yesLabel: "FALL TO THE DARK"
+    });
+
+    if (fall) {
+      await sheet.actor.update({
+        [`flags.${MODULE_ID}.${FORCE_POLARITY_STATE_FLAG}`]:
+          FORCE_POLARITY_STATES.FALLEN,
+        [`flags.${MODULE_ID}.${FORCE_POLARITY_VALUE_FLAG}`]: -2
+      });
+    }
+
+    sheet.render({ force: true });
+    return;
+  }
+
+  // Fallen polarity reaches Return to the Light 6: confirm restoration,
+  // then resume the normal track at Light Side 1.
+  if (
+    state === FORCE_POLARITY_STATES.FALLEN &&
+    next === FORCE_POLARITY_MAX
+  ) {
+    await sheet.actor.setFlag(
+      MODULE_ID,
+      FORCE_POLARITY_VALUE_FLAG,
+      next
+    );
+
+    const restored = await confirmForcePolarityTransition({
+      title: "FORCE POLARITY // RESTORATION THRESHOLD",
+      heading: "RETURN TO LIGHT // TIER 6",
+      message:
+        "The return threshold is complete. Restore the normal LIGHT SIDE / DARK SIDE polarity track and begin at LIGHT SIDE 1?",
+      yesLabel: "RETURN TO THE LIGHT"
+    });
+
+    if (restored) {
+      await sheet.actor.update({
+        [`flags.${MODULE_ID}.${FORCE_POLARITY_STATE_FLAG}`]:
+          FORCE_POLARITY_STATES.NORMAL,
+        [`flags.${MODULE_ID}.${FORCE_POLARITY_VALUE_FLAG}`]: 1
+      });
+    }
+
+    sheet.render({ force: true });
+    return;
+  }
+
+  await sheet.actor.setFlag(
+    MODULE_ID,
+    FORCE_POLARITY_VALUE_FLAG,
+    next
+  );
+
+  if (
+    state === FORCE_POLARITY_STATES.FALLEN &&
+    next === -FORCE_POLARITY_MAX
+  ) {
+    await acknowledgeForceCollapse();
+  }
+
+  sheet.render({ force: true });
+}
+
+function createForcePolarityLight(index, active) {
+  const light = document.createElement("span");
+
+  light.className =
+    `litm-sw-force-light litm-sw-condition-light ${active ? "active" : "inactive"}`;
+
+  light.dataset.index = String(index);
+
+  return light;
+}
+
+function createForcePolarityTracker(sheet) {
+  const state = getForcePolarityState(sheet.actor);
+  const value = getForcePolarityValue(sheet.actor);
+  const tier = Math.abs(value);
+  const display = forcePolarityDisplay(state, value);
+  const editable = canModifyForcePolarity(sheet.actor);
+
+  const panel = document.createElement("div");
+
+  panel.className = [
+    "litm-sw-force-polarity",
+    "litm-sw-force-panel",
+    `litm-sw-force-${display.side}`,
+    `litm-sw-condition-level-${tier}`,
+    state === FORCE_POLARITY_STATES.FALLEN
+      ? "litm-sw-force-fallen"
+      : "litm-sw-force-normal"
+  ].join(" ");
+
+  const controls = document.createElement("div");
+  controls.className = "litm-sw-force-controls";
+
+  const lightButton = document.createElement("button");
+  lightButton.type = "button";
+  lightButton.className =
+    "litm-sw-force-direction litm-sw-force-direction-light";
+  lightButton.textContent = display.topButton;
+  lightButton.title = `Move one tier toward ${display.topButton}`;
+  lightButton.disabled =
+    !editable || value >= FORCE_POLARITY_MAX;
+
+  lightButton.addEventListener("click", async event => {
+    event.preventDefault();
+    event.stopPropagation();
+    await moveForcePolarity(sheet, "light");
+  });
+
+  const darkButton = document.createElement("button");
+  darkButton.type = "button";
+  darkButton.className =
+    "litm-sw-force-direction litm-sw-force-direction-dark";
+  darkButton.textContent = display.bottomButton;
+  darkButton.title = `Move one tier toward ${display.bottomButton}`;
+  darkButton.disabled =
+    !editable || value <= -FORCE_POLARITY_MAX;
+
+  darkButton.addEventListener("click", async event => {
+    event.preventDefault();
+    event.stopPropagation();
+    await moveForcePolarity(sheet, "dark");
+  });
+
+  controls.append(lightButton, darkButton);
+
+  const displayArea = document.createElement("div");
+  displayArea.className = "litm-sw-force-display";
+
+  const header = document.createElement("div");
+  header.className = "litm-sw-force-header";
+
+  const title = document.createElement("span");
+  title.className = "litm-sw-force-title";
+  title.textContent =
+    state === FORCE_POLARITY_STATES.FALLEN
+      ? "FORCE POLARITY // FALLEN"
+      : "FORCE POLARITY";
+
+  const status = document.createElement("span");
+  status.className = "litm-sw-force-status";
+  status.textContent = display.status;
+
+  header.append(title, status);
+
+  if (sheet.actor.system.editMode && editable) {
+    const disable = document.createElement("button");
+    disable.type = "button";
+    disable.className = "litm-sw-force-disable";
+    disable.textContent = "DISABLE";
+    disable.title = "Hide Force Polarity tracker";
+
+    disable.addEventListener("click", async event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      await setForcePolarityData(sheet, {
+        enabled: false
+      });
+    });
+
+    header.append(disable);
+  }
+
+  const lights = document.createElement("div");
+  lights.className = "litm-sw-force-lights";
+  lights.setAttribute(
+    "aria-label",
+    `${display.status}; ${tier} of ${FORCE_POLARITY_MAX}`
+  );
+
+  for (let index = 1; index <= FORCE_POLARITY_MAX; index += 1) {
+    lights.append(
+      createForcePolarityLight(index, index <= tier)
+    );
+  }
+
+  displayArea.append(header, lights);
+  panel.append(controls, displayArea);
+
+  return panel;
+}
+
+function createForcePolarityEnableButton(sheet) {
+  const button = document.createElement("button");
+
+  button.type = "button";
+  button.className = "litm-sw-force-enable";
+  button.innerHTML = `
+    <span class="litm-sw-force-enable-plus">+</span>
+    <span>ENABLE FORCE POLARITY</span>
+  `;
+
+  button.addEventListener("click", async event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    await setForcePolarityData(sheet, {
+      enabled: true
+    });
+  });
+
+  return button;
+}
+
+function enhanceForcePolarityUi(sheet) {
+  const root = sheet.element;
+  if (!root) return;
+
+  root.querySelectorAll(
+    ".litm-sw-force-polarity, .litm-sw-force-enable"
+  ).forEach(element => element.remove());
+
+  const statusPanel =
+    root.querySelector(".floating-status-container-character") ??
+    root.querySelector(
+      ".container-card-with-border.floating-tags-and-status-container"
+    ) ??
+    root.querySelector(".col-status");
+
+  if (!statusPanel) return;
+
+  statusPanel.classList.remove(
+    "litm-sw-force-enabled",
+    "litm-sw-force-enable-ready"
+  );
+
+  const enabled = getForcePolarityEnabled(sheet.actor);
+
+  if (enabled) {
+    statusPanel.classList.add("litm-sw-force-enabled");
+    statusPanel.append(createForcePolarityTracker(sheet));
+    return;
+  }
+
+  if (sheet.actor.system.editMode && canModifyForcePolarity(sheet.actor)) {
+    statusPanel.classList.add("litm-sw-force-enable-ready");
+    statusPanel.append(createForcePolarityEnableButton(sheet));
+  }
+}
+
+
 function enhanceLivingStandardUi(sheet) {
   const root = sheet.element;
   if (!root) return;
@@ -2284,6 +2814,7 @@ Hooks.once("init", async () => {
         enhanceTagUsageUi(this);
         enhanceLivingStandardUi(this);
         enhanceConditionTrackers(this);
+        enhanceForcePolarityUi(this);
         removeLegacyBackgroundControls(this);
         wireProbabilityRollButtons(this);
       }
@@ -2355,6 +2886,7 @@ Hooks.once("init", async () => {
         enhanceTagUsageUi(this);
         enhanceLivingStandardUi(this);
         enhanceConditionTrackers(this);
+        enhanceForcePolarityUi(this);
         removeLegacyBackgroundControls(this);
         wireProbabilityRollButtons(this);
       }
