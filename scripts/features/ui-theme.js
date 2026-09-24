@@ -336,9 +336,28 @@ function replaceThemebookControlGlyph(control, kind) {
 
   const svg = createThemebookSvgIcon(kind);
 
-  // Tag/Weakness trash icons are themselves the data-action element.
-  // Special Improvement trash uses an anchor with an <i> child.
-  // Replacing children preserves all original data-action/data-index values.
+  // Some Mist Engine controls apply Font Awesome directly to the clickable
+  // element rather than to a child <i>. If those classes remain, Font
+  // Awesome's ::before pseudo-element draws the old glyph next to our SVG.
+  // Remove ONLY Font Awesome classes; keep all Foundry/Mist Engine action,
+  // layout, and data attributes intact.
+  for (const className of Array.from(control.classList)) {
+    if (
+      className === "fa" ||
+      className === "fas" ||
+      className === "far" ||
+      className === "fab" ||
+      className === "fa-solid" ||
+      className === "fa-regular" ||
+      className === "fa-brands" ||
+      className.startsWith("fa-")
+    ) {
+      control.classList.remove(className);
+    }
+  }
+
+  // Replacing only the visual contents preserves the original clickable
+  // element, data-action, data-index, event listeners, and document mechanics.
   control.replaceChildren(svg);
   control.dataset.litmSvgIcon = kind;
 

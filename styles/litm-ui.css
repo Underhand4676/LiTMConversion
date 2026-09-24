@@ -777,3 +777,18 @@
   height: 13px;
   color: #e3c17e;
 }
+
+
+/* =========================================================
+   THEMEBOOK SVG ICON DE-DUPLICATION // v0.4.4
+   ========================================================= */
+
+.litm-starwars-themebook-sheet [data-litm-svg-icon]::before,
+.litm-starwars-themebook-sheet [data-litm-svg-icon]::after {
+  content: none !important;
+  display: none !important;
+}
+
+.litm-starwars-themebook-sheet [data-litm-svg-icon] {
+  background-image: none !important;
+}
