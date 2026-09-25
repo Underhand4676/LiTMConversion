@@ -1312,6 +1312,42 @@ function wireKnownForcePowerInputs(sheet) {
   }
 }
 
+
+function arrangeLockedBackpackControls(sheet) {
+  const root = sheet.element;
+  if (!root || sheet.actor.system.editMode) return;
+
+  // Equipment: physically move the native burn control out of the Story Tag
+  // row and into the slot's left rail. This makes the intended layout
+  // deterministic instead of relying on absolute positioning inside the
+  // system partial.
+  for (const slot of root.querySelectorAll(
+    ".litm-sw-pack-slot.occupied:not(.consumable)"
+  )) {
+    const burn = slot.querySelector(".burn-indicator");
+    if (!burn) continue;
+
+    burn.classList.add("litm-sw-pack-rail-burn");
+    if (burn.parentElement !== slot) {
+      slot.insertBefore(burn, slot.firstChild);
+    }
+  }
+
+  // Consumables are always burn-to-use. Keep the native burn control in the
+  // DOM so clicking the consumable name can still invoke it, but never expose
+  // a redundant flame button in the Backpack UI.
+  for (const slot of root.querySelectorAll(
+    ".litm-sw-pack-slot.consumable.occupied"
+  )) {
+    const burn = slot.querySelector(".burn-indicator");
+    if (!burn) continue;
+
+    burn.classList.add("litm-sw-consumable-hidden-burn");
+    burn.hidden = true;
+    burn.style.setProperty("display", "none", "important");
+  }
+}
+
 function enforceConsumableBurnOnly(sheet) {
   const root = sheet.element;
   if (!root || sheet.actor.system.editMode) return;
@@ -3407,6 +3443,7 @@ Hooks.once("init", async () => {
       _onRender(context, options) {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
+        arrangeLockedBackpackControls(this);
         enforceConsumableBurnOnly(this);
         wireBackpackEditorInputs(this);
         wireKnownForcePowerInputs(this);
@@ -3487,6 +3524,7 @@ Hooks.once("init", async () => {
       _onRender(context, options) {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
+        arrangeLockedBackpackControls(this);
         enforceConsumableBurnOnly(this);
         wireBackpackEditorInputs(this);
         wireKnownForcePowerInputs(this);

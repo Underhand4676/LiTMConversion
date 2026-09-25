@@ -5126,3 +5126,68 @@
   .litm-pc-storytag {
   color: #f0cf95 !important;
 }
+
+
+/* =========================================================
+   BACKPACK LOCKED LOADOUT // v0.11.3 rail correction
+   ========================================================= */
+
+/* Equipment uses a real two-row left rail: flame above, editable slot number
+   below, while the Story Tag owns the full right side. The burn control is
+   moved into the slot itself by arrangeLockedBackpackControls(). */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode)
+  .litm-sw-pack-slot.occupied:not(.consumable) {
+  display: grid !important;
+  grid-template-columns: 30px minmax(0, 1fr) !important;
+  grid-template-rows: minmax(34px, 1fr) 19px !important;
+  align-items: stretch !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode)
+  .litm-sw-pack-slot.occupied:not(.consumable)
+  > .burn-indicator.litm-sw-pack-rail-burn {
+  position: static !important;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  align-self: center !important;
+  justify-self: center !important;
+  width: 20px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  margin: 0 !important;
+  z-index: auto !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode)
+  .litm-sw-pack-slot.occupied:not(.consumable)
+  > button.litm-sw-pack-slot-index.litm-sw-pack-slot-edit {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  width: 30px !important;
+  min-width: 30px !important;
+  min-height: 19px !important;
+  height: 19px !important;
+  align-self: stretch !important;
+  border-top: 1px solid rgba(109, 150, 158, .16) !important;
+  border-right: 1px solid rgba(109, 150, 158, .20) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode)
+  .litm-sw-pack-slot.occupied:not(.consumable)
+  > .litm-sw-pack-slot-body {
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+  min-width: 0 !important;
+}
+
+/* Belt-and-suspenders hiding for consumable flames. JS also hides the native
+   control inline while preserving it as the programmatic burn target. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode)
+  .litm-sw-pack-slot.consumable .litm-sw-consumable-hidden-burn {
+  display: none !important;
+}
