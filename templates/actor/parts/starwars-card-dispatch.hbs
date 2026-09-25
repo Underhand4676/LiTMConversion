@@ -12,6 +12,11 @@
     {{> 'systems/mist-engine-fvtt/templates/actor/parts/actor-fellowship-partial.hbs'
         system=@root.system editMode=@root.system.editMode cardKey=card.key}}
 {{/if}}
+{{#if (eq card.type "force-powers")}}
+    {{> 'modules/litm-conversion/templates/actor/parts/starwars-force-powers-partial.hbs'
+        powers=card.powers displayPowers=card.displayPowers
+        editMode=@root.system.editMode cardKey=card.key}}
+{{/if}}
 {{#if (eq card.type "backpack")}}
     {{> 'modules/litm-conversion/templates/actor/parts/starwars-backpack-partial.hbs'
         backpack=@root.backpack system=@root.system

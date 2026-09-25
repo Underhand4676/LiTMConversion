@@ -1,0 +1,53 @@
+<div class="themebook-container container-themebook-with-border litm-sw-force-powers-card" data-card-key="{{cardKey}}">
+    <div class="themebook-style litm-sw-force-powers flexcol">
+        <h2 class="theme-name">
+            KNOWN FORCE POWERS
+            <span class="litm-sw-force-powers-code">FORCE // ABILITIES</span>
+        </h2>
+
+        {{#if editMode}}
+        <div class="litm-sw-force-powers-list edit-mode">
+            {{#each powers as |power index|}}
+            <div class="litm-sw-force-power-row edit-mode">
+                <span class="litm-sw-force-power-index">◈</span>
+                <input
+                    type="text"
+                    class="litm-sw-force-power-input"
+                    data-litm-force-power-input
+                    data-index="{{index}}"
+                    value="{{power}}"
+                    placeholder="Force power"
+                    autocomplete="off"
+                >
+                <button
+                    type="button"
+                    class="litm-sw-force-power-remove"
+                    data-action="removeKnownForcePower"
+                    data-index="{{index}}"
+                    title="Remove Force power"
+                    aria-label="Remove Force power"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            {{/each}}
+        </div>
+
+        <button type="button" class="litm-sw-force-power-add" data-action="addKnownForcePower">
+            <i class="fa-solid fa-plus"></i>
+            ADD POWER
+        </button>
+        {{else}}
+        <div class="litm-sw-force-powers-list">
+            {{#each displayPowers as |power index|}}
+            <div class="litm-sw-force-power-row">
+                <span class="litm-sw-force-power-index">◈</span>
+                <span class="litm-sw-force-power-name">{{power}}</span>
+            </div>
+            {{else}}
+            <div class="litm-sw-force-powers-empty">NO KNOWN POWERS RECORDED</div>
+            {{/each}}
+        </div>
+        {{/if}}
+    </div>
+</div>

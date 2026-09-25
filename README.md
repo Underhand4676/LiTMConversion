@@ -6,20 +6,17 @@ LiTM Conversion is a Star Wars conversion layer for **Legend in the Mist / Mist 
 
 - **Star Wars character sheets**
   - Republic Intelligence dossier styling
-  - Wounded, Strained, and Force Polarity tracking
-  - Living Standard, Current Credits, loadout support, and Crew terminology
+  - Force-sensitive character support
+  - Wounded, Strained, Force Polarity, Living Standard, Current Credits, loadout, and Crew support
   - Themebook-only character construction
 - **Custom d6 dice roller**
-  - Quick, Detailed, Reaction, and Sacrifice roll modes
+  - Probability Processor with multiple roll modes
 - **Probability tools**
-  - Probability Processor
   - Per-player roll telemetry and statistics
 - **Force Aspects deck**
-  - Native Foundry card deck with 18 Force Aspects
-  - GM draw macro with synchronized Sabacc-style reveal
+  - Native Foundry deck with synchronized Sabacc-style reveal
 - **Star Wars interface treatment**
-  - Republic-styled chat and pause overlay
-  - Reskinned Themebooks and Crew Theme Cards
+  - Republic-styled chat, pause overlay, Themebooks, and Crew Theme Cards
 
 ## Install / Update Manifest
 

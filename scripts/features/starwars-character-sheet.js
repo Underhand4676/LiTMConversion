@@ -42,6 +42,7 @@ const FORCE_POLARITY_MAX = 6;
 const FORCE_POLARITY_ENABLED_FLAG = "forcePolarityEnabled";
 const FORCE_POLARITY_STATE_FLAG = "forcePolarityState";
 const FORCE_POLARITY_VALUE_FLAG = "forcePolarityValue";
+const KNOWN_FORCE_POWERS_FLAG = "knownForcePowers";
 
 const FORCE_POLARITY_STATES = {
   NORMAL: "normal",
@@ -504,9 +505,9 @@ function isConsumableEntry(entry) {
 function getTagUsage(entry) {
   let value = String(entry?.question ?? "");
 
-  // Backpack consumables use the beginning of the existing `question` field
-  // as a category marker. Everything after the marker is the human-readable
-  // adjudication note.
+  // Backpack consumables keep their category marker at the beginning of the
+  // existing `question` field. Any text after the marker remains the visible
+  // adjudication note, so the data survives alongside the consumable flag.
   if (value.startsWith(CONSUMABLE_MARKER)) {
     value = value.slice(CONSUMABLE_MARKER.length).replace(/^\s+/, "");
   }
@@ -567,7 +568,7 @@ function buildBackpackSlots(backpack) {
   };
 }
 
-function prepareStarWarsContext(context) {
+function prepareStarWarsContext(context, actor) {
   const slots = buildBackpackSlots(context.backpack);
   context.backpackGearSlots = slots.gearSlots;
   context.backpackConsumableSlots = slots.consumableSlots;
@@ -582,6 +583,26 @@ function prepareStarWarsContext(context) {
     .filter(card => !HIDDEN_CARD_TYPES.has(card.type));
   context.otherCards = Array.from(context.otherCards ?? [])
     .filter(card => !HIDDEN_CARD_TYPES.has(card.type));
+
+  // Force-sensitive characters gain one synthetic card that deliberately is
+  // not a Mist Engine Themebook. Its entries are reference-only powers: they
+  // have no header tag, weakness, burn/select state, advancement, or notes.
+  if (getForcePolarityEnabled(actor)) {
+    const powers = getKnownForcePowers(actor);
+    const forcePowerCard = {
+      type: "force-powers",
+      key: "force-powers",
+      powers,
+      displayPowers: powers.filter(power => power.trim().length)
+    };
+
+    const backpackIndex = context.mainCards.findIndex(card => card.type === "backpack");
+    if (backpackIndex >= 0) {
+      context.mainCards.splice(backpackIndex, 0, forcePowerCard);
+    } else {
+      context.mainCards.push(forcePowerCard);
+    }
+  }
 
   return context;
 }
@@ -726,14 +747,14 @@ async function handleEditBackpackSlot(event, target) {
   const itemName = String(result.name ?? "").trim();
   if (!itemName) return;
 
-  const existingUsage = getTagUsage(existing);
-
   entries[entryIndex] = {
     ...existing,
     name: itemName,
+    // Renaming a slot must never destroy its adjudication note. Consumables
+    // retain the private marker while preserving the note text after it.
     question: category === "consumable"
-      ? `${CONSUMABLE_MARKER}${existingUsage ? `\n${existingUsage}` : ""}`
-      : existingUsage
+      ? setBackpackTagUsage(existing, getTagUsage(existing))
+      : String(existing.question ?? "")
   };
 
   await backpack.update({ "system.items": entries });
@@ -1074,10 +1095,12 @@ function enhanceTagUsageUi(sheet) {
     applyUsageTooltip(tag, getTagUsage(entry));
   }
 
-  // Locked-mode backpack/story tags.
+  // Locked-mode story tags, including Backpack equipment and consumables,
+  // expose their adjudication note through the normal delayed tooltip.
   for (const tag of root.querySelectorAll(".litm-pc-storytag.storytag-selectable")) {
     const index = Number(tag.dataset.index);
     const source = tag.dataset.source ?? "";
+
     const arrayPath = tag.dataset.key || "system.items";
     const doc = resolveTagDocument(sheet, source, tag.dataset.itemId);
     const entry = doc ? entryAt(doc, arrayPath, index) : null;
@@ -1132,7 +1155,8 @@ function enhanceTagUsageUi(sheet) {
     });
   }
 
-  // Unlocked-mode story tags, including backpack equipment and consumables.
+  // Unlocked-mode story tags keep adjudication notes. Backpack entries use
+  // the same data field but get a roomier editor layout through backpack CSS.
   for (const row of root.querySelectorAll(".item-storytag-line")) {
     const nameInput = row.querySelector(
       '.storytag-item-editable[type="text"]'
@@ -1141,6 +1165,7 @@ function enhanceTagUsageUi(sheet) {
 
     const index = Number(nameInput.dataset.index);
     const source = nameInput.dataset.source ?? "";
+
     const itemId = nameInput.dataset.itemId ?? "";
     const arrayPath = nameInput.dataset.key || "system.items";
     const doc = resolveTagDocument(sheet, source, itemId);
@@ -1153,11 +1178,191 @@ function enhanceTagUsageUi(sheet) {
       arrayPath,
       index,
       entry,
-      backpack: arrayPath === "system.items"
+      backpack: source === "backpack"
     });
   }
 }
 
+
+
+function getKnownForcePowers(actor) {
+  const raw = actor?.getFlag(MODULE_ID, KNOWN_FORCE_POWERS_FLAG);
+  if (!Array.isArray(raw)) return [];
+
+  return raw.map(power => {
+    if (typeof power === "string") return power;
+    return String(power?.name ?? "");
+  });
+}
+
+function canModifyKnownForcePowers(actor) {
+  return Boolean(game.user.isGM || actor?.isOwner);
+}
+
+async function setKnownForcePowers(sheet, powers) {
+  if (!canModifyKnownForcePowers(sheet.actor)) return;
+
+  await sheet.actor.setFlag(
+    MODULE_ID,
+    KNOWN_FORCE_POWERS_FLAG,
+    Array.from(powers ?? []).map(power => String(power ?? ""))
+  );
+
+  sheet.render({ force: true });
+}
+
+async function handleAddKnownForcePower(event) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (!getForcePolarityEnabled(this.actor)) return;
+  const powers = getKnownForcePowers(this.actor);
+  powers.push("");
+  await setKnownForcePowers(this, powers);
+}
+
+async function handleRemoveKnownForcePower(event, target) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (!getForcePolarityEnabled(this.actor)) return;
+
+  const index = Number(target.dataset.index);
+  const powers = getKnownForcePowers(this.actor);
+  if (!Number.isInteger(index) || index < 0 || index >= powers.length) return;
+
+  powers.splice(index, 1);
+  await setKnownForcePowers(this, powers);
+}
+
+function wireKnownForcePowerInputs(sheet) {
+  const root = sheet.element;
+  if (!root || !sheet.actor.system.editMode) return;
+  if (!getForcePolarityEnabled(sheet.actor)) return;
+  if (!canModifyKnownForcePowers(sheet.actor)) return;
+
+  for (const input of root.querySelectorAll("[data-litm-force-power-input]")) {
+    input.addEventListener("change", async event => {
+      const index = Number(event.currentTarget.dataset.index);
+      const powers = getKnownForcePowers(sheet.actor);
+      if (!Number.isInteger(index) || index < 0 || index >= powers.length) return;
+
+      powers[index] = String(event.currentTarget.value ?? "").trim();
+      await setKnownForcePowers(sheet, powers);
+    });
+  }
+}
+
+function enforceConsumableBurnOnly(sheet) {
+  const root = sheet.element;
+  if (!root || sheet.actor.system.editMode) return;
+
+  for (const slot of root.querySelectorAll(".litm-sw-pack-slot.consumable.occupied")) {
+    const row = slot.querySelector(".item-storytag-line") ?? slot;
+    const tag = row.querySelector(".litm-pc-storytag");
+    if (!tag) continue;
+
+    tag.classList.add("litm-sw-consumable-burn-only");
+    tag.removeAttribute("title");
+    tag.setAttribute("aria-label", `${String(tag.textContent ?? "Consumable").trim()}; burn to use`);
+
+    const burn = row.querySelector(".burn-indicator");
+    if (burn) {
+      burn.dataset.tooltipText = "Burn this consumable to use it.";
+      burn.dataset.tooltipDirection = "UP";
+      burn.setAttribute("aria-label", "Burn this consumable to use it");
+    }
+
+    const blockNormalSelection = event => {
+      if (event.target.closest?.(".burn-indicator")) return;
+      if (!event.target.closest?.(".litm-pc-storytag")) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      ui.notifications.info("Consumables must be burned to use.");
+    };
+
+    row.addEventListener("click", blockNormalSelection, true);
+    row.addEventListener("contextmenu", blockNormalSelection, true);
+  }
+}
+
+function getBurnOnlyConsumableEntries(actor) {
+  const items = Array.from(actor?.items ?? []);
+  const backpack = items.find(item => String(item?.type ?? "").toLowerCase() === "backpack");
+
+  // Use the exact same slot classifier as the sheet so legacy fifth/sixth
+  // Backpack entries are burn-only too, even if they predate our marker.
+  if (backpack) {
+    return buildBackpackSlots(backpack).consumableSlots
+      .filter(slot => slot.occupied)
+      .map(slot => ({
+        itemId: backpack.id,
+        index: slot.index,
+        name: String(slot.storytag?.name ?? "").trim()
+      }));
+  }
+
+  // Compatibility fallback for unusual system data where the Backpack item
+  // type is not exposed as `backpack`. Explicit markers remain authoritative.
+  const entries = [];
+  for (const item of items) {
+    const storytags = Array.from(item?.system?.items ?? []);
+    storytags.forEach((entry, index) => {
+      if (!isFilledBackpackEntry(entry) || !isConsumableEntry(entry)) return;
+      entries.push({
+        itemId: item.id,
+        index,
+        name: String(entry.name ?? "").trim()
+      });
+    });
+  }
+
+  return entries;
+}
+
+function selectedTagIsUnburnedConsumable(actor, tag) {
+  if (!tag || tag.toBurn) return false;
+
+  const consumables = getBurnOnlyConsumableEntries(actor);
+  if (!consumables.length) return false;
+
+  const source = String(tag.source ?? tag.data?.source ?? "").toLowerCase();
+  const itemId = String(tag.itemId ?? tag.data?.itemId ?? "");
+  const rawIndex = tag.index ?? tag.data?.index;
+  const index = Number(rawIndex);
+  const name = String(tag.name ?? tag.label ?? tag.text ?? "").trim();
+
+  // Prefer exact provenance when Mist Engine supplies it.
+  if (source === "backpack") {
+    if (itemId && Number.isInteger(index)) {
+      return consumables.some(entry => entry.itemId === itemId && entry.index === index);
+    }
+    if (itemId) {
+      return consumables.some(entry => entry.itemId === itemId && (!name || entry.name === name));
+    }
+    return consumables.some(entry => !name || entry.name === name);
+  }
+
+  if (itemId && Number.isInteger(index)) {
+    return consumables.some(entry => entry.itemId === itemId && entry.index === index);
+  }
+
+  // Some DiceRollApp versions omit source metadata for Story Tags. In that
+  // case, match the explicit consumable name as a final compatibility fallback.
+  if (!source && !itemId && name) {
+    return consumables.some(entry => entry.name === name);
+  }
+
+  return false;
+}
+
+function filterBurnOnlyConsumables(actor, selectedTags) {
+  return Array.from(selectedTags ?? []).filter(
+    tag => !selectedTagIsUnburnedConsumable(actor, tag)
+  );
+}
 
 
 function getConditionLevel(actor, key) {
@@ -2239,7 +2444,7 @@ async function launchStarWarsProbabilityRoll(sheet, {
   nativeRollApp.updateTagsAndStatuses(false);
 
   const { dicePool, cut } = calculateProbabilityInputs(
-    nativeRollApp.selectedTags
+    filterBurnOnlyConsumables(actor, nativeRollApp.selectedTags)
   );
 
   await openProbabilityProcessor({
@@ -2293,7 +2498,7 @@ async function handleStarWarsReactionRoll(event, target) {
   nativeRollApp.updateTagsAndStatuses(false);
 
   const dicePool = calculateReactionDicePool(
-    nativeRollApp.selectedTags
+    filterBurnOnlyConsumables(actor, nativeRollApp.selectedTags)
   );
 
   await openProbabilityProcessor({
@@ -3051,7 +3256,8 @@ Hooks.once("init", async () => {
     await foundry.applications.handlebars.loadTemplates([
       `modules/${MODULE_ID}/templates/actor/parts/starwars-card-dispatch.hbs`,
       `modules/${MODULE_ID}/templates/actor/parts/starwars-backpack-partial.hbs`,
-      `modules/${MODULE_ID}/templates/actor/parts/starwars-crew-themecard.hbs`
+      `modules/${MODULE_ID}/templates/actor/parts/starwars-crew-themecard.hbs`,
+      `modules/${MODULE_ID}/templates/actor/parts/starwars-force-powers-partial.hbs`
     ]);
 
     class LiTMStarWarsCharacterSheet extends BaseFullSheet {
@@ -3080,7 +3286,9 @@ Hooks.once("init", async () => {
           litmProbabilityReactionRoll: handleStarWarsReactionRoll,
           litmStarWarsSacrificeRoll: handleStarWarsSacrificeRoll,
           createLiTMBackpackSlotItem: handleCreateBackpackSlotItem,
-          editLiTMBackpackSlot: handleEditBackpackSlot
+          editLiTMBackpackSlot: handleEditBackpackSlot,
+          addKnownForcePower: handleAddKnownForcePower,
+          removeKnownForcePower: handleRemoveKnownForcePower
         }
       };
 
@@ -3106,12 +3314,14 @@ Hooks.once("init", async () => {
 
       async _prepareContext(options) {
         const context = await super._prepareContext(options);
-        return prepareStarWarsContext(context);
+        return prepareStarWarsContext(context, this.actor);
       }
 
       _onRender(context, options) {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
+        enforceConsumableBurnOnly(this);
+        wireKnownForcePowerInputs(this);
         enhanceStatusTierAffordances(this);
         enhanceLivingStandardUi(this);
         enhanceConditionTrackers(this);
@@ -3154,7 +3364,9 @@ Hooks.once("init", async () => {
           litmProbabilityReactionRoll: handleStarWarsReactionRoll,
           litmStarWarsSacrificeRoll: handleStarWarsSacrificeRoll,
           createLiTMBackpackSlotItem: handleCreateBackpackSlotItem,
-          editLiTMBackpackSlot: handleEditBackpackSlot
+          editLiTMBackpackSlot: handleEditBackpackSlot,
+          addKnownForcePower: handleAddKnownForcePower,
+          removeKnownForcePower: handleRemoveKnownForcePower
         }
       };
 
@@ -3180,12 +3392,14 @@ Hooks.once("init", async () => {
 
       async _prepareContext(options) {
         const context = await super._prepareContext(options);
-        return prepareStarWarsContext(context);
+        return prepareStarWarsContext(context, this.actor);
       }
 
       _onRender(context, options) {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
+        enforceConsumableBurnOnly(this);
+        wireKnownForcePowerInputs(this);
         enhanceStatusTierAffordances(this);
         enhanceLivingStandardUi(this);
         enhanceConditionTrackers(this);
