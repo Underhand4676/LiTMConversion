@@ -553,6 +553,7 @@ function buildBackpackSlots(backpack) {
       return {
         occupied: Boolean(item),
         storytag: item?.storytag ?? null,
+        usage: item ? getTagUsage(item.storytag) : "",
         index: item?.index ?? -1,
         slotNumber: slotIndex + 1,
         category
@@ -758,6 +759,61 @@ async function handleEditBackpackSlot(event, target) {
   };
 
   await backpack.update({ "system.items": entries });
+}
+
+async function handleRemoveBackpackSlotItem(event, target) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const backpack = this.actor.items.get(target.dataset.itemId);
+  if (!backpack) return;
+
+  const entryIndex = Number(target.dataset.entryIndex);
+  const entries = foundry.utils.deepClone(Array.from(backpack.system.items ?? []));
+  if (!Number.isInteger(entryIndex) || entryIndex < 0 || entryIndex >= entries.length) return;
+
+  this._saveScrollPositions?.();
+  entries.splice(entryIndex, 1);
+  await backpack.update({ "system.items": entries });
+}
+
+function wireBackpackEditorInputs(sheet) {
+  const root = sheet.element;
+  if (!root || !sheet.actor.system.editMode) return;
+
+  const saveField = async (input, kind) => {
+    const backpack = sheet.actor.items.get(input.dataset.itemId);
+    if (!backpack) return;
+
+    const entryIndex = Number(input.dataset.entryIndex);
+    const entries = foundry.utils.deepClone(Array.from(backpack.system.items ?? []));
+    if (!Number.isInteger(entryIndex) || entryIndex < 0 || entryIndex >= entries.length) return;
+
+    const entry = entries[entryIndex];
+    if (!entry) return;
+
+    if (kind === "name") {
+      const name = String(input.value ?? "").trim();
+      if (!name) {
+        input.value = String(entry.name ?? "");
+        return;
+      }
+      entry.name = name;
+    } else {
+      entry.question = setBackpackTagUsage(entry, input.value);
+    }
+
+    sheet._saveScrollPositions?.();
+    await backpack.update({ "system.items": entries });
+  };
+
+  for (const input of root.querySelectorAll("[data-litm-backpack-name-input]")) {
+    input.addEventListener("change", event => saveField(event.currentTarget, "name"));
+  }
+
+  for (const textarea of root.querySelectorAll("[data-litm-backpack-note-input]")) {
+    textarea.addEventListener("change", event => saveField(event.currentTarget, "note"));
+  }
 }
 
 
@@ -1264,7 +1320,10 @@ function enforceConsumableBurnOnly(sheet) {
 
     tag.classList.add("litm-sw-consumable-burn-only");
     tag.removeAttribute("title");
-    tag.setAttribute("aria-label", `${String(tag.textContent ?? "Consumable").trim()}; burn to use`);
+    tag.setAttribute(
+      "aria-label",
+      `${String(tag.textContent ?? "Consumable").trim()}; click to queue burn`
+    );
 
     const burn = row.querySelector(".burn-indicator");
     if (burn) {
@@ -1273,18 +1332,22 @@ function enforceConsumableBurnOnly(sheet) {
       burn.setAttribute("aria-label", "Burn this consumable to use it");
     }
 
-    const blockNormalSelection = event => {
+    // Consumables never become ordinary selected Story Tags. Left-clicking the
+    // item itself simply presses the native Mist Engine burn control for that
+    // entry. This preserves the system's own toBurn/burned state handling while
+    // making the whole consumable name the obvious interaction target.
+    const queueBurnFromTag = event => {
       if (event.target.closest?.(".burn-indicator")) return;
       if (!event.target.closest?.(".litm-pc-storytag")) return;
 
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
-      ui.notifications.info("Consumables must be burned to use.");
+
+      burn?.click();
     };
 
-    row.addEventListener("click", blockNormalSelection, true);
-    row.addEventListener("contextmenu", blockNormalSelection, true);
+    row.addEventListener("click", queueBurnFromTag, true);
   }
 }
 
@@ -2680,40 +2743,37 @@ async function handleStarWarsSacrificeRoll(event, target) {
       </div>
 
 
-      <div style="
-        display:grid;
-        grid-template-columns:145px 1fr;
-        gap:10px;
-        align-items:center;
-      ">
-        <span style="
-          color:#78979b;
-          font-size:8px;
-          font-weight:700;
-          letter-spacing:1.3px;
-        ">
-          TACTICAL MODIFIER
-        </span>
+      <div class="litm-sw-sacrifice-pool-control">
+        <div class="litm-sw-sacrifice-pool-heading">
+          <span>DICE POOL</span>
+          <strong>BASE // 3D6</strong>
+        </div>
 
-        <input
-          name="modifier"
-          type="number"
-          step="1"
-          value="0"
-          style="
-            width:100%;
-            box-sizing:border-box;
-            margin:0;
-            background:#081114;
-            color:#f0eee5;
-            border:1px solid #45646a;
-            border-left:2px solid #8ea9ad;
-            padding:8px;
-            font-family:monospace;
-            font-size:14px;
-            text-align:right;
-          "
-        >
+        <div class="litm-sw-sacrifice-pool-buttons">
+          <label class="litm-sw-sacrifice-pool-button litm-sw-sacrifice-pool-button-minus">
+            <input
+              type="checkbox"
+              name="poolMinus"
+              value="1"
+            >
+            <span>− 1 DIE</span>
+            <small>ROLL 2D6</small>
+          </label>
+
+          <label class="litm-sw-sacrifice-pool-button litm-sw-sacrifice-pool-button-plus">
+            <input
+              type="checkbox"
+              name="poolPlus"
+              value="1"
+            >
+            <span>+ 1 DIE</span>
+            <small>ROLL 4D6</small>
+          </label>
+        </div>
+
+        <div class="litm-sw-sacrifice-pool-note">
+          NO SELECTION // STANDARD 3D6 POOL
+        </div>
       </div>
 
 
@@ -2725,7 +2785,7 @@ async function handleStarWarsSacrificeRoll(event, target) {
         font-size:8px;
         letter-spacing:1px;
       ">
-        ROLL PROTOCOL // 3D6 // HIGHEST RETURN + MODIFIER RESOLVES CHECK
+        ROLL PROTOCOL // 3D6 BASE // ±1D6 POOL ADJUSTMENT // HIGHEST RETURN RESOLVES CHECK
       </div>
 
     </div>
@@ -2745,13 +2805,44 @@ async function handleStarWarsSacrificeRoll(event, target) {
 
     content,
 
+    render: (_event, dialog) => {
+      const minus = dialog.element.querySelector('input[name="poolMinus"]');
+      const plus = dialog.element.querySelector('input[name="poolPlus"]');
+      const note = dialog.element.querySelector(".litm-sw-sacrifice-pool-note");
+
+      const refreshPoolControl = changed => {
+        if (changed?.checked) {
+          const other = changed === minus ? plus : minus;
+          if (other) other.checked = false;
+        }
+
+        const adjustment = plus?.checked ? 1 : minus?.checked ? -1 : 0;
+        const diceCount = 3 + adjustment;
+
+        if (note) {
+          note.textContent = adjustment === 0
+            ? "NO SELECTION // STANDARD 3D6 POOL"
+            : `CURRENT POOL // ${diceCount}D6 // ${adjustment > 0 ? "+1D6" : "-1D6"}`;
+        }
+      };
+
+      minus?.addEventListener("change", () => refreshPoolControl(minus));
+      plus?.addEventListener("change", () => refreshPoolControl(plus));
+      refreshPoolControl();
+    },
+
     ok: {
       label: "EXECUTE SACRIFICE",
       icon: "fa-solid fa-triangle-exclamation",
-      callback: (_event, button) => ({
-        level: button.form.elements.level.value,
-        modifier: parseInt(button.form.elements.modifier.value) || 0
-      })
+      callback: (_event, button) => {
+        const minus = Boolean(button.form.elements.poolMinus?.checked);
+        const plus = Boolean(button.form.elements.poolPlus?.checked);
+
+        return {
+          level: button.form.elements.level.value,
+          poolAdjustment: plus === minus ? 0 : plus ? 1 : -1
+        };
+      }
     },
 
     rejectClose: false,
@@ -2764,16 +2855,18 @@ async function handleStarWarsSacrificeRoll(event, target) {
   // ---------------------------------------------------------
   // LiTM SACRIFICE PROTOCOL
   //
-  // Roll 3d6. The highest die is the check result before the GM's
-  // discretionary modifier. The modifier is applied to that highest return,
-  // then the resolved check is compared against the Sacrifice thresholds.
+  // Sacrifice normally rolls 3d6. The authorization window can shift the
+  // pool by exactly one die in either direction, producing a 2d6, 3d6, or
+  // 4d6 pool. The highest individual die resolves the Sacrifice check.
   // ---------------------------------------------------------
 
-  const roll = await new Roll("3d6", actor.getRollData()).evaluate();
+  const poolAdjustment = Math.max(-1, Math.min(1, Number(result.poolAdjustment) || 0));
+  const diceCount = 3 + poolAdjustment;
+  const roll = await new Roll(`${diceCount}d6`, actor.getRollData()).evaluate();
 
   const sacrificeDice = roll.dice[0].results.map(entry => entry.result);
   const rawHighest = Math.max(...sacrificeDice);
-  const resolvedCheck = rawHighest + result.modifier;
+  const resolvedCheck = rawHighest;
 
   let outcome = "invain";
 
@@ -2803,10 +2896,12 @@ async function handleStarWarsSacrificeRoll(event, target) {
     lessenedLabel
   });
 
-  const modifierLabel =
-    result.modifier > 0
-      ? `+${result.modifier}`
-      : String(result.modifier);
+  const poolAdjustmentLabel =
+    poolAdjustment > 0
+      ? "+1D6"
+      : poolAdjustment < 0
+        ? "-1D6"
+        : "BASE";
 
   const sacrificeDiceDisplay = sacrificeDice
     .map(value => {
@@ -2895,7 +2990,7 @@ async function handleStarWarsSacrificeRoll(event, target) {
           letter-spacing:1px;
           text-align:right;
         ">
-          3D6 // MOD ${modifierLabel}
+          ${diceCount}D6 // ${poolAdjustmentLabel}
         </div>
       </div>
 
@@ -2920,7 +3015,7 @@ async function handleStarWarsSacrificeRoll(event, target) {
             font-weight:bold;
             letter-spacing:1.6px;
           ">
-            SACRIFICE ARRAY // 3D6
+            SACRIFICE ARRAY // ${diceCount}D6
           </span>
 
           <span style="
@@ -2973,7 +3068,7 @@ async function handleStarWarsSacrificeRoll(event, target) {
 
         <div style="
           display:grid;
-          grid-template-columns:repeat(3,1fr);
+          grid-template-columns:repeat(2,1fr);
           gap:6px;
           margin-bottom:8px;
           padding:7px 8px;
@@ -2990,7 +3085,7 @@ async function handleStarWarsSacrificeRoll(event, target) {
               HIGHEST RETURN
             </div>
             <div style="
-              color:#f3efe2;
+              color:${display.color};
               font-size:13px;
               font-weight:bold;
             ">
@@ -3004,31 +3099,14 @@ async function handleStarWarsSacrificeRoll(event, target) {
               font-size:7px;
               letter-spacing:1px;
             ">
-              MODIFIER
+              DICE POOL
             </div>
             <div style="
               color:#d4aa63;
               font-size:13px;
               font-weight:bold;
             ">
-              ${modifierLabel}
-            </div>
-          </div>
-
-          <div>
-            <div style="
-              color:#6f8589;
-              font-size:7px;
-              letter-spacing:1px;
-            ">
-              RESOLVED CHECK
-            </div>
-            <div style="
-              color:${display.color};
-              font-size:13px;
-              font-weight:bold;
-            ">
-              ${resolvedCheck}
+              ${diceCount}D6 // ${poolAdjustmentLabel}
             </div>
           </div>
 
@@ -3287,6 +3365,7 @@ Hooks.once("init", async () => {
           litmStarWarsSacrificeRoll: handleStarWarsSacrificeRoll,
           createLiTMBackpackSlotItem: handleCreateBackpackSlotItem,
           editLiTMBackpackSlot: handleEditBackpackSlot,
+          removeLiTMBackpackSlotItem: handleRemoveBackpackSlotItem,
           addKnownForcePower: handleAddKnownForcePower,
           removeKnownForcePower: handleRemoveKnownForcePower
         }
@@ -3321,6 +3400,7 @@ Hooks.once("init", async () => {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
         enforceConsumableBurnOnly(this);
+        wireBackpackEditorInputs(this);
         wireKnownForcePowerInputs(this);
         enhanceStatusTierAffordances(this);
         enhanceLivingStandardUi(this);
@@ -3365,6 +3445,7 @@ Hooks.once("init", async () => {
           litmStarWarsSacrificeRoll: handleStarWarsSacrificeRoll,
           createLiTMBackpackSlotItem: handleCreateBackpackSlotItem,
           editLiTMBackpackSlot: handleEditBackpackSlot,
+          removeLiTMBackpackSlotItem: handleRemoveBackpackSlotItem,
           addKnownForcePower: handleAddKnownForcePower,
           removeKnownForcePower: handleRemoveKnownForcePower
         }
@@ -3399,6 +3480,7 @@ Hooks.once("init", async () => {
         super._onRender(context, options);
         enhanceTagUsageUi(this);
         enforceConsumableBurnOnly(this);
+        wireBackpackEditorInputs(this);
         wireKnownForcePowerInputs(this);
         enhanceStatusTierAffordances(this);
         enhanceLivingStandardUi(this);

@@ -13,24 +13,44 @@
                 <span class="litm-sw-pack-section-code">GENERAL LOADOUT // 4</span>
             </div>
 
-            <div class="litm-sw-pack-slots litm-sw-pack-slots-gear">
+            <div class="litm-sw-pack-slots litm-sw-pack-slots-gear {{#if editMode}}litm-sw-pack-slots-edit{{/if}}">
                 {{#each gearSlots as |slot|}}
                 <div class="litm-sw-pack-slot {{#if slot.occupied}}occupied{{else}}empty{{/if}}" data-slot="{{slot.slotNumber}}">
-                    {{#if ../editMode}}
                     <span class="litm-sw-pack-slot-index">0{{slot.slotNumber}}</span>
-                    {{else}}
-                    <button type="button" class="litm-sw-pack-slot-index litm-sw-pack-slot-edit"
-                        data-action="editLiTMBackpackSlot"
-                        data-category="gear"
-                        data-item-id="{{../backpack._id}}"
-                        data-entry-index="{{slot.index}}"
-                        title="Edit backpack slot 0{{slot.slotNumber}}">0{{slot.slotNumber}}</button>
-                    {{/if}}
                     <div class="litm-sw-pack-slot-body">
                     {{#if slot.occupied}}
+                        {{#if ../editMode}}
+                        <div class="litm-sw-pack-edit-entry">
+                            <div class="litm-sw-pack-edit-name-row">
+                                <input type="text"
+                                    class="litm-sw-pack-edit-name"
+                                    value="{{slot.storytag.name}}"
+                                    data-litm-backpack-name-input
+                                    data-item-id="{{../backpack._id}}"
+                                    data-entry-index="{{slot.index}}"
+                                    aria-label="Backpack item name">
+                                <button type="button"
+                                    class="litm-sw-pack-edit-remove"
+                                    data-action="removeLiTMBackpackSlotItem"
+                                    data-item-id="{{../backpack._id}}"
+                                    data-entry-index="{{slot.index}}"
+                                    title="Remove item">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                            <label class="litm-sw-pack-edit-note-label">USE / ADJUDICATION NOTE</label>
+                            <textarea class="litm-sw-pack-edit-note"
+                                rows="3"
+                                placeholder="When should this item apply?"
+                                data-litm-backpack-note-input
+                                data-item-id="{{../backpack._id}}"
+                                data-entry-index="{{slot.index}}">{{slot.usage}}</textarea>
+                        </div>
+                        {{else}}
                         {{> 'systems/mist-engine-fvtt/templates/shared/litm/storytag-line.hbs' slot.storytag
                             storytag=slot.storytag source='backpack' key='system.items'
-                            id=../backpack._id index=slot.index editMode=../editMode tidyTags=../tidyTags}}
+                            id=../backpack._id index=slot.index editMode=false tidyTags=../tidyTags}}
+                        {{/if}}
                     {{else}}
                         {{#if ../editMode}}
                         <button type="button" class="litm-sw-pack-empty-action" data-action="createLiTMBackpackSlotItem" data-category="gear" data-item-id="{{../backpack._id}}">
@@ -52,24 +72,44 @@
                 <span class="litm-sw-pack-section-code">SINGLE-USE // 2</span>
             </div>
 
-            <div class="litm-sw-pack-slots litm-sw-pack-slots-consumables">
+            <div class="litm-sw-pack-slots litm-sw-pack-slots-consumables {{#if editMode}}litm-sw-pack-slots-edit{{/if}}">
                 {{#each consumableSlots as |slot|}}
                 <div class="litm-sw-pack-slot consumable {{#if slot.occupied}}occupied{{else}}empty{{/if}}" data-slot="{{slot.slotNumber}}" data-entry-index="{{slot.index}}" data-item-id="{{../backpack._id}}">
-                    {{#if ../editMode}}
                     <span class="litm-sw-pack-slot-index">C{{slot.slotNumber}}</span>
-                    {{else}}
-                    <button type="button" class="litm-sw-pack-slot-index litm-sw-pack-slot-edit"
-                        data-action="editLiTMBackpackSlot"
-                        data-category="consumable"
-                        data-item-id="{{../backpack._id}}"
-                        data-entry-index="{{slot.index}}"
-                        title="Edit consumable slot C{{slot.slotNumber}}">C{{slot.slotNumber}}</button>
-                    {{/if}}
                     <div class="litm-sw-pack-slot-body">
                     {{#if slot.occupied}}
+                        {{#if ../editMode}}
+                        <div class="litm-sw-pack-edit-entry consumable">
+                            <div class="litm-sw-pack-edit-name-row">
+                                <input type="text"
+                                    class="litm-sw-pack-edit-name"
+                                    value="{{slot.storytag.name}}"
+                                    data-litm-backpack-name-input
+                                    data-item-id="{{../backpack._id}}"
+                                    data-entry-index="{{slot.index}}"
+                                    aria-label="Consumable name">
+                                <button type="button"
+                                    class="litm-sw-pack-edit-remove"
+                                    data-action="removeLiTMBackpackSlotItem"
+                                    data-item-id="{{../backpack._id}}"
+                                    data-entry-index="{{slot.index}}"
+                                    title="Remove consumable">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                            <label class="litm-sw-pack-edit-note-label">USE / ADJUDICATION NOTE</label>
+                            <textarea class="litm-sw-pack-edit-note"
+                                rows="3"
+                                placeholder="When should this consumable apply?"
+                                data-litm-backpack-note-input
+                                data-item-id="{{../backpack._id}}"
+                                data-entry-index="{{slot.index}}">{{slot.usage}}</textarea>
+                        </div>
+                        {{else}}
                         {{> 'systems/mist-engine-fvtt/templates/shared/litm/storytag-line.hbs' slot.storytag
                             storytag=slot.storytag source='backpack' key='system.items'
-                            id=../backpack._id index=slot.index editMode=../editMode tidyTags=../tidyTags}}
+                            id=../backpack._id index=slot.index editMode=false tidyTags=../tidyTags}}
+                        {{/if}}
                     {{else}}
                         {{#if ../editMode}}
                         <button type="button" class="litm-sw-pack-empty-action" data-action="createLiTMBackpackSlotItem" data-category="consumable" data-item-id="{{../backpack._id}}">
