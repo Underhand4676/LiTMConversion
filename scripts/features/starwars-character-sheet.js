@@ -716,6 +716,9 @@ async function handleEditBackpackSlot(event, target) {
           <label style="display:block;color:#81999e;font-size:9px;letter-spacing:.09em;margin-bottom:4px;">ITEM DESIGNATION</label>
           <input name="itemName" type="text" autofocus value="${escapeHtml(existing.name)}"
             style="width:100%;box-sizing:border-box;background:#091216;color:#e9f3f4;border:1px solid #44666d;padding:8px;font-family:monospace;">
+          <label style="display:block;color:#81999e;font-size:9px;letter-spacing:.09em;margin:10px 0 4px;">USE / ADJUDICATION NOTE</label>
+          <textarea name="usageNote" rows="4" placeholder="When should this item apply?"
+            style="width:100%;min-height:74px;box-sizing:border-box;resize:vertical;background:#091216;color:#d8e7e9;border:1px solid #44666d;padding:8px;font-family:monospace;line-height:1.35;">${escapeHtml(getTagUsage(existing))}</textarea>
           <label style="display:flex;align-items:center;gap:7px;margin-top:11px;padding:7px 8px;border-left:2px solid #a85f52;background:rgba(168,95,82,.08);color:#d7aaa2;font-size:9px;letter-spacing:.08em;">
             <input name="removeItem" type="checkbox" style="margin:0;">
             REMOVE ITEM FROM SLOT
@@ -726,6 +729,7 @@ async function handleEditBackpackSlot(event, target) {
         label: "COMMIT SLOT",
         callback: (_event, button) => ({
           name: button.form.elements.itemName.value,
+          note: button.form.elements.usageNote.value,
           remove: Boolean(button.form.elements.removeItem.checked)
         })
       },
@@ -751,11 +755,10 @@ async function handleEditBackpackSlot(event, target) {
   entries[entryIndex] = {
     ...existing,
     name: itemName,
-    // Renaming a slot must never destroy its adjudication note. Consumables
-    // retain the private marker while preserving the note text after it.
-    question: category === "consumable"
-      ? setBackpackTagUsage(existing, getTagUsage(existing))
-      : String(existing.question ?? "")
+    // Locked-mode slot editing can update the same adjudication note shown in
+    // the unlocked Backpack editor. Consumables retain their private category
+    // marker while the visible note text remains fully editable.
+    question: setBackpackTagUsage(existing, result.note)
   };
 
   await backpack.update({ "system.items": entries });
@@ -1331,6 +1334,11 @@ function enforceConsumableBurnOnly(sheet) {
       burn.dataset.tooltipDirection = "UP";
       burn.setAttribute("aria-label", "Burn this consumable to use it");
     }
+
+    const burnQueued = Boolean(
+      burn?.querySelector(".litm-sw-burn-svg.to-burn, .burn-icon.to-burn")
+    );
+    slot.classList.toggle("litm-sw-consumable-queued", burnQueued);
 
     // Consumables never become ordinary selected Story Tags. Left-clicking the
     // item itself simply presses the native Mist Engine burn control for that

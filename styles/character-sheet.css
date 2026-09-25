@@ -5005,3 +5005,124 @@
   border-color: rgba(181,143,82,.34) !important;
   background: rgba(116,82,35,.08) !important;
 }
+
+/* =========================================================
+   BACKPACK LOCKED LOADOUT // v0.11.2
+   ========================================================= */
+
+/* Occupied equipment slots use the left rail for the native burn control at
+   the top and the numbered inventory-edit button at the bottom. The Story Tag
+   gets the full right side of the slot and can wrap naturally. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.occupied:not(.consumable) {
+  min-height: 58px !important;
+  grid-template-columns: 30px minmax(0, 1fr) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.occupied:not(.consumable)
+  button.litm-sw-pack-slot-index.litm-sw-pack-slot-edit {
+  width: 30px !important;
+  min-width: 30px !important;
+  min-height: 19px !important;
+  height: 19px !important;
+  align-self: end !important;
+  border-top: 1px solid rgba(109, 150, 158, .16) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.occupied:not(.consumable)
+  .burn-indicator.litm-sw-burn-control {
+  position: absolute !important;
+  top: 5px !important;
+  left: 5px !important;
+  width: 20px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  margin: 0 !important;
+  z-index: 2 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.occupied .litm-sw-pack-slot-body {
+  align-items: flex-start !important;
+  padding: 5px 5px 4px !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.occupied .item-storytag-line {
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.16 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.occupied .litm-pc-storytag {
+  display: block !important;
+  width: 100% !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  line-height: 1.16 !important;
+}
+
+/* Consumables are intrinsically burn-to-use, so the flame control is hidden.
+   Clicking the consumable name still invokes that native burn action in JS.
+   With no flame occupying the rail, the C1/C2 edit button remains a clean
+   full-height control beside the item name. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.consumable.occupied {
+  min-height: 48px !important;
+  grid-template-columns: 30px minmax(0, 1fr) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.consumable .burn-indicator {
+  display: none !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.consumable.occupied
+  button.litm-sw-pack-slot-index.litm-sw-pack-slot-edit {
+  width: 30px !important;
+  min-width: 30px !important;
+  min-height: 48px !important;
+  height: auto !important;
+  align-self: stretch !important;
+}
+
+/* Empty slots keep the existing vacant-slot presentation; only the number is
+   upgraded from a passive label to the locked-sheet editor control. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.empty
+  button.litm-sw-pack-slot-index.litm-sw-pack-slot-edit {
+  width: 24px !important;
+  min-width: 24px !important;
+  min-height: 34px !important;
+  height: auto !important;
+  align-self: stretch !important;
+  background: transparent !important;
+  color: #587176 !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.consumable.empty
+  button.litm-sw-pack-slot-index.litm-sw-pack-slot-edit {
+  border-right-color: rgba(181, 143, 82, .20) !important;
+  color: #8c744e !important;
+}
+
+/* With the dedicated flame hidden, the slot itself becomes the visual cue that
+   a consumable has been queued to burn. */
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.consumable.litm-sw-consumable-queued {
+  border-color: rgba(220, 166, 75, .62) !important;
+  background: rgba(181, 125, 43, .12) !important;
+  box-shadow: inset 2px 0 0 rgba(220, 166, 75, .68) !important;
+}
+
+.application.mist-engine.sheet.actor.litm-character.litm-conversion-starwars-sheet
+  .litm-sw-backpack-card:not(.litm-sw-backpack-edit-mode) .litm-sw-pack-slot.consumable.litm-sw-consumable-queued
+  .litm-pc-storytag {
+  color: #f0cf95 !important;
+}
